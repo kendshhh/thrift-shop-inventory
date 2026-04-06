@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @php
-        $brandName = data_get($branding ?? [], 'brand_name', config('app.name', 'Thrift Shop'));
+@php
+        $brandName = data_get($branding ?? [], 'brand_name', config('app.name', 'Everdarling'));
         $logoUrl = data_get($branding ?? [], 'logo_url');
         $primaryColor = data_get($branding ?? [], 'primary_color', '#0EA5E9');
         $secondaryColor = data_get($branding ?? [], 'secondary_color', '#2563EB');
@@ -27,10 +27,8 @@
     <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-modern">
         <div class="container app-container">
             <a class="navbar-brand fw-bold fs-4 d-inline-flex align-items-center" href="{{ url('/') }}">
-                @if ($logoUrl)
-                    <img src="{{ $logoUrl }}" alt="{{ $brandName }} logo" class="navbar-brand-logo">
-                @endif
-                <span>{{ $brandName }}</span>
+<img src="/images/everdarling_logo.png" alt="Everdarling logo" class="navbar-brand-logo">
+                <!-- Brand text replaced with logo -->
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#guestNavbar" aria-controls="guestNavbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -57,7 +55,7 @@
                     <div class="text-center mb-4">
                         <a href="{{ url('/') }}" class="text-decoration-none text-dark">
                             <i class="bi bi-bag-heart-fill" style="font-size: 2.4rem; color: var(--accent-color);"></i>
-                            <div class="fw-bold fs-5 mt-1">{{ $brandName }}</div>
+                            <img src="/images/everdarling_logo.png" alt="Everdarling logo" class="navbar-brand-logo footer-logo">
                         </a>
                     </div>
                     <div class="card glass-card auth-panel border-0">

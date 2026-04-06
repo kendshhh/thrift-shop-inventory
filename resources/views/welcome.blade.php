@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    @php
-        $brandName = data_get($branding ?? [], 'brand_name', config('app.name', 'Thrift Shop'));
+@php
+        $brandName = data_get($branding ?? [], 'brand_name', config('app.name', 'Everdarling'));
         $brandTagline = data_get($branding ?? [], 'brand_tagline') ?: 'Sleek Modern Marketplace';
         $logoUrl = data_get($branding ?? [], 'logo_url');
         $primaryColor = data_get($branding ?? [], 'primary_color', '#0EA5E9');
@@ -27,10 +27,8 @@
     <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-modern">
         <div class="container app-container">
             <a class="navbar-brand fw-bold fs-4 d-inline-flex align-items-center" href="{{ url('/') }}">
-                @if ($logoUrl)
-                    <img src="{{ $logoUrl }}" alt="{{ $brandName }} logo" class="navbar-brand-logo">
-                @endif
-                <span>{{ $brandName }}</span>
+<img src="/images/everdarling_logo.png" alt="Everdarling logo" class="navbar-brand-logo">
+                <!-- Brand text replaced with logo -->
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#welcomeNav" aria-controls="welcomeNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -140,10 +138,8 @@
             <div class="row g-5">
                 <div class="col-lg-4">
                     <h5 class="fw-bold mb-4 d-inline-flex align-items-center">
-                        @if ($logoUrl)
-                            <img src="{{ $logoUrl }}" alt="{{ $brandName }} logo" class="navbar-brand-logo">
-                        @endif
-                        <span>{{ $brandName }}</span>
+                        <img src="/images/everdarling_logo.png" alt="Everdarling logo" class="navbar-brand-logo footer-logo">
+                        <!-- Brand text replaced with logo -->
                     </h5>
                     <p class="text-muted">Building a cleaner, faster, and more delightful way to buy quality second-hand goods.</p>
                     <div class="d-flex gap-3 mt-4">

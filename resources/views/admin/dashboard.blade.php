@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div>
-                <h5 class="mb-1 fw-bold"><i class="bi bi-speedometer2 me-2"></i>{{ data_get($branding, 'brand_name') }} Admin</h5>
+Everdarling Admin</h5>
                 <p class="text-muted small mb-0">Command center for inventory and reservations.</p>
             </div>
             <span class="badge rounded-pill text-bg-light border">Live overview</span>
@@ -14,7 +14,7 @@
             <div class="col-lg-8">
                 <span class="admin-chip mb-3 d-inline-flex align-items-center gap-2">
                     <i class="bi bi-stars"></i>
-                    {{ data_get($branding, 'brand_name') }} Dashboard
+                    Everdarling Dashboard
                 </span>
                 <h2 class="display-6 fw-bold mb-3">Manage operations with clarity, speed, and control.</h2>
                 <p class="text-muted mb-0">Monitor stock health, reservation flow, and account activity in one streamlined workspace.</p>
