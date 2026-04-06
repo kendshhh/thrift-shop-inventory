@@ -1,16 +1,14 @@
 @php
     $user = Auth::user();
-    $brandName = data_get($branding, 'brand_name', config('app.name', 'Thrift Shop'));
+$brandName = data_get($branding, 'brand_name', config('app.name', 'Everdarling'));
     $logoUrl = data_get($branding, 'logo_url');
 @endphp
 
 <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-modern">
     <div class="container app-container">
         <a class="navbar-brand fw-bold fs-4 d-inline-flex align-items-center" href="{{ $user ? route('dashboard') : url('/') }}">
-            @if ($logoUrl)
-                <img src="{{ $logoUrl }}" alt="{{ $brandName }} logo" class="navbar-brand-logo">
-            @endif
-            <span>{{ $brandName }}</span>
+<img src="/images/everdarling_logo.png" alt="Everdarling logo" class="navbar-brand-logo">
+            <!-- Brand text replaced with logo -->
         </a>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">

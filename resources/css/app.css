@@ -81,14 +81,17 @@ a:hover {
 	font-size: clamp(1.15rem, 1vw + 0.9rem, 1.4rem);
 }
 
-.navbar-brand-logo {
-	width: 30px;
-	height: 30px;
-	object-fit: cover;
+	.navbar-brand-logo {
+	height: 6.75rem;
+	width: auto;
+	object-fit: contain;
 	border-radius: 8px;
-	border: 1px solid rgba(15, 23, 42, 0.14);
 	margin-right: 0.55rem;
 	flex-shrink: 0;
+}
+
+	.navbar-brand-logo.footer-logo {
+	height: 3.375rem;
 }
 
 .navbar-modern .nav-link {
@@ -103,7 +106,7 @@ a:hover {
 }
 
 .app-main {
-	padding-top: 6.6rem;
+	padding-top: 13.5rem;
 	padding-bottom: 2.75rem;
 }
 
@@ -117,7 +120,7 @@ a:hover {
 }
 
 .guest-main {
-	padding-top: 7rem;
+	padding-top: 14.5rem;
 	padding-bottom: 2rem;
 	min-height: 100vh;
 	display: flex;

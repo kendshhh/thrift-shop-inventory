@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @php
-        $brandName = data_get($branding ?? [], 'brand_name', config('app.name', 'Thrift Shop'));
+@php
+        $brandName = data_get($branding ?? [], 'brand_name', config('app.name', 'Everdarling'));
         $primaryColor = data_get($branding ?? [], 'primary_color', '#0EA5E9');
         $secondaryColor = data_get($branding ?? [], 'secondary_color', '#2563EB');
     @endphp
