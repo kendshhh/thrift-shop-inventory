@@ -732,8 +732,8 @@ code {
 .inventory-detail-image {
 	width: 100%;
 	height: auto;
-	max-height: 260px;
-	object-fit: cover;
+	max-height: none;
+	object-fit: contain;
 	border-radius: 14px;
 	border: 1px solid #cbd5e1;
 }
@@ -870,6 +870,16 @@ code {
 	.page-header-shell {
 		border-radius: 16px;
 	}
+}
+
+.inventory-thumb-preview {
+	max-width: 120px;
+	max-height: 120px;
+	width: auto;
+	height: auto;
+	border-radius: 8px;
+	border: 1px solid var(--glass-border);
+	box-shadow: var(--card-shadow);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -124,7 +124,11 @@ class ReservationController extends Controller
             return $reservation;
         });
 
-        $request->user()?->notify(new ReservationCreatedNotification($reservation));
+        try {
+            $request->user()?->notify(new ReservationCreatedNotification($reservation));
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
 
         return redirect()
             ->route('customer.reservations.show', $reservation)

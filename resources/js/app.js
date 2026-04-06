@@ -68,7 +68,32 @@ const initializeRevealAnimations = () => {
 	targets.forEach((target) => observer.observe(target));
 };
 
+const initializeImagePreview = () => {
+	const imageInput = document.getElementById('image-input');
+	const previewDiv = document.getElementById('image-preview');
+	const previewImg = document.getElementById('preview-img');
+
+	if (!imageInput || !previewDiv || !previewImg) {
+		return;
+	}
+
+	imageInput.addEventListener('change', (event) => {
+		const file = event.target.files[0];
+		if (file && file.type.startsWith('image/')) {
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				previewImg.src = e.target.result;
+				previewDiv.style.display = 'block';
+			};
+			reader.readAsDataURL(file);
+		} else {
+			previewDiv.style.display = 'none';
+		}
+	});
+};
+
 onReady(() => {
 	initializeNavbarScrollState();
 	initializeRevealAnimations();
+	initializeImagePreview();
 });

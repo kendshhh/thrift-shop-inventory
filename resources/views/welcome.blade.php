@@ -3,7 +3,7 @@
 <head>
 @php
         $brandName = data_get($branding ?? [], 'brand_name', config('app.name', 'Everdarling'));
-        $brandTagline = data_get($branding ?? [], 'brand_tagline') ?: 'Sleek Modern Marketplace';
+        $brandTagline = data_get($branding ?? [], 'brand_tagline') ?: 'Curated and Personalized Gems';
         $logoUrl = data_get($branding ?? [], 'logo_url');
         $primaryColor = data_get($branding ?? [], 'primary_color', '#0EA5E9');
         $secondaryColor = data_get($branding ?? [], 'secondary_color', '#2563EB');
@@ -55,21 +55,21 @@
             <div class="row justify-content-center">
                 <div class="col-lg-10">
                     <span class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2 mb-4">
-                        <i class="bi bi-stars me-2"></i>Fresh drops and featured deals every week
+                        <i class="bi bi-stars me-2"></i>Curated drops & one-of-a-kind thrift finds
                     </span>
                     <h1 class="display-2 fw-bold mb-4" style="letter-spacing: -0.04em; line-height: 1.1;">
-                        Design the future <br><span class="text-gradient">of sustainable shopping.</span>
+                        Thoughtfully chosen pieces, <br><span class="text-gradient">made just for you.</span>
                     </h1>
                     <p class="lead text-muted mb-5 fs-4 mx-auto" style="max-width: 720px;">
-                        Discover curated second-hand finds, reserve in seconds, and pick up with confidence. Minimal effort, maximum impact.
+                        Discover handpicked thrifted gems, from timeless staples to unique statement pieces. Each item is carefully selected to bring charm, quality, and individuality into your everyday style.
                     </p>
                     <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
-                        <a href="{{ route('items.index') }}" class="btn btn-primary btn-lg px-5">Browse Items</a>
+                        <a href="{{ route('items.index') }}" class="btn btn-primary btn-lg px-5">Browse Finds</a>
                         @auth
                             <a href="{{ route('dashboard') }}" class="btn btn-outline-custom btn-lg px-5">Go to Dashboard <i class="bi bi-arrow-right ms-2"></i></a>
                         @else
                             @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="btn btn-outline-custom btn-lg px-5">Create Account <i class="bi bi-arrow-right ms-2"></i></a>
+                                <a href="{{ route('register') }}" class="btn btn-outline-custom btn-lg px-5">Create an Account <i class="bi bi-arrow-right ms-2"></i></a>
                             @endif
                         @endauth
                     </div>
@@ -117,10 +117,10 @@
             <div class="glass-card p-5 text-center overflow-hidden position-relative border-0 shadow-lg" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);">
                 <div class="row justify-content-center py-4">
                     <div class="col-lg-8">
-                        <h2 class="display-6 fw-bold mb-4">Ready to elevate your thrift experience?</h2>
-                        <p class="text-muted mb-5 fs-5">Join shoppers discovering smarter and greener finds every day.</p>
+                        <h2 class="display-6 fw-bold mb-4">Find something that feels like you</h2>
+                        <p class="text-muted mb-5 fs-5">Explore curated thrift pieces and discover gems you won’t find anywhere else.</p>
                         <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
-                            <a href="{{ route('items.index') }}" class="btn btn-primary px-4">Explore Inventory</a>
+                            <a href="{{ route('items.index') }}" class="btn btn-primary px-4">Explore Collection</a>
                             @auth
                                 <a href="{{ route('dashboard') }}" class="btn btn-outline-custom px-4">Open Dashboard</a>
                             @else
@@ -133,6 +133,7 @@
         </div>
     </section>
 
+
     <footer id="about" class="footer-modern">
         <div class="container app-container">
             <div class="row g-5">
@@ -141,11 +142,11 @@
                         <img src="/images/everdarling_logo.png" alt="Everdarling logo" class="navbar-brand-logo footer-logo">
                         <!-- Brand text replaced with logo -->
                     </h5>
-                    <p class="text-muted">Building a cleaner, faster, and more delightful way to buy quality second-hand goods.</p>
+                    <p class="text-muted">A curated thrift space offering handpicked, personality-filled pieces, and beyond, each one chosen with intention and care.</p>
                     <div class="d-flex gap-3 mt-4">
                         <a href="#" class="text-muted fs-5"><i class="bi bi-twitter-x"></i></a>
-                        <a href="#" class="text-muted fs-5"><i class="bi bi-github"></i></a>
-                        <a href="#" class="text-muted fs-5"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="text-muted fs-5"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-muted fs-5"><i class="bi bi-facebook"></i></a>
                     </div>
                 </div>
                 <div class="col-6 col-md-3 col-lg-2 offset-lg-2">

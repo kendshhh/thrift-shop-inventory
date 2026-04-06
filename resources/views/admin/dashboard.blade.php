@@ -2,10 +2,10 @@
     <x-slot name="header">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div>
-Everdarling Admin</h5>
-                <p class="text-muted small mb-0">Command center for inventory and reservations.</p>
+                <h5 class="mb-1">Everdarling Admin</h5>
+                <p class="text-muted small mb-0">A simple overview of your pieces and reservations.</p>
             </div>
-            <span class="badge rounded-pill text-bg-light border">Live overview</span>
+            <span class="badge rounded-pill text-bg-light border">Shop overview</span>
         </div>
     </x-slot>
 
@@ -14,18 +14,18 @@ Everdarling Admin</h5>
             <div class="col-lg-8">
                 <span class="admin-chip mb-3 d-inline-flex align-items-center gap-2">
                     <i class="bi bi-stars"></i>
-                    Everdarling Dashboard
+                    Everdarling Admin
                 </span>
-                <h2 class="display-6 fw-bold mb-3">Manage operations with clarity, speed, and control.</h2>
-                <p class="text-muted mb-0">Monitor stock health, reservation flow, and account activity in one streamlined workspace.</p>
+                <h2 class="display-6 fw-bold mb-3">A little space to keep everything in place.</h2>
+                <p class="text-muted mb-0">Track your pieces, manage reservations, and stay on top of your shop—all in one simple, easy flow.</p>
             </div>
             <div class="col-lg-4">
                 <div class="d-grid gap-2">
                     <a href="{{ route('admin.inventory.index') }}" class="btn btn-primary">
-                        <i class="bi bi-boxes me-2"></i>Manage Inventory
+                        <i class="bi bi-boxes me-2"></i>View Inventory
                     </a>
                     <a href="{{ route('admin.reservations.index') }}" class="btn btn-outline-custom">
-                        <i class="bi bi-calendar-check me-2"></i>Review Reservations
+                        <i class="bi bi-calendar-check me-2"></i>Check Reservations
                     </a>
                 </div>
             </div>

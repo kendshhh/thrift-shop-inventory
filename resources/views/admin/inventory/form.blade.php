@@ -77,11 +77,16 @@
                             <input
                                 type="file"
                                 name="image"
+                                id="image-input"
                                 accept="image/png,image/jpeg,image/webp"
                                 class="form-control @error('image') is-invalid @enderror"
                             >
                             <div class="form-text">JPG, PNG, or WebP up to 3MB.</div>
                             @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                            <div id="image-preview" class="mt-3" style="display: none;">
+                                <img id="preview-img" src="" alt="Preview" class="inventory-thumb-preview">
+                            </div>
 
                             @if ($isEditing && $item->imageUrl())
                                 <div class="d-flex align-items-center gap-3 mt-3">
