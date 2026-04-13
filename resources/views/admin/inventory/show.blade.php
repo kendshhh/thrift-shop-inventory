@@ -21,7 +21,7 @@
             <div class="row g-4 mb-4 align-items-start">
                 <div class="col-lg-4">
                     @if ($item->imageUrl())
-                        <img src="{{ $item->imageUrl() }}" alt="{{ $item->name }}" class="inventory-detail-image">
+                        <img src="{{ $item->imageUrl() }}" alt="{{ $item->name }}" class="inventory-detail-image" data-lightbox-image tabindex="0">
                     @else
                         <div class="inventory-detail-placeholder">
                             <i class="bi bi-image fs-2 d-block mb-2"></i>

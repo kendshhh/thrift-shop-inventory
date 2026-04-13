@@ -92,8 +92,81 @@ const initializeImagePreview = () => {
 	});
 };
 
+const initializeImageLightbox = () => {
+	const lightbox = document.getElementById('image-lightbox');
+	const lightboxImage = document.getElementById('image-lightbox-image');
+	const lightboxCaption = document.getElementById('image-lightbox-title');
+	const triggers = document.querySelectorAll('[data-lightbox-image]');
+
+	if (!lightbox || !lightboxImage || !lightboxCaption || !triggers.length) {
+		return;
+	}
+
+	let lastActiveElement = null;
+
+	const closeLightbox = () => {
+		lightbox.classList.remove('is-open');
+		lightbox.setAttribute('aria-hidden', 'true');
+		document.body.classList.remove('lightbox-open');
+		lightboxImage.src = '';
+		lightboxImage.alt = '';
+		lightboxCaption.textContent = '';
+
+		if (lastActiveElement instanceof HTMLElement) {
+			lastActiveElement.focus();
+		}
+	};
+
+	const openLightbox = (trigger) => {
+		lastActiveElement = trigger;
+		lightboxImage.src = trigger.getAttribute('src') ?? '';
+		lightboxImage.alt = trigger.getAttribute('alt') ?? 'Image preview';
+		lightboxCaption.textContent = trigger.getAttribute('alt') ?? 'Image preview';
+		lightbox.classList.add('is-open');
+		lightbox.setAttribute('aria-hidden', 'false');
+		document.body.classList.add('lightbox-open');
+
+		const closeButton = lightbox.querySelector('[data-lightbox-close]');
+		if (closeButton instanceof HTMLElement) {
+			closeButton.focus();
+		}
+	};
+
+	triggers.forEach((trigger) => {
+		trigger.addEventListener('click', (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			openLightbox(trigger);
+		});
+
+		trigger.addEventListener('keydown', (event) => {
+			if (event.key !== 'Enter' && event.key !== ' ') {
+				return;
+			}
+
+			event.preventDefault();
+			openLightbox(trigger);
+		});
+	});
+
+	lightbox.querySelectorAll('[data-lightbox-close]').forEach((element) => {
+		element.addEventListener('click', closeLightbox);
+	});
+
+	document.addEventListener('keydown', (event) => {
+		if (!lightbox.classList.contains('is-open')) {
+			return;
+		}
+
+		if (event.key === 'Escape') {
+			closeLightbox();
+		}
+	});
+};
+
 onReady(() => {
 	initializeNavbarScrollState();
 	initializeRevealAnimations();
 	initializeImagePreview();
+	initializeImageLightbox();
 });

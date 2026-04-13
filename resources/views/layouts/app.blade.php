@@ -37,6 +37,19 @@
         </div>
     </main>
 
+    <div class="image-lightbox" id="image-lightbox" aria-hidden="true">
+        <div class="image-lightbox-backdrop" data-lightbox-close></div>
+        <div class="image-lightbox-dialog" role="dialog" aria-modal="true" aria-labelledby="image-lightbox-title">
+            <button type="button" class="image-lightbox-close" aria-label="Close image preview" data-lightbox-close>
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <div class="image-lightbox-frame">
+                <img src="" alt="" class="image-lightbox-image" id="image-lightbox-image">
+            </div>
+            <div class="image-lightbox-caption" id="image-lightbox-title"></div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

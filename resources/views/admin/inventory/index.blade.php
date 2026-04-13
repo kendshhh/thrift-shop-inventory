@@ -34,7 +34,7 @@
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         @if ($item->imageUrl())
-                                            <img src="{{ $item->imageUrl() }}" alt="{{ $item->name }}" class="inventory-thumb-sm">
+                                            <img src="{{ $item->imageUrl() }}" alt="{{ $item->name }}" class="inventory-thumb-sm" data-lightbox-image tabindex="0">
                                         @else
                                             <span class="inventory-thumb-fallback"><i class="bi bi-image"></i></span>
                                         @endif
