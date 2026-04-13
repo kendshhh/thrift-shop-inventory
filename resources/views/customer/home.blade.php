@@ -78,7 +78,10 @@
                                         <div class="card-body">
                                             <div class="item-thumb-wrap mb-3">
                                                 @if ($item->imageUrl())
-                                                    <img src="{{ $item->imageUrl() }}" alt="{{ $item->name }}" class="item-thumb-image" data-lightbox-image tabindex="0">
+                                                    <div class="image-frame">
+                                                        <div class="image-frame-backdrop" style="background-image: url('{{ $item->imageUrl() }}');"></div>
+                                                        <img src="{{ $item->imageUrl() }}" alt="{{ $item->name }}" class="item-thumb-image image-frame-foreground" data-lightbox-image tabindex="0">
+                                                    </div>
                                                 @else
                                                     <div class="item-thumb-placeholder"><i class="bi bi-image"></i></div>
                                                 @endif

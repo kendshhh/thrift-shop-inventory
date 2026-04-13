@@ -30,7 +30,10 @@
                 <div class="card-body">
                     <div class="item-detail-image-wrap mb-3">
                         @if ($item->imageUrl())
-                            <img src="{{ $item->imageUrl() }}" alt="{{ $item->name }}" class="item-detail-image" data-lightbox-image tabindex="0">
+                            <div class="image-frame image-frame-detail">
+                                <div class="image-frame-backdrop" style="background-image: url('{{ $item->imageUrl() }}');"></div>
+                                <img src="{{ $item->imageUrl() }}" alt="{{ $item->name }}" class="item-detail-image image-frame-foreground" data-lightbox-image tabindex="0">
+                            </div>
                         @else
                             <div class="item-detail-image-placeholder">
                                 <i class="bi bi-image fs-1 d-block mb-2"></i>
