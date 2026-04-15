@@ -46,6 +46,8 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::get('/reservations', [CustomerReservationController::class, 'index'])->name('reservations.index');
     Route::post('/reservations', [CustomerReservationController::class, 'store'])->name('reservations.store');
     Route::get('/reservations/{reservation}', [CustomerReservationController::class, 'show'])->name('reservations.show');
+    Route::patch('/reservations/{reservation}/extend', [CustomerReservationController::class, 'extend'])
+        ->name('reservations.extend');
     Route::patch('/reservations/{reservation}/request-cancellation', [CustomerReservationController::class, 'requestCancellation'])
         ->name('reservations.request-cancellation');
     Route::patch('/reservations/{reservation}/request-reschedule', [CustomerReservationController::class, 'requestReschedule'])

@@ -22,6 +22,9 @@
 
     @php
         $availableQuantity = $item->availableQuantity();
+        $isReservationLocked = $reservationLock['is_locked'] ?? false;
+        $pendingReservationCount = $reservationLock['pending_count'] ?? 0;
+        $reservationLimit = $reservationLock['limit'] ?? 2;
     @endphp
 
     <div class="row g-4">
@@ -58,12 +61,24 @@
                     <div class="mb-3 text-muted small">
                         <i class="bi bi-check-circle-fill text-success me-1"></i>{{ $availableQuantity }} available
                     </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <div class="text-muted small">Seller Name</div>
+                            <div class="fw-medium">{{ $item->seller_name }}</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-muted small">Contact Number</div>
+                            <div class="fw-medium">{{ $item->seller_contact_number }}</div>
+                        </div>
+                    </div>
                     <p class="text-muted mb-4">{{ $item->description ?: 'No description provided.' }}</p>
 
                     <div class="customer-policy-note">
                         <h6 class="fw-semibold mb-2">Reservation Notes</h6>
                         <ul class="mb-0 small text-muted ps-3">
-                            <li>Reservations stay active for 48 hours while awaiting payment.</li>
+                            <li>Reservations stay active for 24 hours while awaiting payment.</li>
+                            <li>You may extend a pending reservation one time for another 24 hours.</li>
+                            <li>Customers with {{ $reservationLimit }} pending reservations are temporarily locked from making another one.</li>
                             <li>Payment is processed in person at pickup.</li>
                             <li>Stock is reserved immediately after you submit.</li>
                         </ul>
@@ -78,7 +93,13 @@
                     <div class="card">
                         <div class="card-header fw-semibold"><i class="bi bi-bag-plus me-1"></i>Reserve This Item</div>
                         <div class="card-body">
-                            @if ($availableQuantity > 0)
+                            @if ($isReservationLocked)
+                                <div class="alert alert-warning mb-3">
+                                    Your reservation button is locked right now because you already have <strong>{{ $pendingReservationCount }}</strong> pending reservation{{ $pendingReservationCount > 1 ? 's' : '' }}.
+                                    Extend, complete, or wait for one to expire before reserving another item.
+                                </div>
+                                <a href="{{ route('customer.reservations.index') }}" class="btn btn-outline-secondary w-100"><i class="bi bi-bag-check me-1"></i>Manage My Reservations</a>
+                            @elseif ($availableQuantity > 0)
                                 <form method="POST" action="{{ route('customer.reservations.store') }}">
                                     @csrf
                                     <input type="hidden" name="item_id" value="{{ $item->id }}">

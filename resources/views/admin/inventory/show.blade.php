@@ -58,6 +58,14 @@
                             <div class="text-muted small">Available</div>
                             <div class="fw-medium text-success">{{ $item->availableQuantity() }}</div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="text-muted small">Seller Name</div>
+                            <div class="fw-medium">{{ $item->seller_name }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-muted small">Contact Number</div>
+                            <div class="fw-medium">{{ $item->seller_contact_number }}</div>
+                        </div>
                     </div>
                 </div>
             </div>

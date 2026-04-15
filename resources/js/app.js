@@ -72,6 +72,8 @@ const initializeImagePreview = () => {
 	const imageInput = document.getElementById('image-input');
 	const previewDiv = document.getElementById('image-preview');
 	const previewImg = document.getElementById('preview-img');
+	const ratioWarning = document.getElementById('image-ratio-warning');
+	const ratioHint = document.getElementById('image-ratio-hint');
 
 	if (!imageInput || !previewDiv || !previewImg) {
 		return;
@@ -84,10 +86,32 @@ const initializeImagePreview = () => {
 			reader.onload = (e) => {
 				previewImg.src = e.target.result;
 				previewDiv.style.display = 'block';
+
+				const testImage = new Image();
+				testImage.onload = () => {
+					const ratio = testImage.width / testImage.height;
+					const isSixteenByNine = Math.abs(ratio - 16 / 9) <= 0.01;
+
+					if (ratioWarning) {
+						ratioWarning.style.display = isSixteenByNine ? 'none' : 'block';
+					}
+
+					if (ratioHint) {
+						ratioHint.textContent = `Selected image: ${testImage.width}x${testImage.height}${isSixteenByNine ? ' (valid 16:9)' : ' (not 16:9)'}`;
+					}
+				};
+
+				testImage.src = e.target.result;
 			};
 			reader.readAsDataURL(file);
 		} else {
 			previewDiv.style.display = 'none';
+			if (ratioWarning) {
+				ratioWarning.style.display = 'none';
+			}
+			if (ratioHint) {
+				ratioHint.textContent = 'Recommended example: 1600x900, 1280x720, or 1920x1080.';
+			}
 		}
 	});
 };

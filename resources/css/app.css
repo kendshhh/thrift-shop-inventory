@@ -802,10 +802,9 @@ code {
 .item-thumb-image {
 	width: 100%;
 	height: 100%;
-	object-fit: contain;
+	object-fit: cover;
 	object-position: center;
 	display: block;
-	padding: 0.4rem;
 }
 
 .item-thumb-placeholder {

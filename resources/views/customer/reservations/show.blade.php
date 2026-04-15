@@ -54,6 +54,7 @@
         };
 
         $canRequestChanges = in_array($reservation->status->value, ['pending', 'overdue'], true);
+        $canExtendReservation = $reservation->isExtendable();
 
         $isExpiringSoon = $reservation->status->value === 'pending'
             && $reservation->expires_at
@@ -65,7 +66,7 @@
         <div class="alert alert-warning d-flex align-items-start gap-2 mb-4" role="alert">
             <i class="bi bi-alarm-fill fs-5 mt-1"></i>
             <div>
-                This reservation expires {{ $reservation->expires_at?->diffForHumans() }}. Please pay in person to keep your items reserved.
+                This reservation expires {{ $reservation->expires_at?->diffForHumans() }}. Please pay in person, or extend it once for another 24 hours before it expires.
             </div>
         </div>
     @elseif ($reservation->status->value === 'overdue')
@@ -89,8 +90,20 @@
                         <dt class="col-5 text-muted">Pickup Date</dt><dd class="col-7">{{ optional($reservation->pickup_date)->format('M d, Y') }}</dd>
                         <dt class="col-5 text-muted">Pickup Slot</dt><dd class="col-7">{{ ucfirst(str_replace('_', ' ', (string) $reservation->pickup_slot)) }}</dd>
                         <dt class="col-5 text-muted">Expires</dt><dd class="col-7">{{ optional($reservation->expires_at)->format('M d, Y H:i') }}</dd>
+                        <dt class="col-5 text-muted">Extension Used</dt><dd class="col-7">{{ $reservation->extended_at ? 'Yes' : 'No' }}</dd>
                         <dt class="col-5 text-muted">Total</dt><dd class="col-7 fw-bold text-success">&#8369;{{ number_format((float) $reservation->total_amount, 2) }}</dd>
                     </dl>
+
+                    @if ($canExtendReservation)
+                        <hr>
+                        <form method="POST" action="{{ route('customer.reservations.extend', $reservation) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-clock-history me-1"></i>Extend Reservation by 24 Hours
+                            </button>
+                        </form>
+                    @endif
 
                     @if ($reservation->notes)
                         <hr>

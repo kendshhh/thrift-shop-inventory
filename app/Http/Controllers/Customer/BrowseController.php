@@ -8,6 +8,7 @@ use App\Enums\ReservationStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Item;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -131,8 +132,28 @@ class BrowseController extends Controller
     {
         abort_if($item->status !== ItemStatus::ACTIVE, 404);
 
+        $reservationLock = [
+            'is_locked' => false,
+            'pending_count' => 0,
+            'limit' => Reservation::MAX_PENDING_RESERVATIONS_PER_USER,
+        ];
+
+        if (auth()->user()?->hasRole('customer')) {
+            $pendingCount = auth()->user()
+                ->reservations()
+                ->where('status', ReservationStatus::PENDING->value)
+                ->count();
+
+            $reservationLock = [
+                'is_locked' => $pendingCount >= Reservation::MAX_PENDING_RESERVATIONS_PER_USER,
+                'pending_count' => $pendingCount,
+                'limit' => Reservation::MAX_PENDING_RESERVATIONS_PER_USER,
+            ];
+        }
+
         return view('customer.items.show', [
             'item' => $item->load('category'),
+            'reservationLock' => $reservationLock,
         ]);
     }
 }

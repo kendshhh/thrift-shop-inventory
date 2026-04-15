@@ -15,6 +15,10 @@ class Reservation extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const DEFAULT_EXPIRATION_HOURS = 24;
+    public const EXTENSION_HOURS = 24;
+    public const MAX_PENDING_RESERVATIONS_PER_USER = 2;
+
     protected $fillable = [
         'user_id',
         'reference',
@@ -34,6 +38,7 @@ class Reservation extends Model
         'customer_requested_at',
         'customer_request_handled_at',
         'customer_request_admin_note',
+        'extended_at',
         'total_amount',
     ];
 
@@ -47,6 +52,7 @@ class Reservation extends Model
         'customer_requested_pickup_date' => 'date',
         'customer_requested_at' => 'datetime',
         'customer_request_handled_at' => 'datetime',
+        'extended_at' => 'datetime',
         'total_amount' => 'decimal:2',
     ];
 
@@ -58,7 +64,7 @@ class Reservation extends Model
             }
 
             if (empty($reservation->expires_at)) {
-                $reservation->expires_at = now()->addHours(48);
+                $reservation->expires_at = now()->addHours(self::DEFAULT_EXPIRATION_HOURS);
             }
         });
     }
@@ -83,6 +89,14 @@ class Reservation extends Model
     public function isExpired(): bool
     {
         return now()->greaterThan($this->expires_at) && $this->status === ReservationStatus::PENDING;
+    }
+
+    public function isExtendable(): bool
+    {
+        return $this->status === ReservationStatus::PENDING
+            && $this->expires_at !== null
+            && now()->lt($this->expires_at)
+            && $this->extended_at === null;
     }
 
     private static function generateReference(): string
