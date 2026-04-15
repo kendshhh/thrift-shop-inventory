@@ -65,7 +65,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="text-muted mb-0 small">
-            Showing <strong>{{ $items->count() }}</strong> of <strong>{{ $items->total() }}</strong> available item{{ $items->total() === 1 ? '' : 's' }}.
+            Showing <strong>{{ $items->count() }}</strong> of <strong>{{ $items->total() }}</strong> browseable item{{ $items->total() === 1 ? '' : 's' }}.
         </p>
         @if ($hasFilters)
             <span class="badge bg-light text-dark border">Filtered Results</span>
@@ -97,10 +97,20 @@
                             <p class="text-muted small mb-3">{{ \Illuminate\Support\Str::limit($item->description ?: 'No description provided.', 95) }}</p>
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="fw-bold text-success">&#8369;{{ number_format((float) $item->price, 2) }}</span>
-                                <span class="text-muted small">{{ $item->availableQuantity() }} left</span>
+                                @if ($item->isAvailableForPurchase())
+                                    <span class="text-muted small">{{ $item->availableQuantity() }} left</span>
+                                @elseif ($item->hasScheduledRestock())
+                                    <span class="countdown-chip" data-countdown-to="{{ $item->restock_at?->toIso8601String() }}">
+                                        Restocks in <span data-countdown-label>Loading...</span>
+                                    </span>
+                                @else
+                                    <span class="text-muted small">Currently unavailable</span>
+                                @endif
                             </div>
 
-                            <div class="btn btn-sm btn-primary w-100">View Details</div>
+                            <div class="btn btn-sm {{ $item->isAvailableForPurchase() ? 'btn-primary' : 'btn-outline-secondary' }} w-100">
+                                {{ $item->isAvailableForPurchase() ? 'View Details' : 'View Availability' }}
+                            </div>
                         </div>
                     </div>
                 </a>

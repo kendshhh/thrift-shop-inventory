@@ -22,6 +22,7 @@
 
     @php
         $availableQuantity = $item->availableQuantity();
+        $isAvailable = $item->isAvailableForPurchase();
     @endphp
 
     <div class="row g-4">
@@ -44,8 +45,10 @@
 
                     <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
                         <h4 class="fw-bold mb-1">{{ $item->name }}</h4>
-                        @if ($availableQuantity > 0)
+                        @if ($isAvailable)
                             <span class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle">In Stock</span>
+                        @elseif ($item->hasScheduledRestock())
+                            <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle">Restocking Soon</span>
                         @else
                             <span class="badge rounded-pill bg-secondary">Out of Stock</span>
                         @endif
@@ -56,7 +59,16 @@
                     </div>
                     <div class="fs-4 fw-bold text-success mb-3">&#8369;{{ number_format((float) $item->price, 2) }}</div>
                     <div class="mb-3 text-muted small">
-                        <i class="bi bi-check-circle-fill text-success me-1"></i>{{ $availableQuantity }} available
+                        @if ($isAvailable)
+                            <span><i class="bi bi-check-circle-fill text-success me-1"></i>{{ $availableQuantity }} available</span>
+                        @elseif ($item->hasScheduledRestock())
+                            <span class="countdown-chip" data-countdown-to="{{ $item->restock_at?->toIso8601String() }}">
+                                Restocks in <span data-countdown-label>Loading...</span>
+                            </span>
+                            <div class="mt-2">Expected on {{ $item->restock_at?->format('M d, Y g:i A') }}</div>
+                        @else
+                            <span><i class="bi bi-x-circle text-secondary me-1"></i>Currently unavailable</span>
+                        @endif
                     </div>
                     <p class="text-muted mb-4">{{ $item->description ?: 'No description provided.' }}</p>
 
@@ -78,7 +90,7 @@
                     <div class="card">
                         <div class="card-header fw-semibold"><i class="bi bi-bag-plus me-1"></i>Reserve This Item</div>
                         <div class="card-body">
-                            @if ($availableQuantity > 0)
+                            @if ($isAvailable)
                                 <form method="POST" action="{{ route('customer.reservations.store') }}">
                                     @csrf
                                     <input type="hidden" name="item_id" value="{{ $item->id }}">
@@ -123,7 +135,11 @@
                                 </form>
                             @else
                                 <div class="alert alert-secondary mb-3">
-                                    This item is currently fully reserved.
+                                    @if ($item->hasScheduledRestock())
+                                        This item is unavailable right now, but it is scheduled to return on {{ $item->restock_at?->format('M d, Y g:i A') }}.
+                                    @else
+                                        This item is currently unavailable.
+                                    @endif
                                 </div>
                                 <a href="{{ route('items.index') }}" class="btn btn-outline-secondary w-100"><i class="bi bi-search me-1"></i>Browse Similar Items</a>
                             @endif

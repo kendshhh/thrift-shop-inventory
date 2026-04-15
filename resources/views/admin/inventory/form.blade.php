@@ -68,6 +68,18 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label fw-medium">Restock Date & Time <span class="text-muted fw-normal small">(optional)</span></label>
+                            <input
+                                name="restock_at"
+                                type="datetime-local"
+                                class="form-control @error('restock_at') is-invalid @enderror"
+                                value="{{ old('restock_at', $item->restock_at?->format('Y-m-d\\TH:i')) }}"
+                            >
+                            <div class="form-text">Set this when an out-of-stock item is expected back so the countdown can be shown to users.</div>
+                            @error('restock_at') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label fw-medium">Tags <span class="text-muted fw-normal small">(comma separated)</span></label>
                             <input name="tags" class="form-control" value="{{ old('tags', implode(', ', $item->tags ?? [])) }}">
                         </div>

@@ -85,6 +85,7 @@ class InventoryController extends Controller
             'tags' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
             'status' => ['required', Rule::in(ItemStatus::values())],
+            'restock_at' => ['nullable', 'date'],
         ]);
 
         if ($request->hasFile('image')) {
@@ -96,6 +97,7 @@ class InventoryController extends Controller
         $validated['slug'] = $this->makeUniqueSlug($validated['name']);
         $validated['reserved_quantity'] = 0;
         $validated['tags'] = $this->normalizeTags($request->input('tags'));
+        $validated['restock_at'] = $request->filled('restock_at') ? $request->input('restock_at') : null;
 
         Item::query()->create($validated);
 
@@ -144,6 +146,7 @@ class InventoryController extends Controller
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
             'remove_image' => ['nullable', 'boolean'],
             'status' => ['required', Rule::in(ItemStatus::values())],
+            'restock_at' => ['nullable', 'date'],
         ]);
 
         if ((int) $validated['quantity'] < $item->reserved_quantity) {
@@ -171,6 +174,7 @@ class InventoryController extends Controller
 
         $validated['slug'] = $this->makeUniqueSlug($validated['name'], $item->id);
         $validated['tags'] = $this->normalizeTags($request->input('tags'));
+        $validated['restock_at'] = $request->filled('restock_at') ? $request->input('restock_at') : null;
 
         $item->update($validated);
 
@@ -191,6 +195,27 @@ class InventoryController extends Controller
         return redirect()
             ->route('admin.inventory.index')
             ->with('status', 'Inventory item archived.');
+    }
+
+    public function forceDestroy(Item $item): RedirectResponse
+    {
+        if ($item->reservationItems()->exists()) {
+            return redirect()
+                ->route('admin.inventory.show', $item)
+                ->withErrors([
+                    'delete' => 'This item cannot be permanently deleted because it is linked to one or more reservations.',
+                ]);
+        }
+
+        if ($item->image_path !== null && $item->image_path !== '') {
+            Storage::disk('public')->delete($item->image_path);
+        }
+
+        $item->forceDelete();
+
+        return redirect()
+            ->route('admin.inventory.index')
+            ->with('status', 'Inventory item permanently deleted.');
     }
 
     private function makeUniqueSlug(string $name, ?int $ignoreItemId = null): string

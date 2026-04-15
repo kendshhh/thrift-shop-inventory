@@ -66,8 +66,18 @@ class BrowseController extends Controller
 
         return view('customer.home', [
             'featuredItems' => Item::query()
-                ->where('status', ItemStatus::ACTIVE->value)
-                ->whereRaw('quantity > reserved_quantity')
+                ->where(function ($builder): void {
+                    $builder
+                        ->where(function ($available): void {
+                            $available->where('status', ItemStatus::ACTIVE->value)
+                                ->whereRaw('quantity > reserved_quantity');
+                        })
+                        ->orWhere(function ($restocking): void {
+                            $restocking->where('status', ItemStatus::OUT_OF_STOCK->value)
+                                ->whereNotNull('restock_at')
+                                ->where('restock_at', '>', now());
+                        });
+                })
                 ->orderByDesc('created_at')
                 ->limit(8)
                 ->get(),
@@ -91,8 +101,18 @@ class BrowseController extends Controller
 
         $query = Item::query()
             ->with('category')
-            ->where('status', ItemStatus::ACTIVE->value)
-            ->whereRaw('quantity > reserved_quantity');
+            ->where(function ($builder): void {
+                $builder
+                    ->where(function ($available): void {
+                        $available->where('status', ItemStatus::ACTIVE->value)
+                            ->whereRaw('quantity > reserved_quantity');
+                    })
+                    ->orWhere(function ($restocking): void {
+                        $restocking->where('status', ItemStatus::OUT_OF_STOCK->value)
+                            ->whereNotNull('restock_at')
+                            ->where('restock_at', '>', now());
+                    });
+            });
 
         if (!empty($validated['search'])) {
             $query->where(function ($builder) use ($validated): void {
@@ -129,7 +149,7 @@ class BrowseController extends Controller
 
     public function show(Item $item): View
     {
-        abort_if($item->status !== ItemStatus::ACTIVE, 404);
+        abort_if($item->status === ItemStatus::ARCHIVED, 404);
 
         return view('customer.items.show', [
             'item' => $item->load('category'),

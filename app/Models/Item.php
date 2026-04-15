@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -28,6 +29,7 @@ class Item extends Model
         'tags',
         'image_path',
         'status',
+        'restock_at',
     ];
 
     protected $casts = [
@@ -37,6 +39,7 @@ class Item extends Model
         'tags' => 'array',
         'condition' => ItemCondition::class,
         'status' => ItemStatus::class,
+        'restock_at' => 'datetime',
     ];
 
     public function category(): BelongsTo
@@ -52,6 +55,16 @@ class Item extends Model
     public function availableQuantity(): int
     {
         return max(0, $this->quantity - $this->reserved_quantity);
+    }
+
+    public function isAvailableForPurchase(): bool
+    {
+        return $this->status === ItemStatus::ACTIVE && $this->availableQuantity() > 0;
+    }
+
+    public function hasScheduledRestock(): bool
+    {
+        return $this->restock_at instanceof Carbon && $this->restock_at->isFuture();
     }
 
     public function imageUrl(): ?string

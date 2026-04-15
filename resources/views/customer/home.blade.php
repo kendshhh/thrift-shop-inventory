@@ -95,7 +95,15 @@
                                             <p class="text-muted small mb-3">{{ \Illuminate\Support\Str::limit($item->description ?: 'No description available yet.', 90) }}</p>
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <span class="text-success fw-bold">&#8369;{{ number_format((float) $item->price, 2) }}</span>
-                                                <span class="text-muted small"><i class="bi bi-check-circle me-1"></i>{{ $item->availableQuantity() }} available</span>
+                                                @if ($item->isAvailableForPurchase())
+                                                    <span class="text-muted small"><i class="bi bi-check-circle me-1"></i>{{ $item->availableQuantity() }} available</span>
+                                                @elseif ($item->hasScheduledRestock())
+                                                    <span class="countdown-chip" data-countdown-to="{{ $item->restock_at?->toIso8601String() }}">
+                                                        Restocks in <span data-countdown-label>Loading...</span>
+                                                    </span>
+                                                @else
+                                                    <span class="text-muted small">Currently unavailable</span>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

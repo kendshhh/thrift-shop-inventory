@@ -38,7 +38,14 @@
                                         @else
                                             <span class="inventory-thumb-fallback"><i class="bi bi-image"></i></span>
                                         @endif
-                                        <span class="fw-medium">{{ $item->name }}</span>
+                                        <div>
+                                            <div class="fw-medium">{{ $item->name }}</div>
+                                            @if ($item->hasScheduledRestock())
+                                                <div class="countdown-chip mt-1" data-countdown-to="{{ $item->restock_at?->toIso8601String() }}">
+                                                    Restocks in <span data-countdown-label>Loading...</span>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                 </td>
                                 <td><span class="badge bg-secondary">{{ $item->category?->name ?? 'Uncategorized' }}</span></td>
@@ -53,6 +60,11 @@
                                 <td class="text-end">
                                     <a href="{{ route('admin.inventory.show', $item) }}" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-eye"></i></a>
                                     <a href="{{ route('admin.inventory.edit', $item) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <form method="POST" action="{{ route('admin.inventory.force-destroy', $item) }}" class="d-inline" onsubmit="return confirm('Permanently delete this item? This cannot be undone.')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger ms-1"><i class="bi bi-trash"></i></button>
+                                    </form>
                                 </td>
                             </tr>
                         @empty

@@ -57,6 +57,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/branding', [BrandingController::class, 'edit'])->name('branding.edit');
     Route::put('/branding', [BrandingController::class, 'update'])->name('branding.update');
 
+    Route::delete('/inventory/{item}/permanent', [InventoryController::class, 'forceDestroy'])
+        ->name('inventory.force-destroy');
+
     Route::resource('inventory', InventoryController::class)
         ->parameters(['inventory' => 'item']);
 

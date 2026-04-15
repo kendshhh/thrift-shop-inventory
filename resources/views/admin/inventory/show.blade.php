@@ -12,6 +12,12 @@
         </div>
     @endif
 
+    @error('delete')
+        <div class="alert alert-danger alert-dismissible fade show mb-4">
+            {{ $message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @enderror
+
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">{{ $item->name }}</h5>
@@ -58,6 +64,19 @@
                             <div class="text-muted small">Available</div>
                             <div class="fw-medium text-success">{{ $item->availableQuantity() }}</div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="text-muted small">Restock</div>
+                            <div class="fw-medium">
+                                @if ($item->hasScheduledRestock())
+                                    <span>{{ $item->restock_at?->format('M d, Y g:i A') }}</span>
+                                    <div class="countdown-chip mt-2" data-countdown-to="{{ $item->restock_at?->toIso8601String() }}">
+                                        Returns in <span data-countdown-label>Loading...</span>
+                                    </div>
+                                @else
+                                    Not scheduled
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -75,6 +94,11 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger"><i class="bi bi-archive me-1"></i>Archive</button>
+                </form>
+                <form method="POST" action="{{ route('admin.inventory.force-destroy', $item) }}" onsubmit="return confirm('Permanently delete this item? This cannot be undone.')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Delete Permanently</button>
                 </form>
             </div>
         </div>
