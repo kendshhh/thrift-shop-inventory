@@ -93,11 +93,19 @@
                                 accept="image/png,image/jpeg,image/webp"
                                 class="form-control @error('image') is-invalid @enderror"
                             >
-                            <div class="form-text">JPG, PNG, or WebP up to 3MB.</div>
+                            <div class="alert alert-info py-2 px-3 mt-2 mb-2 small">
+                                16:9 format only. Capture image with white background. JPG, PNG, or WebP up to 3MB.
+                            </div>
+                            <div id="image-ratio-hint" class="form-text">Recommended example: 1600x900, 1280x720, or 1920x1080.</div>
+                            <div id="image-ratio-warning" class="text-danger small mt-2" style="display: none;">
+                                Selected image is not 16:9 and will be rejected when you save.
+                            </div>
                             @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
                             <div id="image-preview" class="mt-3" style="display: none;">
-                                <img id="preview-img" src="" alt="Preview" class="inventory-thumb-preview">
+                                <div class="ratio ratio-16x9 border rounded-3 overflow-hidden bg-light">
+                                    <img id="preview-img" src="" alt="Preview" class="w-100 h-100" style="object-fit: contain; background: #fff;">
+                                </div>
                             </div>
 
                             @if ($isEditing && $item->imageUrl())
@@ -114,6 +122,29 @@
                         <div class="mb-4">
                             <label class="form-label fw-medium">Description</label>
                             <textarea name="description" class="form-control" rows="4">{{ old('description', $item->description) }}</textarea>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Seller Name</label>
+                                <input
+                                    name="seller_name"
+                                    class="form-control @error('seller_name') is-invalid @enderror"
+                                    value="{{ old('seller_name', $item->seller_name) }}"
+                                    required
+                                >
+                                @error('seller_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Contact Number</label>
+                                <input
+                                    name="seller_contact_number"
+                                    class="form-control @error('seller_contact_number') is-invalid @enderror"
+                                    value="{{ old('seller_contact_number', $item->seller_contact_number) }}"
+                                    required
+                                >
+                                @error('seller_contact_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
                         </div>
 
                         <div class="d-flex gap-2">

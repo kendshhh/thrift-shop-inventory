@@ -25,6 +25,8 @@ class Item extends Model
         'quantity',
         'reserved_quantity',
         'description',
+        'seller_name',
+        'seller_contact_number',
         'condition',
         'tags',
         'image_path',

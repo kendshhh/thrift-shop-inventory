@@ -22,7 +22,7 @@ class ExpireReservationsCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Expire pending reservations that passed the 48-hour payment window.';
+    protected $description = 'Expire pending reservations that passed the 24-hour payment window.';
 
     /**
      * Execute the console command.

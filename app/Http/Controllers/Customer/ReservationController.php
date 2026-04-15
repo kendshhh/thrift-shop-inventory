@@ -84,6 +84,18 @@ class ReservationController extends Controller
         ]);
 
         $reservation = DB::transaction(function () use ($request, $validated): Reservation {
+            $pendingReservationCount = Reservation::query()
+                ->where('user_id', $request->user()->id)
+                ->where('status', ReservationStatus::PENDING->value)
+                ->lockForUpdate()
+                ->count();
+
+            if ($pendingReservationCount >= Reservation::MAX_PENDING_RESERVATIONS_PER_USER) {
+                throw ValidationException::withMessages([
+                    'item_id' => 'Reservation lock active. You already have 2 pending reservations. Please complete, extend, or wait for one to expire before reserving again.',
+                ]);
+            }
+
             /** @var Item $item */
             $item = Item::query()
                 ->lockForUpdate()
@@ -132,7 +144,7 @@ class ReservationController extends Controller
 
         return redirect()
             ->route('customer.reservations.show', $reservation)
-            ->with('status', 'Reservation submitted. Please pay in person within 48 hours.');
+            ->with('status', 'Reservation submitted. Please pay in person within 24 hours.');
     }
 
     public function show(Request $request, Reservation $reservation): View
@@ -142,6 +154,26 @@ class ReservationController extends Controller
         return view('customer.reservations.show', [
             'reservation' => $reservation->load(['reservationItems.item', 'user']),
         ]);
+    }
+
+    public function extend(Request $request, Reservation $reservation): RedirectResponse
+    {
+        abort_unless($reservation->user_id === $request->user()->id, 403);
+
+        if (!$reservation->isExtendable()) {
+            return back()->withErrors([
+                'customer_request' => 'This reservation can no longer be extended.',
+            ]);
+        }
+
+        $reservation->forceFill([
+            'expires_at' => $reservation->expires_at->copy()->addHours(Reservation::EXTENSION_HOURS),
+            'extended_at' => now(),
+        ])->save();
+
+        return redirect()
+            ->route('customer.reservations.show', $reservation)
+            ->with('status', 'Reservation extended for 24 more hours.');
     }
 
     public function requestCancellation(Request $request, Reservation $reservation): RedirectResponse

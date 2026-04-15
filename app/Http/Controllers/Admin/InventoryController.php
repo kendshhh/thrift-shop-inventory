@@ -81,9 +81,11 @@ class InventoryController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'quantity' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
+            'seller_name' => ['required', 'string', 'max:255'],
+            'seller_contact_number' => ['required', 'string', 'max:50'],
             'condition' => ['required', Rule::in(ItemCondition::values())],
             'tags' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+            'image' => $this->imageRules(),
             'status' => ['required', Rule::in(ItemStatus::values())],
             'restock_at' => ['nullable', 'date'],
         ]);
@@ -141,9 +143,11 @@ class InventoryController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'quantity' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
+            'seller_name' => ['required', 'string', 'max:255'],
+            'seller_contact_number' => ['required', 'string', 'max:50'],
             'condition' => ['required', Rule::in(ItemCondition::values())],
             'tags' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+            'image' => $this->imageRules(),
             'remove_image' => ['nullable', 'boolean'],
             'status' => ['required', Rule::in(ItemStatus::values())],
             'restock_at' => ['nullable', 'date'],
@@ -251,5 +255,39 @@ class InventoryController extends Controller
             ->filter(fn (string $tag) => $tag !== '')
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private function imageRules(): array
+    {
+        return [
+            'nullable',
+            'image',
+            'mimes:jpg,jpeg,png,webp',
+            'max:3072',
+            function (string $attribute, mixed $value, \Closure $fail): void {
+                if ($value === null) {
+                    return;
+                }
+
+                $dimensions = @getimagesize($value->getRealPath());
+
+                if ($dimensions === false || ($dimensions[1] ?? 0) === 0) {
+                    $fail('The image could not be read.');
+                    return;
+                }
+
+                $width = (int) $dimensions[0];
+                $height = (int) $dimensions[1];
+                $ratio = $width / $height;
+                $expectedRatio = 16 / 9;
+
+                if (abs($ratio - $expectedRatio) > 0.01) {
+                    $fail('The image must use a 16:9 aspect ratio.');
+                }
+            },
+        ];
     }
 }
