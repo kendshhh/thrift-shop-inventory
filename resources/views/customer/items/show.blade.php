@@ -23,6 +23,7 @@
     @php
         $availableQuantity = $item->availableQuantity();
         $isAvailable = $item->isAvailableForPurchase();
+        $isReservedOut = $item->isReservedOut();
         $isReservationLocked = $reservationLock['is_locked'] ?? false;
         $pendingReservationCount = $reservationLock['pending_count'] ?? 0;
         $reservationLimit = $reservationLock['limit'] ?? 2;
@@ -50,6 +51,8 @@
                         <h4 class="fw-bold mb-1">{{ $item->name }}</h4>
                         @if ($isAvailable)
                             <span class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle">In Stock</span>
+                        @elseif ($isReservedOut)
+                            <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle">Reserved by Another Customer</span>
                         @elseif ($item->hasScheduledRestock())
                             <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle">Restocking Soon</span>
                         @else
@@ -64,6 +67,11 @@
                     <div class="mb-3 text-muted small">
                         @if ($isAvailable)
                             <span><i class="bi bi-check-circle-fill text-success me-1"></i>{{ $availableQuantity }} available</span>
+                        @elseif ($isReservedOut)
+                            <span class="countdown-chip" data-countdown-to="{{ $item->nextReservationAvailabilityAt()?->toIso8601String() }}">
+                                Available in <span data-countdown-label>Loading...</span>
+                            </span>
+                            <div class="mt-2">Reserved temporarily by another customer. If payment is not completed before expiry, this item will be available again.</div>
                         @elseif ($item->hasScheduledRestock())
                             <span class="countdown-chip" data-countdown-to="{{ $item->restock_at?->toIso8601String() }}">
                                 Restocks in <span data-countdown-label>Loading...</span>
@@ -164,7 +172,9 @@
                                 <a href="{{ route('customer.reservations.index') }}" class="btn btn-outline-secondary w-100"><i class="bi bi-bag-check me-1"></i>Manage My Reservations</a>
                             @else
                                 <div class="alert alert-secondary mb-3">
-                                    @if ($item->hasScheduledRestock())
+                                    @if ($isReservedOut)
+                                        This item is temporarily reserved by another customer. If payment is not completed before {{ $item->nextReservationAvailabilityAt()?->format('M d, Y g:i A') }}, it may become available again.
+                                    @elseif ($item->hasScheduledRestock())
                                         This item is unavailable right now, but it is scheduled to return on {{ $item->restock_at?->format('M d, Y g:i A') }}.
                                     @else
                                         This item is currently unavailable.

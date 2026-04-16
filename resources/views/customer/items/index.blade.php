@@ -91,7 +91,13 @@
 
                             <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                                 <span class="badge text-bg-light border">{{ $item->category?->name ?? 'Uncategorized' }}</span>
-                                <span class="badge bg-white border text-dark">{{ $item->condition->label() }}</span>
+                                @if ($item->isReservedOut())
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Reserved</span>
+                                @elseif ($item->hasScheduledRestock())
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Restocking Soon</span>
+                                @else
+                                    <span class="badge bg-white border text-dark">{{ $item->condition->label() }}</span>
+                                @endif
                             </div>
                             <h6 class="fw-bold text-dark mb-2">{{ $item->name }}</h6>
                             <p class="text-muted small mb-3">{{ \Illuminate\Support\Str::limit($item->description ?: 'No description provided.', 95) }}</p>
@@ -99,6 +105,10 @@
                                 <span class="fw-bold text-success">&#8369;{{ number_format((float) $item->price, 2) }}</span>
                                 @if ($item->isAvailableForPurchase())
                                     <span class="text-muted small">{{ $item->availableQuantity() }} left</span>
+                                @elseif ($item->isReservedOut())
+                                    <span class="countdown-chip" data-countdown-to="{{ $item->nextReservationAvailabilityAt()?->toIso8601String() }}">
+                                        Available in <span data-countdown-label>Loading...</span>
+                                    </span>
                                 @elseif ($item->hasScheduledRestock())
                                     <span class="countdown-chip" data-countdown-to="{{ $item->restock_at?->toIso8601String() }}">
                                         Restocks in <span data-countdown-label>Loading...</span>
@@ -107,6 +117,10 @@
                                     <span class="text-muted small">Currently unavailable</span>
                                 @endif
                             </div>
+
+                            @if ($item->isReservedOut())
+                                <p class="text-muted small mb-3">Reserved by another customer. It becomes available again if payment is not made before the timer ends.</p>
+                            @endif
 
                             <div class="btn btn-sm {{ $item->isAvailableForPurchase() ? 'btn-primary' : 'btn-outline-secondary' }} w-100">
                                 {{ $item->isAvailableForPurchase() ? 'View Details' : 'View Availability' }}

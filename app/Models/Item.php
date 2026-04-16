@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ItemCondition;
 use App\Enums\ItemStatus;
+use App\Enums\ReservationStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -67,6 +68,31 @@ class Item extends Model
     public function hasScheduledRestock(): bool
     {
         return $this->restock_at instanceof Carbon && $this->restock_at->isFuture();
+    }
+
+    public function nextReservationAvailabilityAt(): ?Carbon
+    {
+        $reservationItems = $this->relationLoaded('reservationItems')
+            ? $this->reservationItems
+            : $this->reservationItems()->with('reservation')->get();
+
+        $reservation = $reservationItems
+            ->map(fn ($reservationItem) => $reservationItem->reservation)
+            ->filter(fn ($reservation) => $reservation !== null
+                && $reservation->status === ReservationStatus::PENDING
+                && $reservation->expires_at instanceof Carbon
+                && $reservation->expires_at->isFuture())
+            ->sortBy(fn ($reservation) => $reservation->expires_at?->getTimestamp())
+            ->first();
+
+        return $reservation?->expires_at;
+    }
+
+    public function isReservedOut(): bool
+    {
+        return $this->status === ItemStatus::ACTIVE
+            && $this->availableQuantity() <= 0
+            && $this->nextReservationAvailabilityAt() instanceof Carbon;
     }
 
     public function imageUrl(): ?string

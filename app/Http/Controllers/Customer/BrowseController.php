@@ -67,11 +67,11 @@ class BrowseController extends Controller
 
         return view('customer.home', [
             'featuredItems' => Item::query()
+                ->with(['category', 'reservationItems.reservation'])
                 ->where(function ($builder): void {
                     $builder
                         ->where(function ($available): void {
-                            $available->where('status', ItemStatus::ACTIVE->value)
-                                ->whereRaw('quantity > reserved_quantity');
+                            $available->where('status', ItemStatus::ACTIVE->value);
                         })
                         ->orWhere(function ($restocking): void {
                             $restocking->where('status', ItemStatus::OUT_OF_STOCK->value)
@@ -101,12 +101,11 @@ class BrowseController extends Controller
         ]);
 
         $query = Item::query()
-            ->with('category')
+            ->with(['category', 'reservationItems.reservation'])
             ->where(function ($builder): void {
                 $builder
                     ->where(function ($available): void {
-                        $available->where('status', ItemStatus::ACTIVE->value)
-                            ->whereRaw('quantity > reserved_quantity');
+                        $available->where('status', ItemStatus::ACTIVE->value);
                     })
                     ->orWhere(function ($restocking): void {
                         $restocking->where('status', ItemStatus::OUT_OF_STOCK->value)
@@ -172,7 +171,7 @@ class BrowseController extends Controller
         }
 
         return view('customer.items.show', [
-            'item' => $item->load('category'),
+            'item' => $item->load(['category', 'reservationItems.reservation']),
             'reservationLock' => $reservationLock,
         ]);
     }
