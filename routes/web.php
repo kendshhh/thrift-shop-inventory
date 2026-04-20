@@ -72,6 +72,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     Route::delete('/inventory/{item}/permanent', [InventoryController::class, 'forceDestroy'])
         ->name('inventory.force-destroy');
+    Route::patch('/inventory/{item}/unarchive', [InventoryController::class, 'unarchive'])
+        ->name('inventory.unarchive');
 
     Route::resource('inventory', InventoryController::class)
         ->parameters(['inventory' => 'item']);

@@ -3,6 +3,9 @@
         <div class="d-flex align-items-center gap-2">
             <a href="{{ route('admin.inventory.index') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
             <h5 class="mb-0 fw-bold">Inventory Item Details</h5>
+            @if ($item->status === \App\Enums\ItemStatus::ARCHIVED)
+                <x-status-badge type="inventory" value="archived" label="Archived" />
+            @endif
         </div>
     </x-slot>
 
@@ -21,7 +24,12 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">{{ $item->name }}</h5>
-            <span class="badge fs-6 bg-{{ $item->status->value === 'active' ? 'success' : 'secondary' }}">{{ $item->status->label() }}</span>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                @if ($item->trashed())
+                    <x-status-badge type="inventory" value="archived" label="Recovered Archived Record" />
+                @endif
+                <x-status-badge class="fs-6" type="inventory" :value="$item->status->value" :label="$item->status->label()" :pill="true" />
+            </div>
         </div>
         <div class="card-body">
             <div class="row g-4 mb-4 align-items-start">
@@ -98,11 +106,19 @@
 
             <div class="d-flex gap-2">
                 <a href="{{ route('admin.inventory.edit', $item) }}" class="btn btn-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
-                <form method="POST" action="{{ route('admin.inventory.destroy', $item) }}" onsubmit="return confirm('Archive this item?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger"><i class="bi bi-archive me-1"></i>Archive</button>
-                </form>
+                @if ($item->status === \App\Enums\ItemStatus::ARCHIVED)
+                    <form method="POST" action="{{ route('admin.inventory.unarchive', $item) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-success"><i class="bi bi-arrow-counterclockwise me-1"></i>Unarchive</button>
+                    </form>
+                @else
+                    <form method="POST" action="{{ route('admin.inventory.destroy', $item) }}" onsubmit="return confirm('Archive this item?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger"><i class="bi bi-archive me-1"></i>Archive</button>
+                    </form>
+                @endif
                 <form method="POST" action="{{ route('admin.inventory.force-destroy', $item) }}" onsubmit="return confirm('Permanently delete this item? This cannot be undone.')">
                     @csrf
                     @method('DELETE')

@@ -30,7 +30,7 @@ class InventoryController extends Controller
             'sort' => ['nullable', Rule::in(['latest', 'name_asc', 'name_desc', 'price_asc', 'price_desc', 'quantity_asc', 'quantity_desc'])],
         ]);
 
-        $query = Item::query()->with('category');
+        $query = Item::query()->withTrashed()->with('category');
 
         if (!empty($validated['search'])) {
             $search = (string) $validated['search'];
@@ -71,6 +71,7 @@ class InventoryController extends Controller
             'conditions' => ItemCondition::cases(),
             'statuses' => ItemStatus::cases(),
             'filters' => $request->only(['search', 'category_id', 'condition', 'status', 'sort']),
+            'archivedCount' => Item::onlyTrashed()->count() + Item::query()->where('status', ItemStatus::ARCHIVED)->count(),
         ]);
     }
 
@@ -129,20 +130,22 @@ class InventoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Item $item): View
+    public function show(string $item): View
     {
         return view('admin.inventory.show', [
-            'item' => $item->load('category'),
+            'item' => $this->findAdminItemOrFail($item)->load('category'),
         ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Item $item): View
+    public function edit(string $item): View
     {
+        $itemModel = $this->findAdminItemOrFail($item);
+
         return view('admin.inventory.form', [
-            'item' => $item,
+            'item' => $itemModel,
             'categories' => Category::query()->orderBy('name')->get(),
             'conditions' => ItemCondition::cases(),
             'statuses' => ItemStatus::cases(),
@@ -153,8 +156,10 @@ class InventoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Item $item): RedirectResponse
+    public function update(Request $request, string $item): RedirectResponse
     {
+        $itemModel = $this->findAdminItemOrFail($item);
+
         $validated = $request->validate([
             'category_id' => ['nullable', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
@@ -171,22 +176,22 @@ class InventoryController extends Controller
             'restock_at' => ['nullable', 'date'],
         ]);
 
-        if ((int) $validated['quantity'] < $item->reserved_quantity) {
+        if ((int) $validated['quantity'] < $itemModel->reserved_quantity) {
             return back()
                 ->withInput()
                 ->withErrors(['quantity' => 'Quantity cannot be lower than the currently reserved quantity.']);
         }
 
-        if ($request->boolean('remove_image') && $item->image_path !== null) {
-            Storage::disk('public')->delete($item->image_path);
+        if ($request->boolean('remove_image') && $itemModel->image_path !== null) {
+            Storage::disk('public')->delete($itemModel->image_path);
             $validated['image_path'] = null;
         }
 
         if ($request->hasFile('image')) {
             $newImagePath = $request->file('image')->store('inventory', 'public');
 
-            if ($item->image_path !== null) {
-                Storage::disk('public')->delete($item->image_path);
+            if ($itemModel->image_path !== null) {
+                Storage::disk('public')->delete($itemModel->image_path);
             }
 
             $validated['image_path'] = $newImagePath;
@@ -194,46 +199,80 @@ class InventoryController extends Controller
 
         unset($validated['image'], $validated['remove_image']);
 
-        $validated['slug'] = $this->makeUniqueSlug($validated['name'], $item->id);
+        $validated['slug'] = $this->makeUniqueSlug($validated['name'], $itemModel->id);
         $validated['tags'] = $this->normalizeTags($request->input('tags'));
         $validated['restock_at'] = $request->filled('restock_at') ? $request->input('restock_at') : null;
 
-        $item->update($validated);
+        $itemModel->update($validated);
+
+        if ($itemModel->trashed()) {
+            $itemModel->restore();
+        }
 
         return redirect()
-            ->route('admin.inventory.show', $item)
+            ->route('admin.inventory.show', $itemModel)
             ->with('status', 'Inventory item updated.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Item $item): RedirectResponse
+    public function destroy(string $item): RedirectResponse
     {
-        $item->status = ItemStatus::ARCHIVED;
-        $item->save();
-        $item->delete();
+        $itemModel = $this->findAdminItemOrFail($item);
+
+        if ($itemModel->trashed()) {
+            $itemModel->restore();
+        }
+
+        $itemModel->status = ItemStatus::ARCHIVED;
+        $itemModel->save();
 
         return redirect()
             ->route('admin.inventory.index')
             ->with('status', 'Inventory item archived.');
     }
 
-    public function forceDestroy(Item $item): RedirectResponse
+    public function unarchive(string $item): RedirectResponse
     {
-        if ($item->reservationItems()->exists()) {
+        $itemModel = $this->findAdminItemOrFail($item);
+
+        if ($itemModel->trashed()) {
+            $itemModel->restore();
+            $itemModel->refresh();
+        }
+
+        if ($itemModel->status === ItemStatus::ARCHIVED) {
+            $targetStatus = $itemModel->availableQuantity() > 0
+                ? ItemStatus::ACTIVE
+                : ItemStatus::OUT_OF_STOCK;
+
+            $itemModel->status = $targetStatus;
+            $itemModel->save();
+        }
+
+        return redirect()
+            ->back()
+            ->with('status', 'Inventory item restored from archive.');
+    }
+
+    public function forceDestroy(string $item): RedirectResponse
+    {
+        $itemModel = $this->findAdminItemOrFail($item);
+
+        if ($itemModel->reservationItems()->exists()) {
             return redirect()
-                ->route('admin.inventory.show', $item)
+                ->route('admin.inventory.show', $itemModel)
                 ->withErrors([
                     'delete' => 'This item cannot be permanently deleted because it is linked to one or more reservations.',
                 ]);
         }
 
-        if ($item->image_path !== null && $item->image_path !== '') {
-            Storage::disk('public')->delete($item->image_path);
+        if ($itemModel->image_path !== null && $itemModel->image_path !== '') {
+            Storage::disk('public')->delete($itemModel->image_path);
         }
 
-        $item->forceDelete();
+        $itemModel->forceDelete();
 
         return redirect()
             ->route('admin.inventory.index')
@@ -247,7 +286,7 @@ class InventoryController extends Controller
         $counter = 1;
 
         while (
-            Item::query()
+            Item::withTrashed()
                 ->where('slug', $slug)
                 ->when($ignoreItemId !== null, fn ($query) => $query->where('id', '!=', $ignoreItemId))
                 ->exists()
@@ -273,6 +312,13 @@ class InventoryController extends Controller
             ->filter(fn (string $tag) => $tag !== '')
             ->values()
             ->all();
+    }
+
+    private function findAdminItemOrFail(string $slug): Item
+    {
+        return Item::withTrashed()
+            ->where('slug', $slug)
+            ->firstOrFail();
     }
 
     /**

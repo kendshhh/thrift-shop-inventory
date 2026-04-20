@@ -1,8 +1,17 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <h5 class="mb-0 fw-bold"><i class="bi bi-boxes me-2"></i>Inventory</h5>
-            <a href="{{ route('admin.inventory.create') }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Item</a>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-boxes me-2"></i>Inventory</h5>
+                @if (($archivedCount ?? 0) > 0)
+                    <x-status-badge type="inventory" value="archived" :label="($archivedCount ?? 0).' Archived'" />
+                @endif
+            </div>
+            <div class="action-row action-row-end">
+                <a href="{{ route('admin.inventory.index') }}" class="btn btn-sm {{ ($filters['status'] ?? '') === '' ? 'btn-outline-dark' : 'btn-outline-secondary' }}">All Items</a>
+                <a href="{{ route('admin.inventory.index', ['status' => 'archived']) }}" class="btn btn-sm {{ ($filters['status'] ?? '') === 'archived' ? 'btn-outline-dark' : 'btn-outline-secondary' }}"><i class="bi bi-archive me-1"></i>Archived</a>
+                <a href="{{ route('admin.inventory.create') }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Item</a>
+            </div>
         </div>
     </x-slot>
 
@@ -114,7 +123,12 @@
                                             <span class="inventory-thumb-fallback"><i class="bi bi-image"></i></span>
                                         @endif
                                         <div>
-                                            <div class="fw-medium">{{ $item->name }}</div>
+                                            <div class="fw-medium d-flex flex-wrap align-items-center gap-2">
+                                                <span>{{ $item->name }}</span>
+                                                @if ($item->trashed())
+                                                    <x-status-badge type="inventory" value="archived" label="Archived Record" />
+                                                @endif
+                                            </div>
                                             @if ($item->hasScheduledRestock())
                                                 <div class="countdown-chip mt-1" data-countdown-to="{{ $item->restock_at?->toIso8601String() }}">
                                                     Restocks in <span data-countdown-label>Loading...</span>
@@ -134,6 +148,19 @@
                                     <div class="action-row action-row-end">
                                         <a href="{{ route('admin.inventory.show', $item) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
                                         <a href="{{ route('admin.inventory.edit', $item) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                        @if ($item->status === \App\Enums\ItemStatus::ARCHIVED)
+                                            <form method="POST" action="{{ route('admin.inventory.unarchive', $item) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-arrow-counterclockwise"></i></button>
+                                            </form>
+                                        @else
+                                            <form method="POST" action="{{ route('admin.inventory.destroy', $item) }}" onsubmit="return confirm('Archive this item?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-warning"><i class="bi bi-archive"></i></button>
+                                            </form>
+                                        @endif
                                         <form method="POST" action="{{ route('admin.inventory.force-destroy', $item) }}" onsubmit="return confirm('Permanently delete this item? This cannot be undone.')">
                                             @csrf
                                             @method('DELETE')
@@ -144,7 +171,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">No inventory items found.</td>
+                                <td colspan="7" class="text-center text-muted py-4">{{ ($filters['status'] ?? '') === 'archived' ? 'No archived inventory items found.' : 'No inventory items found.' }}</td>
                             </tr>
                         @endforelse
                     </tbody>
