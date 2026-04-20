@@ -27,6 +27,7 @@
     @php
         $statusBadgeClass = match($reservation->status->value) {
             'pending' => 'bg-warning text-dark',
+            'ready_for_pickup' => 'bg-info text-dark',
             'completed' => 'bg-success',
             'overdue' => 'bg-danger',
             'expired' => 'bg-secondary',
@@ -53,7 +54,7 @@
             default => 'N/A',
         };
 
-        $canRequestChanges = in_array($reservation->status->value, ['pending', 'overdue'], true);
+        $canRequestChanges = in_array($reservation->status->value, \App\Enums\ReservationStatus::customerSelfServiceValues(), true);
         $canExtendReservation = $reservation->isExtendable();
 
         $isExpiringSoon = $reservation->status->value === 'pending'
@@ -67,6 +68,13 @@
             <i class="bi bi-alarm-fill fs-5 mt-1"></i>
             <div>
                 This reservation expires {{ $reservation->expires_at?->diffForHumans() }}. Please pay in person, or extend it once for another 24 hours before it expires.
+            </div>
+        </div>
+    @elseif ($reservation->status->value === 'ready_for_pickup')
+        <div class="alert alert-info d-flex align-items-start gap-2 mb-4" role="alert">
+            <i class="bi bi-bell-fill fs-5 mt-1"></i>
+            <div>
+                Your items are ready for pickup. Please visit the shop on your scheduled pickup date and settle payment in person.
             </div>
         </div>
     @elseif ($reservation->status->value === 'overdue')
@@ -107,7 +115,7 @@
 
                     @if ($reservation->notes)
                         <hr>
-                        <h6 class="fw-semibold small mb-2">Your Notes</h6>
+                        <h6 class="fw-semibold small mb-2">Reservation Notes</h6>
                         <p class="mb-0 small text-muted">{{ $reservation->notes }}</p>
                     @endif
                 </div>

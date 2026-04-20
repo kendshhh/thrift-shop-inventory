@@ -36,6 +36,7 @@ class BrowseController extends Controller
             $customerStats = [
                 'total_reservations' => (int) $statusCounts->sum(),
                 'pending_reservations' => (int) ($statusCounts[ReservationStatus::PENDING->value] ?? 0),
+                'ready_reservations' => (int) ($statusCounts[ReservationStatus::READY_FOR_PICKUP->value] ?? 0),
                 'expiring_soon' => $request->user()
                     ->reservations()
                     ->where('status', ReservationStatus::PENDING->value)
@@ -45,6 +46,7 @@ class BrowseController extends Controller
                     ->reservations()
                     ->whereIn('status', [
                         ReservationStatus::PENDING->value,
+                        ReservationStatus::READY_FOR_PICKUP->value,
                         ReservationStatus::OVERDUE->value,
                     ])
                     ->whereDate('pickup_date', '>=', today())
@@ -56,6 +58,7 @@ class BrowseController extends Controller
                 ->with('reservationItems.item')
                 ->whereIn('status', [
                     ReservationStatus::PENDING->value,
+                    ReservationStatus::READY_FOR_PICKUP->value,
                     ReservationStatus::OVERDUE->value,
                 ])
                 ->whereDate('pickup_date', '>=', today())
@@ -160,7 +163,7 @@ class BrowseController extends Controller
         if (auth()->user()?->hasRole('customer')) {
             $pendingCount = auth()->user()
                 ->reservations()
-                ->where('status', ReservationStatus::PENDING->value)
+                ->whereIn('status', ReservationStatus::activeValues())
                 ->count();
 
             $reservationLock = [

@@ -15,6 +15,7 @@
     @php
         $statusBadgeClasses = [
             'pending' => 'bg-warning text-dark',
+            'ready_for_pickup' => 'bg-info text-dark',
             'completed' => 'bg-success',
             'overdue' => 'bg-danger',
             'expired' => 'bg-secondary',
@@ -31,16 +32,16 @@
         </div>
         <div class="col-6 col-xl-3">
             <div class="customer-stat-card customer-stat-amber">
-                <span class="customer-stat-label">Pending</span>
-                <div class="customer-stat-value">{{ number_format((int) ($customerStats['pending_reservations'] ?? 0)) }}</div>
-                <span class="customer-stat-meta"><i class="bi bi-hourglass-split me-1"></i>Awaiting in-person payment</span>
+                <span class="customer-stat-label">Ready for Pickup</span>
+                <div class="customer-stat-value">{{ number_format((int) ($customerStats['ready_reservations'] ?? 0)) }}</div>
+                <span class="customer-stat-meta"><i class="bi bi-bell me-1"></i>Prepared and awaiting payment</span>
             </div>
         </div>
         <div class="col-6 col-xl-3">
-            <div class="customer-stat-card customer-stat-red">
-                <span class="customer-stat-label">Expiring in 24h</span>
-                <div class="customer-stat-value">{{ number_format((int) ($customerStats['expiring_soon'] ?? 0)) }}</div>
-                <span class="customer-stat-meta"><i class="bi bi-alarm me-1"></i>Pay before reservation expires</span>
+            <div class="customer-stat-card customer-stat-sky">
+                <span class="customer-stat-label">Pending</span>
+                <div class="customer-stat-value">{{ number_format((int) ($customerStats['pending_reservations'] ?? 0)) }}</div>
+                <span class="customer-stat-meta"><i class="bi bi-hourglass-split me-1"></i>Awaiting in-person payment</span>
             </div>
         </div>
         <div class="col-6 col-xl-3">
@@ -173,6 +174,10 @@
                                 <span class="small text-muted">{{ $reservation->reservationItems->sum('quantity') }} item{{ $reservation->reservationItems->sum('quantity') > 1 ? 's' : '' }}</span>
                                 <span class="fw-semibold text-success small">&#8369;{{ number_format((float) $reservation->total_amount, 2) }}</span>
                             </div>
+
+                            @if ($reservation->status->value === 'ready_for_pickup')
+                                <div class="text-info-emphasis small mt-2"><i class="bi bi-bell me-1"></i>Ready for pickup and payment.</div>
+                            @endif
 
                             @if ($isExpiringSoon)
                                 <div class="text-danger-emphasis small mt-2"><i class="bi bi-alarm me-1"></i>Expires {{ $reservation->expires_at->diffForHumans() }}</div>

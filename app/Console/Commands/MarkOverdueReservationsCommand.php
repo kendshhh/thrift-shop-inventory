@@ -21,7 +21,7 @@ class MarkOverdueReservationsCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Mark completed reservations as overdue when pickup date has passed.';
+    protected $description = 'Mark unpaid reservations as overdue when the pickup date has passed.';
 
     /**
      * Execute the console command.
@@ -29,8 +29,11 @@ class MarkOverdueReservationsCommand extends Command
     public function handle(): int
     {
         $affected = Reservation::query()
-            ->where('status', ReservationStatus::COMPLETED->value)
-            ->where('payment_status', PaymentStatus::COMPLETED->value)
+            ->whereIn('status', [
+                ReservationStatus::PENDING->value,
+                ReservationStatus::READY_FOR_PICKUP->value,
+            ])
+            ->where('payment_status', '!=', PaymentStatus::COMPLETED->value)
             ->whereDate('pickup_date', '<', now()->toDateString())
             ->update([
                 'status' => ReservationStatus::OVERDUE->value,

@@ -59,6 +59,7 @@ class ReservationController extends Controller
             'stats' => [
                 'total' => (int) $statusCounts->sum(),
                 'pending' => (int) ($statusCounts[ReservationStatus::PENDING->value] ?? 0),
+                'ready' => (int) ($statusCounts[ReservationStatus::READY_FOR_PICKUP->value] ?? 0),
                 'overdue' => (int) ($statusCounts[ReservationStatus::OVERDUE->value] ?? 0),
                 'completed' => (int) ($statusCounts[ReservationStatus::COMPLETED->value] ?? 0),
                 'expiring_soon' => $request->user()
@@ -84,15 +85,15 @@ class ReservationController extends Controller
         ]);
 
         $reservation = DB::transaction(function () use ($request, $validated): Reservation {
-            $pendingReservationCount = Reservation::query()
+            $activeReservationCount = Reservation::query()
                 ->where('user_id', $request->user()->id)
-                ->where('status', ReservationStatus::PENDING->value)
+                ->whereIn('status', ReservationStatus::activeValues())
                 ->lockForUpdate()
                 ->count();
 
-            if ($pendingReservationCount >= Reservation::MAX_PENDING_RESERVATIONS_PER_USER) {
+            if ($activeReservationCount >= Reservation::MAX_PENDING_RESERVATIONS_PER_USER) {
                 throw ValidationException::withMessages([
-                    'item_id' => 'Reservation lock active. You already have 2 pending reservations. Please complete, extend, or wait for one to expire before reserving again.',
+                    'item_id' => 'Reservation lock active. You already have 2 active reservations. Please complete, pick up, or wait for one to expire before reserving again.',
                 ]);
             }
 
@@ -261,9 +262,6 @@ class ReservationController extends Controller
 
     private function canCreateCustomerRequest(Reservation $reservation): bool
     {
-        return in_array($reservation->status, [
-            ReservationStatus::PENDING,
-            ReservationStatus::OVERDUE,
-        ], true);
+        return in_array($reservation->status->value, ReservationStatus::customerSelfServiceValues(), true);
     }
 }

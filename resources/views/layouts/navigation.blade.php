@@ -1,7 +1,10 @@
 @php
     $user = Auth::user();
-$brandName = data_get($branding, 'brand_name', config('app.name', 'Everdarling'));
+    $brandName = data_get($branding, 'brand_name', config('app.name', 'Everdarling'));
     $logoUrl = data_get($branding, 'logo_url');
+    $unreadNotificationCount = $user && !$user->isAdmin()
+        ? $user->unreadNotifications()->count()
+        : 0;
 @endphp
 
 <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-modern">
@@ -35,6 +38,18 @@ $brandName = data_get($branding, 'brand_name', config('app.name', 'Everdarling')
                 @endif
 
                 <ul class="navbar-nav ms-auto align-items-lg-center mt-3 mt-lg-0">
+                    @if (!$user->isAdmin())
+                        <li class="nav-item me-lg-2">
+                            <a class="nav-link position-relative rounded-pill px-3 py-2 bg-white border shadow-sm{{ request()->routeIs('customer.notifications.*') ? ' active' : '' }}" href="{{ route('customer.notifications.index') }}">
+                                <i class="bi bi-bell me-1"></i>Notifications
+                                @if ($unreadNotificationCount > 0)
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
+                                    </span>
+                                @endif
+                            </a>
+                        </li>
+                    @endif
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle rounded-pill px-3 py-2 bg-white border shadow-sm" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle me-1"></i>{{ $user->name }}

@@ -56,6 +56,7 @@ class ReservationManagementController extends Controller
         $previousPaymentStatusLabel = $reservation->payment_status->label();
 
         $newStatus = ReservationStatus::from($validated['status']);
+        $newPaymentStatus = PaymentStatus::from($validated['payment_status']);
 
         if (!$reservation->status->canTransitionTo($newStatus)) {
             return back()->withErrors([
@@ -63,10 +64,22 @@ class ReservationManagementController extends Controller
             ]);
         }
 
+        if ($newStatus === ReservationStatus::READY_FOR_PICKUP && $newPaymentStatus === PaymentStatus::COMPLETED) {
+            return back()->withErrors([
+                'payment_status' => 'Ready for pickup reservations should still be awaiting in-person payment.',
+            ]);
+        }
+
+        if ($newStatus === ReservationStatus::COMPLETED && $newPaymentStatus !== PaymentStatus::COMPLETED) {
+            return back()->withErrors([
+                'payment_status' => 'Completed reservations must have payment marked as completed.',
+            ]);
+        }
+
         $wasExpired = $reservation->status === ReservationStatus::EXPIRED;
 
         $reservation->status = $newStatus;
-        $reservation->payment_status = PaymentStatus::from($validated['payment_status']);
+        $reservation->payment_status = $newPaymentStatus;
         $reservation->notes = $validated['notes'] ?? $reservation->notes;
 
         if ($reservation->payment_status === PaymentStatus::COMPLETED && $reservation->paid_at === null) {

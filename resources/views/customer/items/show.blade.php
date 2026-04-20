@@ -98,7 +98,7 @@
                         <ul class="mb-0 small text-muted ps-3">
                             <li>Reservations stay active for 24 hours while awaiting payment.</li>
                             <li>You may extend a pending reservation one time for another 24 hours.</li>
-                            <li>Customers with {{ $reservationLimit }} pending reservations are temporarily locked from making another one.</li>
+                            <li>Customers with {{ $reservationLimit }} active reservations are temporarily locked from making another one.</li>
                             <li>Payment is processed in person at pickup.</li>
                             <li>Stock is reserved immediately after you submit.</li>
                         </ul>
@@ -116,7 +116,7 @@
                             @if ($isAvailable)
                                 @if ($isReservationLocked)
                                     <div class="alert alert-warning mb-3">
-                                        Your reservation button is locked right now because you already have <strong>{{ $pendingReservationCount }}</strong> pending reservation{{ $pendingReservationCount > 1 ? 's' : '' }}.
+                                        Your reservation button is locked right now because you already have <strong>{{ $pendingReservationCount }}</strong> active reservation{{ $pendingReservationCount > 1 ? 's' : '' }}.
                                         Extend, complete, or wait for one to expire before reserving another item.
                                     </div>
                                     <a href="{{ route('customer.reservations.index') }}" class="btn btn-outline-secondary w-100"><i class="bi bi-bag-check me-1"></i>Manage My Reservations</a>
@@ -166,7 +166,7 @@
                                 @endif
                             @elseif ($isReservationLocked)
                                 <div class="alert alert-warning mb-3">
-                                    Your reservation button is locked right now because you already have <strong>{{ $pendingReservationCount }}</strong> pending reservation{{ $pendingReservationCount > 1 ? 's' : '' }}.
+                                    Your reservation button is locked right now because you already have <strong>{{ $pendingReservationCount }}</strong> active reservation{{ $pendingReservationCount > 1 ? 's' : '' }}.
                                     Extend, complete, or wait for one to expire before reserving another item.
                                 </div>
                                 <a href="{{ route('customer.reservations.index') }}" class="btn btn-outline-secondary w-100"><i class="bi bi-bag-check me-1"></i>Manage My Reservations</a>

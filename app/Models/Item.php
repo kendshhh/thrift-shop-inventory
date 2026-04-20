@@ -76,16 +76,36 @@ class Item extends Model
             ? $this->reservationItems
             : $this->reservationItems()->with('reservation')->get();
 
-        $reservation = $reservationItems
+        $availabilityMoments = $reservationItems
             ->map(fn ($reservationItem) => $reservationItem->reservation)
-            ->filter(fn ($reservation) => $reservation !== null
-                && $reservation->status === ReservationStatus::PENDING
-                && $reservation->expires_at instanceof Carbon
-                && $reservation->expires_at->isFuture())
-            ->sortBy(fn ($reservation) => $reservation->expires_at?->getTimestamp())
+            ->filter()
+            ->map(function ($reservation): ?Carbon {
+                if (
+                    $reservation->status === ReservationStatus::PENDING
+                    && $reservation->expires_at instanceof Carbon
+                    && $reservation->expires_at->isFuture()
+                ) {
+                    return $reservation->expires_at;
+                }
+
+                if (
+                    $reservation->status === ReservationStatus::READY_FOR_PICKUP
+                    && $reservation->pickup_date instanceof Carbon
+                ) {
+                    $pickupDeadline = $reservation->pickup_date->copy()->endOfDay();
+
+                    if ($pickupDeadline->isFuture()) {
+                        return $pickupDeadline;
+                    }
+                }
+
+                return null;
+            })
+            ->filter()
+            ->sortBy(fn (Carbon $moment) => $moment->getTimestamp())
             ->first();
 
-        return $reservation?->expires_at;
+        return $availabilityMoments;
     }
 
     public function isReservedOut(): bool

@@ -18,6 +18,12 @@
         </div>
     @endif
 
+    @if ($errors->any() && !$errors->has('customer_request'))
+        <div class="alert alert-danger alert-dismissible fade show mb-4">
+            {{ $errors->first() }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     @php
         $requestStatusClass = match($reservation->customer_request_status) {
             'pending' => 'bg-warning text-dark',
@@ -135,23 +141,27 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label fw-medium">Reservation Status</label>
-                                <select name="status" class="form-select" required>
+                                <select name="status" class="form-select @error('status') is-invalid @enderror" required>
                                     @foreach ($statuses as $status)
                                         <option value="{{ $status->value }}" @selected($reservation->status === $status)>{{ $status->label() }}</option>
                                     @endforeach
                                 </select>
+                                @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-medium">Payment Status</label>
-                                <select name="payment_status" class="form-select" required>
+                                <select name="payment_status" class="form-select @error('payment_status') is-invalid @enderror" required>
                                     @foreach ($paymentStatuses as $paymentStatus)
                                         <option value="{{ $paymentStatus->value }}" @selected($reservation->payment_status === $paymentStatus)>{{ $paymentStatus->label() }}</option>
                                     @endforeach
                                 </select>
+                                @error('payment_status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium">Admin Notes</label>
-                                <textarea name="notes" class="form-control" rows="3">{{ old('notes', $reservation->notes) }}</textarea>
+                                <textarea name="notes" class="form-control @error('notes') is-invalid @enderror" rows="3">{{ old('notes', $reservation->notes) }}</textarea>
+                                @error('notes') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <div class="form-text">Use Ready for Pickup to notify the customer in-app that the item is prepared and awaiting in-person payment.</div>
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="btn btn-primary">Save Changes</button>

@@ -99,6 +99,11 @@ class Reservation extends Model
             && $this->extended_at === null;
     }
 
+    public function isReadyForPickup(): bool
+    {
+        return $this->status === ReservationStatus::READY_FOR_PICKUP;
+    }
+
     private static function generateReference(): string
     {
         do {

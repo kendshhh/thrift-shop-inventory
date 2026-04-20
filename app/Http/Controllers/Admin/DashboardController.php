@@ -16,7 +16,10 @@ class DashboardController extends Controller
         return view('admin.dashboard', [
             'totalInventoryItems' => Item::query()->count(),
             'activeReservations' => Reservation::query()
-                ->where('status', ReservationStatus::PENDING->value)
+                ->whereIn('status', [
+                    ReservationStatus::PENDING->value,
+                    ReservationStatus::READY_FOR_PICKUP->value,
+                ])
                 ->count(),
             'overdueReservations' => Reservation::query()
                 ->where('status', ReservationStatus::OVERDUE->value)

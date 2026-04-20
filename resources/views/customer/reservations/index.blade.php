@@ -12,6 +12,7 @@
     @php
         $statusBadgeClasses = [
             'pending' => 'bg-warning text-dark',
+            'ready_for_pickup' => 'bg-info text-dark',
             'completed' => 'bg-success',
             'overdue' => 'bg-danger',
             'expired' => 'bg-secondary',
@@ -29,28 +30,35 @@
     @endphp
 
     <div class="row g-3 mb-4">
-        <div class="col-6 col-xl-3">
+        <div class="col-6 col-xl">
             <div class="customer-stat-card customer-stat-sky">
                 <span class="customer-stat-label">Total</span>
                 <div class="customer-stat-value">{{ number_format((int) ($stats['total'] ?? 0)) }}</div>
                 <span class="customer-stat-meta">All reservations</span>
             </div>
         </div>
-        <div class="col-6 col-xl-3">
+        <div class="col-6 col-xl">
             <div class="customer-stat-card customer-stat-amber">
                 <span class="customer-stat-label">Pending</span>
                 <div class="customer-stat-value">{{ number_format((int) ($stats['pending'] ?? 0)) }}</div>
                 <span class="customer-stat-meta">Awaiting payment</span>
             </div>
         </div>
-        <div class="col-6 col-xl-3">
+        <div class="col-6 col-xl">
+            <div class="customer-stat-card customer-stat-sky">
+                <span class="customer-stat-label">Ready for Pickup</span>
+                <div class="customer-stat-value">{{ number_format((int) ($stats['ready'] ?? 0)) }}</div>
+                <span class="customer-stat-meta">Prepared and awaiting payment</span>
+            </div>
+        </div>
+        <div class="col-6 col-xl">
             <div class="customer-stat-card customer-stat-red">
                 <span class="customer-stat-label">Overdue</span>
                 <div class="customer-stat-value">{{ number_format((int) ($stats['overdue'] ?? 0)) }}</div>
                 <span class="customer-stat-meta">Needs immediate action</span>
             </div>
         </div>
-        <div class="col-6 col-xl-3">
+        <div class="col-6 col-xl">
             <div class="customer-stat-card customer-stat-green">
                 <span class="customer-stat-label">Completed</span>
                 <div class="customer-stat-value">{{ number_format((int) ($stats['completed'] ?? 0)) }}</div>
@@ -140,6 +148,9 @@
                                 <td class="small">
                                     <div>{{ optional($reservation->pickup_date)->format('M d, Y') }}</div>
                                     <div class="text-muted">{{ ucfirst(str_replace('_', ' ', (string) $reservation->pickup_slot)) }}</div>
+                                    @if ($reservation->status->value === 'ready_for_pickup')
+                                        <div class="text-info-emphasis">Ready for pickup and payment</div>
+                                    @endif
                                     @if ($isExpiringSoon)
                                         <div class="text-danger-emphasis">Expires {{ $reservation->expires_at->diffForHumans() }}</div>
                                     @endif

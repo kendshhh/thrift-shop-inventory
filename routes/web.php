@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ReservationManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Customer\BrowseController;
+use App\Http\Controllers\Customer\NotificationController;
 use App\Http\Controllers\Customer\ReservationController as CustomerReservationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
@@ -43,6 +44,8 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/home', [BrowseController::class, 'home'])->name('home');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::get('/reservations', [CustomerReservationController::class, 'index'])->name('reservations.index');
     Route::post('/reservations', [CustomerReservationController::class, 'store'])->name('reservations.store');
     Route::get('/reservations/{reservation}', [CustomerReservationController::class, 'show'])->name('reservations.show');
