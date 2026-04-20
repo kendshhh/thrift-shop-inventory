@@ -16,10 +16,12 @@ class BrandingSetting extends Model
         'primary_color',
         'secondary_color',
         'logo_path',
+        'payment_details',
         'updated_by',
     ];
 
     protected $casts = [
+        'payment_details' => 'array',
         'updated_by' => 'integer',
     ];
 

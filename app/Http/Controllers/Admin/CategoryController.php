@@ -14,12 +14,17 @@ class CategoryController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Category::query()
-            ->withCount('items')
-            ->latest();
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['nullable', Rule::in(['0', '1'])],
+            'sort' => ['nullable', Rule::in(['latest', 'name_asc', 'name_desc', 'items_desc', 'items_asc'])],
+        ]);
 
-        if ($request->filled('search')) {
-            $search = (string) $request->input('search');
+        $query = Category::query()
+            ->withCount('items');
+
+        if (!empty($validated['search'])) {
+            $search = (string) $validated['search'];
             $query->where(function ($builder) use ($search): void {
                 $builder->where('name', 'like', "%{$search}%")
                     ->orWhere('slug', 'like', "%{$search}%")
@@ -27,13 +32,21 @@ class CategoryController extends Controller
             });
         }
 
-        if ($request->filled('is_active')) {
-            $query->where('is_active', (bool) $request->boolean('is_active'));
+        if (array_key_exists('is_active', $validated) && $validated['is_active'] !== null && $validated['is_active'] !== '') {
+            $query->where('is_active', $validated['is_active'] === '1');
         }
+
+        match ($validated['sort'] ?? 'latest') {
+            'name_asc' => $query->orderBy('name'),
+            'name_desc' => $query->orderByDesc('name'),
+            'items_desc' => $query->orderByDesc('items_count'),
+            'items_asc' => $query->orderBy('items_count'),
+            default => $query->latest(),
+        };
 
         return view('admin.categories.index', [
             'categories' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only(['search', 'is_active']),
+            'filters' => $request->only(['search', 'is_active', 'sort']),
         ]);
     }
 

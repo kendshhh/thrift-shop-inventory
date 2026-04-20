@@ -15,13 +15,17 @@ class BrandingController extends Controller
     public function edit(): View
     {
         return view('admin.branding.edit', [
-            'settings' => BrandingSetting::query()->find(1),
+            'settings' => BrandingSetting::query()->find(1) ?? BrandingSetting::query()->first(),
             'branding' => Branding::current(),
         ]);
     }
 
     public function update(Request $request): RedirectResponse
     {
+        $settings = BrandingSetting::query()->find(1) ?? BrandingSetting::query()->first() ?? tap(new BrandingSetting(), static function (BrandingSetting $settings): void {
+            $settings->id = 1;
+        });
+
         $validated = $request->validate([
             'brand_name' => ['required', 'string', 'max:80'],
             'brand_tagline' => ['nullable', 'string', 'max:180'],
@@ -31,7 +35,6 @@ class BrandingController extends Controller
             'remove_logo' => ['nullable', 'boolean'],
         ]);
 
-        $settings = BrandingSetting::query()->firstOrNew(['id' => 1]);
         $removeLogo = $request->boolean('remove_logo');
         $hasNewLogo = $request->hasFile('logo');
         $disk = Storage::disk('public');

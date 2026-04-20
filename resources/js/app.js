@@ -120,7 +120,7 @@ const initializeImageLightbox = () => {
 	const lightbox = document.getElementById('image-lightbox');
 	const lightboxImage = document.getElementById('image-lightbox-image');
 	const lightboxCaption = document.getElementById('image-lightbox-title');
-	const triggers = document.querySelectorAll('[data-lightbox-image]');
+	const triggers = document.querySelectorAll('[data-lightbox-image], [data-lightbox-src]');
 
 	if (!lightbox || !lightboxImage || !lightboxCaption || !triggers.length) {
 		return;
@@ -143,9 +143,11 @@ const initializeImageLightbox = () => {
 
 	const openLightbox = (trigger) => {
 		lastActiveElement = trigger;
-		lightboxImage.src = trigger.getAttribute('src') ?? '';
-		lightboxImage.alt = trigger.getAttribute('alt') ?? 'Image preview';
-		lightboxCaption.textContent = trigger.getAttribute('alt') ?? 'Image preview';
+		const source = trigger.getAttribute('data-lightbox-src') ?? trigger.getAttribute('src') ?? '';
+		const alt = trigger.getAttribute('data-lightbox-alt') ?? trigger.getAttribute('alt') ?? 'Image preview';
+		lightboxImage.src = source;
+		lightboxImage.alt = alt;
+		lightboxCaption.textContent = alt;
 		lightbox.classList.add('is-open');
 		lightbox.setAttribute('aria-hidden', 'false');
 		document.body.classList.add('lightbox-open');

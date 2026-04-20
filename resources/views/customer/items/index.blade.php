@@ -16,52 +16,61 @@
             || filled($filters['sort'] ?? null);
     @endphp
 
-    <div class="card customer-filter-card mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('items.index') }}" class="row g-3 align-items-end">
-                <div class="col-12 col-lg-4">
-                    <label for="search" class="form-label fw-medium mb-1">Search</label>
-                    <input id="search" name="search" class="form-control" placeholder="Item name or description" value="{{ $filters['search'] ?? '' }}">
-                </div>
-
-                <div class="col-6 col-lg-2">
-                    <label for="category_id" class="form-label fw-medium mb-1">Category</label>
-                    <select id="category_id" name="category_id" class="form-select">
-                        <option value="">All</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" @selected((string) ($filters['category_id'] ?? '') === (string) $category->id)>{{ $category->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-6 col-lg-2">
-                    <label for="condition" class="form-label fw-medium mb-1">Condition</label>
-                    <select id="condition" name="condition" class="form-select">
-                        <option value="">All</option>
-                        @foreach ($conditions as $condition)
-                            <option value="{{ $condition->value }}" @selected(($filters['condition'] ?? '') === $condition->value)>{{ $condition->label() }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-6 col-lg-2">
-                    <label for="sort" class="form-label fw-medium mb-1">Sort</label>
-                    <select id="sort" name="sort" class="form-select">
-                        <option value="latest" @selected(($filters['sort'] ?? 'latest') === 'latest')>Newest</option>
-                        <option value="price_asc" @selected(($filters['sort'] ?? '') === 'price_asc')>Price: Low to High</option>
-                        <option value="price_desc" @selected(($filters['sort'] ?? '') === 'price_desc')>Price: High to Low</option>
-                    </select>
-                </div>
-
-                <div class="col-6 col-lg-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-funnel me-1"></i>Apply</button>
-                    @if ($hasFilters)
-                        <a href="{{ route('items.index') }}" class="btn btn-outline-secondary">Reset</a>
-                    @endif
-                </div>
-            </form>
-        </div>
-    </div>
+    @include('partials.filter-bar', [
+        'action' => route('items.index'),
+        'resetUrl' => route('items.index'),
+        'hasFilters' => $hasFilters,
+        'cardClass' => 'card customer-filter-card mb-4',
+        'fields' => [
+            [
+                'name' => 'search',
+                'id' => 'search',
+                'label' => 'Search',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['search'] ?? '',
+                'placeholder' => 'Item name or description',
+                'colClass' => 'col-12 col-lg-4',
+            ],
+            [
+                'name' => 'category_id',
+                'id' => 'category_id',
+                'type' => 'select',
+                'label' => 'Category',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['category_id'] ?? '',
+                'colClass' => 'col-6 col-lg-2',
+                'options' => collect([['value' => '', 'label' => 'All']])
+                    ->merge($categories->map(fn ($category) => ['value' => (string) $category->id, 'label' => $category->name]))
+                    ->all(),
+            ],
+            [
+                'name' => 'condition',
+                'id' => 'condition',
+                'type' => 'select',
+                'label' => 'Condition',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['condition'] ?? '',
+                'colClass' => 'col-6 col-lg-2',
+                'options' => collect([['value' => '', 'label' => 'All']])
+                    ->merge(collect($conditions)->map(fn ($condition) => ['value' => $condition->value, 'label' => $condition->label()]))
+                    ->all(),
+            ],
+            [
+                'name' => 'sort',
+                'id' => 'sort',
+                'type' => 'select',
+                'label' => 'Sort',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['sort'] ?? 'latest',
+                'colClass' => 'col-6 col-lg-2',
+                'options' => [
+                    ['value' => 'latest', 'label' => 'Newest'],
+                    ['value' => 'price_asc', 'label' => 'Price: Low to High'],
+                    ['value' => 'price_desc', 'label' => 'Price: High to Low'],
+                ],
+            ],
+        ],
+    ])
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <p class="text-muted mb-0 small">

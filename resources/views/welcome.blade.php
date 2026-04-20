@@ -133,7 +133,6 @@
         </div>
     </section>
 
-
     <footer id="about" class="footer-modern">
         <div class="container app-container">
             <div class="row g-5">

@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\BrandingController;
+use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
+use App\Http\Controllers\Admin\PaymentSettingsController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ReservationManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -61,6 +63,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/branding', [BrandingController::class, 'edit'])->name('branding.edit');
     Route::put('/branding', [BrandingController::class, 'update'])->name('branding.update');
+    Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{notification}/read', [AdminNotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::patch('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::get('/payments', [PaymentSettingsController::class, 'edit'])->name('payments.edit');
+    Route::put('/payments', [PaymentSettingsController::class, 'update'])->name('payments.update');
+    Route::delete('/payments/{paymentId}', [PaymentSettingsController::class, 'destroy'])->name('payments.destroy');
 
     Route::delete('/inventory/{item}/permanent', [InventoryController::class, 'forceDestroy'])
         ->name('inventory.force-destroy');

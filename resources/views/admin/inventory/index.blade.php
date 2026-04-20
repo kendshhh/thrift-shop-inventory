@@ -1,10 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
             <h5 class="mb-0 fw-bold"><i class="bi bi-boxes me-2"></i>Inventory</h5>
             <a href="{{ route('admin.inventory.create') }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Item</a>
         </div>
     </x-slot>
+
+        @php
+            $hasFilters = filled($filters['search'] ?? null)
+                || filled($filters['category_id'] ?? null)
+                || filled($filters['condition'] ?? null)
+                || filled($filters['status'] ?? null)
+                || (($filters['sort'] ?? 'latest') !== 'latest');
+        @endphp
 
     @if (session('status'))
         <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
@@ -12,6 +20,73 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
+
+    @include('partials.filter-bar', [
+        'action' => route('admin.inventory.index'),
+        'resetUrl' => route('admin.inventory.index'),
+        'hasFilters' => $hasFilters,
+        'fields' => [
+            [
+                'name' => 'search',
+                'id' => 'inventory-search',
+                'label' => 'Search',
+                'value' => $filters['search'] ?? '',
+                'placeholder' => 'Name, description, or slug',
+                'colClass' => 'col-12 col-lg-3',
+            ],
+            [
+                'name' => 'category_id',
+                'id' => 'inventory-category',
+                'type' => 'select',
+                'label' => 'Category',
+                'value' => $filters['category_id'] ?? '',
+                'colClass' => 'col-6 col-lg-2',
+                'options' => collect([['value' => '', 'label' => 'All']])
+                    ->merge($categories->map(fn ($category) => ['value' => (string) $category->id, 'label' => $category->name]))
+                    ->all(),
+            ],
+            [
+                'name' => 'condition',
+                'id' => 'inventory-condition',
+                'type' => 'select',
+                'label' => 'Condition',
+                'value' => $filters['condition'] ?? '',
+                'colClass' => 'col-6 col-lg-2',
+                'options' => collect([['value' => '', 'label' => 'All']])
+                    ->merge(collect($conditions)->map(fn ($condition) => ['value' => $condition->value, 'label' => $condition->label()]))
+                    ->all(),
+            ],
+            [
+                'name' => 'status',
+                'id' => 'inventory-status',
+                'type' => 'select',
+                'label' => 'Status',
+                'value' => $filters['status'] ?? '',
+                'colClass' => 'col-6 col-lg-2',
+                'options' => collect([['value' => '', 'label' => 'All']])
+                    ->merge(collect($statuses)->map(fn ($status) => ['value' => $status->value, 'label' => $status->label()]))
+                    ->all(),
+            ],
+            [
+                'name' => 'sort',
+                'id' => 'inventory-sort',
+                'type' => 'select',
+                'label' => 'Sort',
+                'value' => $filters['sort'] ?? 'latest',
+                'colClass' => 'col-6 col-lg-2',
+                'options' => [
+                    ['value' => 'latest', 'label' => 'Newest'],
+                    ['value' => 'name_asc', 'label' => 'Name: A to Z'],
+                    ['value' => 'name_desc', 'label' => 'Name: Z to A'],
+                    ['value' => 'price_asc', 'label' => 'Price: Low to High'],
+                    ['value' => 'price_desc', 'label' => 'Price: High to Low'],
+                    ['value' => 'quantity_desc', 'label' => 'Qty: High to Low'],
+                    ['value' => 'quantity_asc', 'label' => 'Qty: Low to High'],
+                ],
+            ],
+        ],
+        'actionsColClass' => 'col-12 col-lg-1 d-flex gap-2',
+    ])
 
     <div class="card">
         <div class="card-body p-0">
@@ -53,18 +128,18 @@
                                 <td>{{ $item->quantity }}</td>
                                 <td>{{ $item->reserved_quantity }}</td>
                                 <td>
-                                    <span class="badge bg-{{ $item->status->value === 'active' ? 'success' : 'secondary' }}">
-                                        {{ $item->status->label() }}
-                                    </span>
+                                    <x-status-badge type="inventory" :value="$item->status->value" :label="$item->status->label()" />
                                 </td>
                                 <td class="text-end">
-                                    <a href="{{ route('admin.inventory.show', $item) }}" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-eye"></i></a>
-                                    <a href="{{ route('admin.inventory.edit', $item) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                                    <form method="POST" action="{{ route('admin.inventory.force-destroy', $item) }}" class="d-inline" onsubmit="return confirm('Permanently delete this item? This cannot be undone.')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger ms-1"><i class="bi bi-trash"></i></button>
-                                    </form>
+                                    <div class="action-row action-row-end">
+                                        <a href="{{ route('admin.inventory.show', $item) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
+                                        <a href="{{ route('admin.inventory.edit', $item) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                        <form method="POST" action="{{ route('admin.inventory.force-destroy', $item) }}" onsubmit="return confirm('Permanently delete this item? This cannot be undone.')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

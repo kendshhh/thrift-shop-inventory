@@ -18,6 +18,17 @@ class Item extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::created(function (self $item): void {
+            $item->syncStatusWithAvailability();
+        });
+
+        static::updated(function (self $item): void {
+            $item->syncStatusWithAvailability();
+        });
+    }
+
     protected $fillable = [
         'category_id',
         'name',
@@ -131,5 +142,22 @@ class Item extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    private function syncStatusWithAvailability(): void
+    {
+        if ($this->status === ItemStatus::ARCHIVED) {
+            return;
+        }
+
+        $targetStatus = $this->availableQuantity() <= 0
+            ? ItemStatus::OUT_OF_STOCK
+            : ItemStatus::ACTIVE;
+
+        if ($this->status !== $targetStatus) {
+            $this->forceFill([
+                'status' => $targetStatus,
+            ])->saveQuietly();
+        }
     }
 }

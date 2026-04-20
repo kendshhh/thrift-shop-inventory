@@ -174,6 +174,65 @@ a:hover {
 	transition: box-shadow 0.22s ease, transform 0.22s ease;
 }
 
+.payment-detail-card,
+.payment-editor-card,
+.payment-editor-qr-card {
+	background: rgba(255, 255, 255, 0.72);
+	border: 1px solid rgba(15, 23, 42, 0.08);
+	border-radius: 18px;
+	box-shadow: 0 10px 22px -16px rgba(15, 23, 42, 0.3);
+}
+
+.payment-detail-card,
+.payment-editor-card {
+	padding: 1rem;
+}
+
+.payment-editor-qr-card {
+	padding: 0.75rem;
+	height: 100%;
+}
+
+.payment-detail-meta {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 0.9rem;
+	margin-bottom: 0.85rem;
+}
+
+.payment-detail-label {
+	font-size: 0.73rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+	margin-bottom: 0.2rem;
+}
+
+.payment-qr-thumb {
+	display: block;
+	width: 100%;
+	max-height: 220px;
+	object-fit: contain;
+	background: #fff;
+	border: 1px solid rgba(15, 23, 42, 0.08);
+	border-radius: 16px;
+	padding: 0.45rem;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75);
+}
+
+.payment-detail-card.is-compact .payment-qr-thumb {
+	max-height: 180px;
+}
+
+.saved-payment-card .payment-details-shell {
+	width: 100%;
+}
+
+.saved-payment-card .payment-detail-card {
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 250, 252, 0.9) 100%);
+}
+
 [data-lightbox-image] {
 	cursor: zoom-in;
 }
@@ -435,6 +494,129 @@ body.lightbox-open {
 .badge {
 	font-weight: 600;
 	letter-spacing: 0.02em;
+}
+
+.status-badge {
+	--status-badge-bg: #64748b;
+	--status-badge-color: #ffffff;
+	--status-badge-border: transparent;
+	background-color: var(--status-badge-bg) !important;
+	color: var(--status-badge-color) !important;
+	border: 1px solid var(--status-badge-border) !important;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.status-badge-pending {
+	--status-badge-bg: #f59e0b;
+	--status-badge-color: #1f2937;
+	--status-badge-border: #d97706;
+}
+
+.status-badge-pending-subtle {
+	--status-badge-bg: #fef3c7;
+	--status-badge-color: #92400e;
+	--status-badge-border: #f59e0b;
+}
+
+.status-badge-ready {
+	--status-badge-bg: #0ea5e9;
+	--status-badge-color: #082f49;
+	--status-badge-border: #0284c7;
+}
+
+.status-badge-ready-subtle {
+	--status-badge-bg: #dbeafe;
+	--status-badge-color: #1d4ed8;
+	--status-badge-border: #60a5fa;
+}
+
+.status-badge-success {
+	--status-badge-bg: #16a34a;
+	--status-badge-color: #ffffff;
+	--status-badge-border: #15803d;
+}
+
+.status-badge-success-subtle {
+	--status-badge-bg: #dcfce7;
+	--status-badge-color: #166534;
+	--status-badge-border: #4ade80;
+}
+
+.status-badge-overdue {
+	--status-badge-bg: #dc2626;
+	--status-badge-color: #ffffff;
+	--status-badge-border: #b91c1c;
+}
+
+.status-badge-overdue-subtle {
+	--status-badge-bg: #fee2e2;
+	--status-badge-color: #991b1b;
+	--status-badge-border: #f87171;
+}
+
+.status-badge-muted {
+	--status-badge-bg: #64748b;
+	--status-badge-color: #ffffff;
+	--status-badge-border: #475569;
+}
+
+.status-badge-muted-subtle {
+	--status-badge-bg: #f1f5f9;
+	--status-badge-color: #475569;
+	--status-badge-border: #cbd5e1;
+}
+
+.status-badge-unread {
+	--status-badge-bg: #dc2626;
+	--status-badge-color: #ffffff;
+	--status-badge-border: #b91c1c;
+}
+
+.status-badge-read {
+	--status-badge-bg: #64748b;
+	--status-badge-color: #ffffff;
+	--status-badge-border: #475569;
+}
+
+.status-badge-new {
+	--status-badge-bg: #2563eb;
+	--status-badge-color: #ffffff;
+	--status-badge-border: #1d4ed8;
+}
+
+.status-badge-admin {
+	--status-badge-bg: #1e293b;
+	--status-badge-color: #ffffff;
+	--status-badge-border: #0f172a;
+}
+
+.status-badge-archived {
+	--status-badge-bg: #334155;
+	--status-badge-color: #ffffff;
+	--status-badge-border: #1e293b;
+}
+
+.action-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.action-row-end {
+	justify-content: flex-end;
+}
+
+.action-row > form {
+	margin: 0;
+}
+
+.action-link-inline {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	font-size: 0.875rem;
+	text-decoration: underline;
 }
 
 .auth-panel {

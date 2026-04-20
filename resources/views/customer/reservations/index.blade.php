@@ -10,20 +10,6 @@
     </x-slot>
 
     @php
-        $statusBadgeClasses = [
-            'pending' => 'bg-warning text-dark',
-            'ready_for_pickup' => 'bg-info text-dark',
-            'completed' => 'bg-success',
-            'overdue' => 'bg-danger',
-            'expired' => 'bg-secondary',
-        ];
-
-        $paymentBadgeClasses = [
-            'pending' => 'bg-warning text-dark',
-            'completed' => 'bg-success',
-            'overdue' => 'bg-danger',
-        ];
-
         $hasFilters = filled($filters['status'] ?? null)
             || filled($filters['payment_status'] ?? null)
             || filled($filters['reference'] ?? null);
@@ -76,43 +62,47 @@
         </div>
     @endif
 
-    <div class="card customer-filter-card mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('customer.reservations.index') }}" class="row g-3 align-items-end">
-                <div class="col-12 col-lg-4">
-                    <label for="reference" class="form-label fw-medium mb-1">Reference</label>
-                    <input id="reference" name="reference" class="form-control" placeholder="Search by reference" value="{{ $filters['reference'] ?? '' }}">
-                </div>
-
-                <div class="col-6 col-lg-3">
-                    <label for="status" class="form-label fw-medium mb-1">Status</label>
-                    <select id="status" name="status" class="form-select">
-                        <option value="">All</option>
-                        @foreach ($statuses as $status)
-                            <option value="{{ $status->value }}" @selected(($filters['status'] ?? '') === $status->value)>{{ $status->label() }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-6 col-lg-3">
-                    <label for="payment_status" class="form-label fw-medium mb-1">Payment</label>
-                    <select id="payment_status" name="payment_status" class="form-select">
-                        <option value="">All</option>
-                        @foreach ($paymentStatuses as $paymentStatus)
-                            <option value="{{ $paymentStatus->value }}" @selected(($filters['payment_status'] ?? '') === $paymentStatus->value)>{{ $paymentStatus->label() }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-12 col-lg-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-funnel me-1"></i>Apply</button>
-                    @if ($hasFilters)
-                        <a href="{{ route('customer.reservations.index') }}" class="btn btn-outline-secondary">Reset</a>
-                    @endif
-                </div>
-            </form>
-        </div>
-    </div>
+    @include('partials.filter-bar', [
+        'action' => route('customer.reservations.index'),
+        'resetUrl' => route('customer.reservations.index'),
+        'hasFilters' => $hasFilters,
+        'cardClass' => 'card customer-filter-card mb-4',
+        'fields' => [
+            [
+                'name' => 'reference',
+                'id' => 'reference',
+                'label' => 'Reference',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['reference'] ?? '',
+                'placeholder' => 'Search by reference',
+                'colClass' => 'col-12 col-lg-4',
+            ],
+            [
+                'name' => 'status',
+                'id' => 'status',
+                'type' => 'select',
+                'label' => 'Status',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['status'] ?? '',
+                'colClass' => 'col-6 col-lg-3',
+                'options' => collect([['value' => '', 'label' => 'All']])
+                    ->merge(collect($statuses)->map(fn ($status) => ['value' => $status->value, 'label' => $status->label()]))
+                    ->all(),
+            ],
+            [
+                'name' => 'payment_status',
+                'id' => 'payment_status',
+                'type' => 'select',
+                'label' => 'Payment',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['payment_status'] ?? '',
+                'colClass' => 'col-6 col-lg-3',
+                'options' => collect([['value' => '', 'label' => 'All']])
+                    ->merge(collect($paymentStatuses)->map(fn ($paymentStatus) => ['value' => $paymentStatus->value, 'label' => $paymentStatus->label()]))
+                    ->all(),
+            ],
+        ],
+    ])
 
     <div class="card">
         <div class="card-body p-0">
@@ -132,8 +122,7 @@
                     <tbody>
                         @forelse ($reservations as $reservation)
                             @php
-                                $statusClass = $statusBadgeClasses[$reservation->status->value] ?? 'bg-secondary';
-                                $paymentClass = $paymentBadgeClasses[$reservation->payment_status->value] ?? 'bg-secondary';
+                                $previewItem = $reservation->reservationItems->first()?->item;
                                 $isExpiringSoon = $reservation->status->value === 'pending'
                                     && $reservation->expires_at
                                     && $reservation->expires_at->lte(now()->addDay())
@@ -142,9 +131,21 @@
 
                             <tr>
                                 <td class="fw-medium font-monospace">{{ $reservation->reference }}</td>
-                                <td class="small text-muted">{{ $reservation->reservationItems->sum('quantity') }} item{{ $reservation->reservationItems->sum('quantity') > 1 ? 's' : '' }}</td>
-                                <td><span class="badge rounded-pill {{ $statusClass }}">{{ $reservation->status->label() }}</span></td>
-                                <td><span class="badge rounded-pill {{ $paymentClass }}">{{ $reservation->payment_status->label() }}</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if ($previewItem?->imageUrl())
+                                            <img src="{{ $previewItem->imageUrl() }}" alt="{{ $previewItem->name }}" class="inventory-thumb-sm" data-lightbox-image tabindex="0">
+                                        @else
+                                            <span class="inventory-thumb-fallback"><i class="bi bi-image"></i></span>
+                                        @endif
+                                        <div class="small">
+                                            <div class="fw-medium text-dark">{{ $previewItem?->name ?? 'Archived Item' }}</div>
+                                            <div class="text-muted">{{ $reservation->reservationItems->sum('quantity') }} item{{ $reservation->reservationItems->sum('quantity') > 1 ? 's' : '' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><x-status-badge type="reservation" :value="$reservation->status->value" :label="$reservation->status->label()" /></td>
+                                <td><x-status-badge type="payment" :value="$reservation->payment_status->value" :label="$reservation->payment_status->label()" /></td>
                                 <td class="small">
                                     <div>{{ optional($reservation->pickup_date)->format('M d, Y') }}</div>
                                     <div class="text-muted">{{ ucfirst(str_replace('_', ' ', (string) $reservation->pickup_slot)) }}</div>

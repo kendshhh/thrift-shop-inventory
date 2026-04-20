@@ -57,42 +57,37 @@ class RolesAndAdminSeeder extends Seeder
         $adminPassword = env('DEFAULT_ADMIN_PASSWORD', '123');
         $customerPassword = env('DEFAULT_CUSTOMER_PASSWORD', '123');
 
-        $admin = User::query()->firstOrCreate(
-            ['email' => env('DEFAULT_ADMIN_EMAIL', 'admin@thriftshop.local')],
+        $admin = $this->firstOrCreateDefaultUser(
+            email: env('DEFAULT_ADMIN_EMAIL', 'admin@thriftshop.local'),
+            defaultName: env('DEFAULT_ADMIN_NAME', 'System Admin'),
+            defaultPassword: $adminPassword,
+        );
+
+        if (! $admin->hasRole($adminRole)) {
+            $admin->assignRole($adminRole);
+        }
+
+        $customer = $this->firstOrCreateDefaultUser(
+            email: env('DEFAULT_CUSTOMER_EMAIL', 'customer@thriftshop.local'),
+            defaultName: env('DEFAULT_CUSTOMER_NAME', 'Default Customer'),
+            defaultPassword: $customerPassword,
+        );
+
+        if (! $customer->hasRole($customerRole)) {
+            $customer->assignRole($customerRole);
+        }
+    }
+
+    private function firstOrCreateDefaultUser(string $email, string $defaultName, string $defaultPassword): User
+    {
+        return User::query()->firstOrCreate(
+            ['email' => $email],
             [
-                'name' => env('DEFAULT_ADMIN_NAME', 'System Admin'),
-                'password' => Hash::make($adminPassword),
+                'name' => $defaultName,
+                'password' => Hash::make($defaultPassword),
                 'email_verified_at' => now(),
                 'is_active' => true,
             ]
         );
-
-        $admin->forceFill([
-            'name' => env('DEFAULT_ADMIN_NAME', 'System Admin'),
-            'password' => Hash::make($adminPassword),
-            'email_verified_at' => $admin->email_verified_at ?? now(),
-            'is_active' => true,
-        ])->save();
-
-        $admin->syncRoles([$adminRole]);
-
-        $customer = User::query()->firstOrCreate(
-            ['email' => env('DEFAULT_CUSTOMER_EMAIL', 'customer@thriftshop.local')],
-            [
-                'name' => env('DEFAULT_CUSTOMER_NAME', 'Default Customer'),
-                'password' => Hash::make($customerPassword),
-                'email_verified_at' => now(),
-                'is_active' => true,
-            ]
-        );
-
-        $customer->forceFill([
-            'name' => env('DEFAULT_CUSTOMER_NAME', 'Default Customer'),
-            'password' => Hash::make($customerPassword),
-            'email_verified_at' => $customer->email_verified_at ?? now(),
-            'is_active' => true,
-        ])->save();
-
-        $customer->syncRoles([$customerRole]);
     }
 }

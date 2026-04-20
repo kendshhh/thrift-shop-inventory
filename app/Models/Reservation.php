@@ -104,6 +104,20 @@ class Reservation extends Model
         return $this->status === ReservationStatus::READY_FOR_PICKUP;
     }
 
+    public function canCustomerRequestCancellation(): bool
+    {
+        return in_array($this->status, [
+            ReservationStatus::PENDING,
+            ReservationStatus::READY_FOR_PICKUP,
+            ReservationStatus::OVERDUE,
+        ], true);
+    }
+
+    public function canCustomerRequestReschedule(): bool
+    {
+        return in_array($this->status->value, ReservationStatus::customerSelfServiceValues(), true);
+    }
+
     private static function generateReference(): string
     {
         do {

@@ -22,10 +22,18 @@ class InventoryController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Item::query()->with('category')->latest();
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'condition' => ['nullable', Rule::in(ItemCondition::values())],
+            'status' => ['nullable', Rule::in(ItemStatus::values())],
+            'sort' => ['nullable', Rule::in(['latest', 'name_asc', 'name_desc', 'price_asc', 'price_desc', 'quantity_asc', 'quantity_desc'])],
+        ]);
 
-        if ($request->filled('search')) {
-            $search = (string) $request->input('search');
+        $query = Item::query()->with('category');
+
+        if (!empty($validated['search'])) {
+            $search = (string) $validated['search'];
             $query->where(function ($builder) use ($search): void {
                 $builder->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
@@ -33,17 +41,27 @@ class InventoryController extends Controller
             });
         }
 
-        if ($request->filled('category_id')) {
-            $query->where('category_id', (int) $request->input('category_id'));
+        if (!empty($validated['category_id'])) {
+            $query->where('category_id', (int) $validated['category_id']);
         }
 
-        if ($request->filled('condition')) {
-            $query->where('condition', (string) $request->input('condition'));
+        if (!empty($validated['condition'])) {
+            $query->where('condition', (string) $validated['condition']);
         }
 
-        if ($request->filled('status')) {
-            $query->where('status', (string) $request->input('status'));
+        if (!empty($validated['status'])) {
+            $query->where('status', (string) $validated['status']);
         }
+
+        match ($validated['sort'] ?? 'latest') {
+            'name_asc' => $query->orderBy('name'),
+            'name_desc' => $query->orderByDesc('name'),
+            'price_asc' => $query->orderBy('price'),
+            'price_desc' => $query->orderByDesc('price'),
+            'quantity_asc' => $query->orderBy('quantity'),
+            'quantity_desc' => $query->orderByDesc('quantity'),
+            default => $query->latest(),
+        };
 
         $items = $query->paginate(15)->withQueryString();
 
@@ -52,7 +70,7 @@ class InventoryController extends Controller
             'categories' => Category::query()->orderBy('name')->get(),
             'conditions' => ItemCondition::cases(),
             'statuses' => ItemStatus::cases(),
-            'filters' => $request->only(['search', 'category_id', 'condition', 'status']),
+            'filters' => $request->only(['search', 'category_id', 'condition', 'status', 'sort']),
         ]);
     }
 

@@ -103,6 +103,18 @@
                             <li>Stock is reserved immediately after you submit.</li>
                         </ul>
                     </div>
+
+                    @if (data_get($branding, 'payment_details'))
+                        <div class="mt-4">
+                            @include('partials.payment-details', [
+                                'paymentDetails' => data_get($branding, 'payment_details', []),
+                                'title' => 'Accepted Payment Details',
+                                'subtitle' => 'Use these details as reference before pickup. Full payment instructions also appear inside your reservation page.',
+                                'compact' => true,
+                                'emptyMessage' => null,
+                            ])
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

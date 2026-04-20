@@ -13,6 +13,10 @@
     </x-slot>
 
     @php
+        $hasFilters = filled($filters['search'] ?? null)
+            || filled($filters['category_id'] ?? null)
+            || filled($filters['condition'] ?? null);
+
         $statusBadgeClasses = [
             'pending' => 'bg-warning text-dark',
             'ready_for_pickup' => 'bg-info text-dark',
@@ -62,6 +66,48 @@
             </div>
         </div>
     @endif
+
+    @include('partials.filter-bar', [
+        'action' => route('customer.home'),
+        'resetUrl' => route('customer.home'),
+        'hasFilters' => $hasFilters,
+        'cardClass' => 'card customer-filter-card mb-4',
+        'fields' => [
+            [
+                'name' => 'search',
+                'id' => 'home-search',
+                'label' => 'Search Featured Items',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['search'] ?? '',
+                'placeholder' => 'Item name or description',
+                'colClass' => 'col-12 col-lg-5',
+            ],
+            [
+                'name' => 'category_id',
+                'id' => 'home-category',
+                'type' => 'select',
+                'label' => 'Category',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['category_id'] ?? '',
+                'colClass' => 'col-6 col-lg-3',
+                'options' => collect([['value' => '', 'label' => 'All']])
+                    ->merge($categories->map(fn ($category) => ['value' => (string) $category->id, 'label' => $category->name]))
+                    ->all(),
+            ],
+            [
+                'name' => 'condition',
+                'id' => 'home-condition',
+                'type' => 'select',
+                'label' => 'Condition',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['condition'] ?? '',
+                'colClass' => 'col-6 col-lg-2',
+                'options' => collect([['value' => '', 'label' => 'All']])
+                    ->merge(collect($conditions)->map(fn ($condition) => ['value' => $condition->value, 'label' => $condition->label()]))
+                    ->all(),
+            ],
+        ],
+    ])
 
     <div class="row g-4">
         <div class="col-xl-8">
@@ -124,7 +170,7 @@
                             <div class="col">
                                 <div class="text-center text-muted py-4">
                                     <i class="bi bi-box-seam fs-3 d-block mb-2"></i>
-                                    No featured items yet.
+                                    {{ $hasFilters ? 'No featured items matched your filters.' : 'No featured items yet.' }}
                                 </div>
                             </div>
                         @endforelse

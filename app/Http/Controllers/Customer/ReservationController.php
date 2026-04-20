@@ -10,6 +10,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\Reservation;
 use App\Models\ReservationItem;
+use App\Models\User;
+use App\Notifications\AdminReservationNotification;
+use App\Notifications\ReservationActivityNotification;
 use App\Notifications\ReservationCreatedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -143,6 +146,8 @@ class ReservationController extends Controller
             report($exception);
         }
 
+        $this->notifyAdmins($reservation->loadMissing('user'), 'new_reservation');
+
         return redirect()
             ->route('customer.reservations.show', $reservation)
             ->with('status', 'Reservation submitted. Please pay in person within 24 hours.');
@@ -172,6 +177,12 @@ class ReservationController extends Controller
             'extended_at' => now(),
         ])->save();
 
+        $request->user()?->notify(new ReservationActivityNotification(
+            $reservation,
+            'Reservation extended',
+            'Your reservation '.$reservation->reference.' was extended for 24 more hours.'
+        ));
+
         return redirect()
             ->route('customer.reservations.show', $reservation)
             ->with('status', 'Reservation extended for 24 more hours.');
@@ -181,9 +192,9 @@ class ReservationController extends Controller
     {
         abort_unless($reservation->user_id === $request->user()->id, 403);
 
-        if (!$this->canCreateCustomerRequest($reservation)) {
+        if (!$reservation->canCustomerRequestCancellation()) {
             return back()->withErrors([
-                'customer_request' => 'Only pending or overdue reservations can be updated through self-service.',
+                'customer_request' => 'Cancellation requests are available for active reservations that are not yet completed.',
             ]);
         }
 
@@ -208,6 +219,18 @@ class ReservationController extends Controller
             'customer_request_admin_note' => null,
         ]);
 
+        $request->user()?->notify(new ReservationActivityNotification(
+            $reservation,
+            'Cancellation request submitted',
+            'Your cancellation request for '.$reservation->reference.' was submitted and is waiting for admin review.',
+            [
+                'request_type' => 'cancellation',
+                'request_status' => 'pending',
+            ]
+        ));
+
+        $this->notifyAdmins($reservation->loadMissing('user'), 'customer_request_submitted');
+
         return redirect()
             ->route('customer.reservations.show', $reservation)
             ->with('status', 'Cancellation request submitted. We will review it shortly.');
@@ -217,7 +240,7 @@ class ReservationController extends Controller
     {
         abort_unless($reservation->user_id === $request->user()->id, 403);
 
-        if (!$this->canCreateCustomerRequest($reservation)) {
+        if (!$reservation->canCustomerRequestReschedule()) {
             return back()->withErrors([
                 'customer_request' => 'Only pending or overdue reservations can be updated through self-service.',
             ]);
@@ -255,13 +278,29 @@ class ReservationController extends Controller
             'customer_request_admin_note' => null,
         ]);
 
+        $request->user()?->notify(new ReservationActivityNotification(
+            $reservation,
+            'Reschedule request submitted',
+            'Your reschedule request for '.$reservation->reference.' was submitted and is waiting for admin review.',
+            [
+                'request_type' => 'reschedule',
+                'request_status' => 'pending',
+            ]
+        ));
+
+        $this->notifyAdmins($reservation->loadMissing('user'), 'customer_request_submitted');
+
         return redirect()
             ->route('customer.reservations.show', $reservation)
             ->with('status', 'Pickup reschedule request submitted. We will review it shortly.');
     }
 
-    private function canCreateCustomerRequest(Reservation $reservation): bool
+    private function notifyAdmins(Reservation $reservation, string $eventType): void
     {
-        return in_array($reservation->status->value, ReservationStatus::customerSelfServiceValues(), true);
+        User::role('admin')
+            ->get()
+            ->each(static function (User $admin) use ($reservation, $eventType): void {
+                $admin->notify(new AdminReservationNotification($reservation, $eventType));
+            });
     }
 }

@@ -40,7 +40,7 @@ class Branding
                 return self::normalize($defaults);
             }
 
-            $settings = BrandingSetting::query()->find(1);
+            $settings = BrandingSetting::query()->find(1) ?? BrandingSetting::query()->first();
 
             if (! $settings) {
                 return self::normalize($defaults);
@@ -52,6 +52,7 @@ class Branding
                 'primary_color' => $settings->primary_color,
                 'secondary_color' => $settings->secondary_color,
                 'logo_path' => $settings->logo_path,
+                'payment_details' => $settings->payment_details,
             ]);
         } catch (Throwable) {
             return self::normalize($defaults);
@@ -66,6 +67,7 @@ class Branding
             'primary_color' => self::DEFAULT_PRIMARY_COLOR,
             'secondary_color' => self::DEFAULT_SECONDARY_COLOR,
             'logo_path' => null,
+            'payment_details' => [],
         ];
     }
 
@@ -91,8 +93,61 @@ class Branding
             'primary_color' => self::normalizeHexColor($values['primary_color'] ?? null, $defaults['primary_color']),
             'secondary_color' => self::normalizeHexColor($values['secondary_color'] ?? null, $defaults['secondary_color']),
             'logo_path' => $logoPath,
-            'logo_url' => self::logoUrl($logoPath),
+            'logo_url' => self::publicDiskUrl($logoPath),
+            'payment_details' => self::normalizePaymentDetails($values['payment_details'] ?? []),
         ];
+    }
+
+    public static function normalizePaymentDetails(mixed $entries): array
+    {
+        if (! is_array($entries)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($entries as $entry) {
+            if (! is_array($entry)) {
+                continue;
+            }
+
+            $name = trim((string) ($entry['name'] ?? ''));
+            $bankName = trim((string) ($entry['bank_name'] ?? ''));
+            $bankNumber = trim((string) ($entry['bank_number'] ?? ''));
+
+            $paths = array_values(array_unique(array_filter(
+                array_map(static fn ($path) => trim((string) $path), (array) ($entry['qr_image_paths'] ?? [])),
+                static fn ($path) => $path !== ''
+            )));
+
+            if ($name === '' && $bankName === '' && $bankNumber === '' && $paths === []) {
+                continue;
+            }
+
+            $normalized[] = [
+                'name' => $name,
+                'bank_name' => $bankName,
+                'bank_number' => $bankNumber,
+                'qr_image_paths' => $paths,
+                'qr_images' => array_values(array_filter(array_map(
+                    static function (string $path): ?array {
+                        $url = self::publicDiskUrl($path);
+
+                        if ($url === null) {
+                            return null;
+                        }
+
+                        return [
+                            'path' => $path,
+                            'url' => $url,
+                        ];
+                    },
+                    $paths
+                ))),
+            ];
+        }
+
+        return $normalized;
     }
 
     private static function normalizeHexColor(mixed $value, string $fallback): string
@@ -111,18 +166,18 @@ class Branding
         return $candidate;
     }
 
-    private static function logoUrl(?string $logoPath): ?string
+    public static function publicDiskUrl(?string $path): ?string
     {
-        if ($logoPath === null || $logoPath === '') {
+        if ($path === null || $path === '') {
             return null;
         }
 
-        if (Str::startsWith($logoPath, ['http://', 'https://', '/'])) {
-            return $logoPath;
+        if (Str::startsWith($path, ['http://', 'https://', '/'])) {
+            return $path;
         }
 
         try {
-            return Storage::disk('public')->url($logoPath);
+            return '/storage/'.ltrim($path, '/');
         } catch (Throwable) {
             return null;
         }

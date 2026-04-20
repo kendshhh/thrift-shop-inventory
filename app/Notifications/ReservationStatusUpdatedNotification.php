@@ -63,19 +63,23 @@ class ReservationStatusUpdatedNotification extends Notification
 
     private function title(): string
     {
-        if ($this->reservation->isReadyForPickup()) {
-            return 'Reservation ready for pickup';
-        }
-
-        return 'Reservation updated';
+        return match ($this->reservation->status->value) {
+            'ready_for_pickup' => 'Reservation ready for pickup',
+            'completed' => 'Reservation completed',
+            'overdue' => 'Reservation overdue',
+            'expired' => 'Reservation cancelled',
+            default => 'Reservation updated',
+        };
     }
 
     private function message(): string
     {
-        if ($this->reservation->isReadyForPickup()) {
-            return 'Your reservation '.$this->reservation->reference.' is ready for pickup. Please visit the shop and settle payment during your scheduled pickup.';
-        }
-
-        return 'Your reservation '.$this->reservation->reference.' was updated from '.$this->previousStatusLabel.' to '.$this->reservation->status->label().'.';
+        return match ($this->reservation->status->value) {
+            'ready_for_pickup' => 'Your reservation '.$this->reservation->reference.' is ready for pickup. Please visit the shop and settle payment during your scheduled pickup.',
+            'completed' => 'Your reservation '.$this->reservation->reference.' has been marked as completed. Thank you for picking up your order.',
+            'overdue' => 'Your reservation '.$this->reservation->reference.' is now overdue. Please contact the shop as soon as possible if you still plan to pick it up.',
+            'expired' => 'Your reservation '.$this->reservation->reference.' is no longer active and has been cancelled.',
+            default => 'Your reservation '.$this->reservation->reference.' was updated from '.$this->previousStatusLabel.' to '.$this->reservation->status->label().'.',
+        };
     }
 }

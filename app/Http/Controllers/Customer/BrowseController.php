@@ -17,6 +17,12 @@ class BrowseController extends Controller
 {
     public function home(Request $request): View
     {
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'condition' => ['nullable', Rule::in(ItemCondition::values())],
+        ]);
+
         $customerStats = [
             'total_reservations' => 0,
             'pending_reservations' => 0,
@@ -68,29 +74,52 @@ class BrowseController extends Controller
                 ->get();
         }
 
+        $featuredItemsQuery = Item::query()
+            ->select('items.*')
+            ->distinct()
+            ->with(['category', 'reservationItems.reservation'])
+            ->where(function ($builder): void {
+                $builder
+                    ->where(function ($available): void {
+                        $available->where('status', ItemStatus::ACTIVE->value);
+                    })
+                    ->orWhere(function ($restocking): void {
+                        $restocking->where('status', ItemStatus::OUT_OF_STOCK->value)
+                            ->whereNotNull('restock_at')
+                            ->where('restock_at', '>', now());
+                    });
+            });
+
+        if (!empty($validated['search'])) {
+            $featuredItemsQuery->where(function ($builder) use ($validated): void {
+                $builder->where('name', 'like', '%'.$validated['search'].'%')
+                    ->orWhere('description', 'like', '%'.$validated['search'].'%');
+            });
+        }
+
+        if (!empty($validated['category_id'])) {
+            $featuredItemsQuery->where('category_id', (int) $validated['category_id']);
+        }
+
+        if (!empty($validated['condition'])) {
+            $featuredItemsQuery->where('condition', $validated['condition']);
+        }
+
         return view('customer.home', [
-            'featuredItems' => Item::query()
-                ->with(['category', 'reservationItems.reservation'])
-                ->where(function ($builder): void {
-                    $builder
-                        ->where(function ($available): void {
-                            $available->where('status', ItemStatus::ACTIVE->value);
-                        })
-                        ->orWhere(function ($restocking): void {
-                            $restocking->where('status', ItemStatus::OUT_OF_STOCK->value)
-                                ->whereNotNull('restock_at')
-                                ->where('restock_at', '>', now());
-                        });
-                })
+            'featuredItems' => $featuredItemsQuery
                 ->orderByDesc('created_at')
                 ->limit(8)
-                ->get(),
+                ->get()
+                ->unique('id')
+                ->values(),
             'categories' => Category::query()
                 ->where('is_active', true)
                 ->orderBy('name')
                 ->get(),
+            'conditions' => ItemCondition::cases(),
             'customerStats' => $customerStats,
             'upcomingReservations' => $upcomingReservations,
+            'filters' => $request->only(['search', 'category_id', 'condition']),
         ]);
     }
 
@@ -104,6 +133,8 @@ class BrowseController extends Controller
         ]);
 
         $query = Item::query()
+            ->select('items.*')
+            ->distinct()
             ->with(['category', 'reservationItems.reservation'])
             ->where(function ($builder): void {
                 $builder

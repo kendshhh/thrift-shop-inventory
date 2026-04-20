@@ -59,10 +59,11 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">Status</label>
                                 <select name="status" class="form-select @error('status') is-invalid @enderror" required>
-                                    @foreach ($statuses as $status)
+                                    @foreach (collect($statuses)->filter(fn ($status) => $status->value !== \App\Enums\ItemStatus::OUT_OF_STOCK->value) as $status)
                                         <option value="{{ $status->value }}" @selected(old('status', $item->status?->value ?? \App\Enums\ItemStatus::ACTIVE->value) === $status->value)>{{ $status->label() }}</option>
                                     @endforeach
                                 </select>
+                                <div class="form-text">Available items switch to Out of Stock automatically when quantity or available stock reaches 0. Use Archived only to hide an item intentionally.</div>
                                 @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
@@ -147,7 +148,7 @@
                             </div>
                         </div>
 
-                        <div class="d-flex gap-2">
+                        <div class="action-row">
                             <button type="submit" class="btn btn-primary">{{ $isEditing ? 'Update Item' : 'Create Item' }}</button>
                             <a href="{{ route('admin.inventory.index') }}" class="btn btn-outline-secondary">Cancel</a>
                         </div>

@@ -13,33 +13,55 @@
         </div>
     @endif
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('admin.categories.index') }}" class="row g-3 align-items-end">
-                <div class="col-md-7">
-                    <label class="form-label fw-medium">Search</label>
-                    <input
-                        type="text"
-                        name="search"
-                        class="form-control"
-                        value="{{ $filters['search'] ?? '' }}"
-                        placeholder="Search by name, slug, or description"
-                    >
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label fw-medium">Status</label>
-                    <select name="is_active" class="form-select">
-                        <option value="">All</option>
-                        <option value="1" @selected(($filters['is_active'] ?? '') === '1')>Active</option>
-                        <option value="0" @selected(($filters['is_active'] ?? '') === '0')>Inactive</option>
-                    </select>
-                </div>
-                <div class="col-md-2 d-grid">
-                    <button type="submit" class="btn btn-outline-custom">Filter</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    @php
+        $hasFilters = filled($filters['search'] ?? null)
+            || filled($filters['is_active'] ?? null)
+            || (($filters['sort'] ?? 'latest') !== 'latest');
+    @endphp
+
+    @include('partials.filter-bar', [
+        'action' => route('admin.categories.index'),
+        'resetUrl' => route('admin.categories.index'),
+        'hasFilters' => $hasFilters,
+        'fields' => [
+            [
+                'name' => 'search',
+                'id' => 'category-search',
+                'label' => 'Search',
+                'value' => $filters['search'] ?? '',
+                'placeholder' => 'Search by name, slug, or description',
+                'colClass' => 'col-12 col-lg-5',
+            ],
+            [
+                'name' => 'is_active',
+                'id' => 'category-status',
+                'type' => 'select',
+                'label' => 'Status',
+                'value' => $filters['is_active'] ?? '',
+                'colClass' => 'col-6 col-lg-2',
+                'options' => [
+                    ['value' => '', 'label' => 'All'],
+                    ['value' => '1', 'label' => 'Active'],
+                    ['value' => '0', 'label' => 'Inactive'],
+                ],
+            ],
+            [
+                'name' => 'sort',
+                'id' => 'category-sort',
+                'type' => 'select',
+                'label' => 'Sort',
+                'value' => $filters['sort'] ?? 'latest',
+                'colClass' => 'col-6 col-lg-3',
+                'options' => [
+                    ['value' => 'latest', 'label' => 'Newest'],
+                    ['value' => 'name_asc', 'label' => 'Name: A to Z'],
+                    ['value' => 'name_desc', 'label' => 'Name: Z to A'],
+                    ['value' => 'items_desc', 'label' => 'Most Items'],
+                    ['value' => 'items_asc', 'label' => 'Fewest Items'],
+                ],
+            ],
+        ],
+    ])
 
     <div class="card">
         <div class="card-body p-0">
@@ -62,11 +84,7 @@
                                 <td class="text-muted small font-monospace">{{ $category->slug }}</td>
                                 <td class="text-center">{{ $category->items_count }}</td>
                                 <td>
-                                    @if ($category->is_active)
-                                        <span class="badge bg-success-subtle text-success-emphasis">Active</span>
-                                    @else
-                                        <span class="badge bg-secondary-subtle text-secondary-emphasis">Inactive</span>
-                                    @endif
+                                    <x-status-badge type="user-state" :value="$category->is_active ? 'active' : 'suspended'" :label="$category->is_active ? 'Active' : 'Inactive'" />
                                 </td>
                                 <td class="small text-muted">{{ $category->updated_at->format('M d, Y') }}</td>
                                 <td class="text-end">

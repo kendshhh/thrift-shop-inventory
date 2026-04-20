@@ -3,6 +3,9 @@
         <div class="d-flex align-items-center gap-2">
             <a href="{{ route('admin.reservations.index') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
             <h5 class="mb-0 fw-bold">Reservation Details</h5>
+            @if ($wasNewReservation ?? false)
+                <x-status-badge type="notification-event" value="new_reservation" label="New" />
+            @endif
         </div>
     </x-slot>
 
@@ -25,13 +28,6 @@
     @endif
 
     @php
-        $requestStatusClass = match($reservation->customer_request_status) {
-            'pending' => 'bg-warning text-dark',
-            'approved' => 'bg-success',
-            'declined' => 'bg-danger',
-            default => 'bg-secondary',
-        };
-
         $requestTypeLabel = match($reservation->customer_request_type) {
             'cancellation' => 'Cancellation',
             'reschedule' => 'Reschedule',
@@ -66,7 +62,16 @@
                         <tbody>
                             @foreach ($reservation->reservationItems as $lineItem)
                                 <tr>
-                                    <td>{{ $lineItem->item?->name ?? 'Archived Item' }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if ($lineItem->item?->imageUrl())
+                                                <img src="{{ $lineItem->item->imageUrl() }}" alt="{{ $lineItem->item->name }}" class="inventory-thumb-sm" data-lightbox-image tabindex="0">
+                                            @else
+                                                <span class="inventory-thumb-fallback"><i class="bi bi-image"></i></span>
+                                            @endif
+                                            <span>{{ $lineItem->item?->name ?? 'Archived Item' }}</span>
+                                        </div>
+                                    </td>
                                     <td>{{ $lineItem->quantity }}</td>
                                     <td>&#8369;{{ number_format((float) $lineItem->unit_price, 2) }}</td>
                                     <td>&#8369;{{ number_format((float) $lineItem->line_total, 2) }}</td>
@@ -90,7 +95,7 @@
                                         <div class="small text-muted">Submitted {{ optional($reservation->customer_requested_at)->diffForHumans() }}</div>
                                     @endif
                                 </div>
-                                <span class="badge rounded-pill {{ $requestStatusClass }}">{{ ucfirst((string) $reservation->customer_request_status) }}</span>
+                                <x-status-badge type="request" :value="$reservation->customer_request_status" :label="ucfirst((string) $reservation->customer_request_status)" />
                             </div>
 
                             @if ($reservation->customer_request_reason)
@@ -118,7 +123,7 @@
                                     <textarea name="admin_note" class="form-control @error('admin_note') is-invalid @enderror" rows="3">{{ old('admin_note') }}</textarea>
                                     @error('admin_note') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
-                                <div class="d-flex gap-2">
+                                <div class="action-row">
                                     <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">Approve Request</button>
                                     <button type="submit" name="action" value="decline" class="btn btn-sm btn-outline-danger">Decline Request</button>
                                 </div>
@@ -143,7 +148,7 @@
                                 <label class="form-label fw-medium">Reservation Status</label>
                                 <select name="status" class="form-select @error('status') is-invalid @enderror" required>
                                     @foreach ($statuses as $status)
-                                        <option value="{{ $status->value }}" @selected($reservation->status === $status)>{{ $status->label() }}</option>
+                                        <option value="{{ $status->value }}" @selected(old('status', $reservation->status->value) === $status->value)>{{ $status->label() }}</option>
                                     @endforeach
                                 </select>
                                 @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -152,7 +157,7 @@
                                 <label class="form-label fw-medium">Payment Status</label>
                                 <select name="payment_status" class="form-select @error('payment_status') is-invalid @enderror" required>
                                     @foreach ($paymentStatuses as $paymentStatus)
-                                        <option value="{{ $paymentStatus->value }}" @selected($reservation->payment_status === $paymentStatus)>{{ $paymentStatus->label() }}</option>
+                                        <option value="{{ $paymentStatus->value }}" @selected(old('payment_status', $reservation->payment_status->value) === $paymentStatus->value)>{{ $paymentStatus->label() }}</option>
                                     @endforeach
                                 </select>
                                 @error('payment_status') <div class="invalid-feedback">{{ $message }}</div> @enderror

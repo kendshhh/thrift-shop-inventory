@@ -26,7 +26,7 @@ class ReservationCreatedNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -57,11 +57,25 @@ class ReservationCreatedNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $pickupDate = optional($this->reservation->pickup_date)->format('M d, Y') ?? 'N/A';
+        $pickupSlot = $this->reservation->pickup_slot !== null
+            ? ucfirst(str_replace('_', ' ', (string) $this->reservation->pickup_slot))
+            : 'N/A';
+
         return [
+            'title' => 'Reservation submitted',
+            'message' => 'Your reservation '.$this->reservation->reference.' was submitted successfully. Please complete payment and visit the shop before the reservation deadline.',
             'reservation_id' => $this->reservation->id,
             'reference' => $this->reservation->reference,
+            'status_label' => $this->reservation->status->label(),
             'status' => $this->reservation->status->value,
+            'payment_status_label' => $this->reservation->payment_status->label(),
             'payment_status' => $this->reservation->payment_status->value,
+            'pickup_date' => $pickupDate,
+            'pickup_slot' => $pickupSlot,
+            'notes' => $this->reservation->notes,
+            'action_url' => route('customer.reservations.show', $this->reservation),
+            'action_label' => 'View Reservation',
         ];
     }
 }

@@ -5,6 +5,15 @@
     $unreadNotificationCount = $user && !$user->isAdmin()
         ? $user->unreadNotifications()->count()
         : 0;
+    $adminUnreadNotifications = $user && $user->isAdmin()
+        ? $user->unreadNotifications()->where('type', \App\Notifications\AdminReservationNotification::class)->get()
+        : collect();
+    $adminUnreadNotificationCount = $adminUnreadNotifications->count();
+    $newReservationAlertCount = $adminUnreadNotifications
+        ->filter(function ($notification) {
+            return ($notification->data['event_type'] ?? null) === 'new_reservation';
+        })
+        ->count();
 @endphp
 
 <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-modern">
@@ -25,9 +34,17 @@
                         <li class="nav-item"><a class="nav-link mx-lg-2{{ request()->routeIs('admin.dashboard') ? ' active' : '' }}" href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                         <li class="nav-item"><a class="nav-link mx-lg-2{{ request()->routeIs('admin.inventory.*') ? ' active' : '' }}" href="{{ route('admin.inventory.index') }}">Inventory</a></li>
                         <li class="nav-item"><a class="nav-link mx-lg-2{{ request()->routeIs('admin.categories.*') ? ' active' : '' }}" href="{{ route('admin.categories.index') }}">Categories</a></li>
-                        <li class="nav-item"><a class="nav-link mx-lg-2{{ request()->routeIs('admin.reservations.*') ? ' active' : '' }}" href="{{ route('admin.reservations.index') }}">Reservations</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link mx-lg-2 position-relative{{ request()->routeIs('admin.reservations.*') ? ' active' : '' }}" href="{{ route('admin.reservations.index') }}">
+                                Reservations
+                                @if ($newReservationAlertCount > 0)
+                                    <span class="badge rounded-pill bg-danger ms-1">{{ $newReservationAlertCount > 99 ? '99+' : $newReservationAlertCount }}</span>
+                                @endif
+                            </a>
+                        </li>
                         <li class="nav-item"><a class="nav-link mx-lg-2{{ request()->routeIs('admin.users.*') ? ' active' : '' }}" href="{{ route('admin.users.index') }}">Users</a></li>
                         <li class="nav-item"><a class="nav-link mx-lg-2{{ request()->routeIs('admin.branding.*') ? ' active' : '' }}" href="{{ route('admin.branding.edit') }}">Branding</a></li>
+                        <li class="nav-item"><a class="nav-link mx-lg-2{{ request()->routeIs('admin.payments.*') ? ' active' : '' }}" href="{{ route('admin.payments.edit') }}">Payments</a></li>
                     </ul>
                 @else
                     <ul class="navbar-nav me-auto align-items-lg-center">
@@ -38,7 +55,18 @@
                 @endif
 
                 <ul class="navbar-nav ms-auto align-items-lg-center mt-3 mt-lg-0">
-                    @if (!$user->isAdmin())
+                    @if ($user->isAdmin())
+                        <li class="nav-item me-lg-2">
+                            <a class="nav-link position-relative rounded-pill px-3 py-2 bg-white border shadow-sm{{ request()->routeIs('admin.notifications.*') ? ' active' : '' }}" href="{{ route('admin.notifications.index') }}">
+                                <i class="bi bi-bell"></i>
+                                @if ($adminUnreadNotificationCount > 0)
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {{ $adminUnreadNotificationCount > 99 ? '99+' : $adminUnreadNotificationCount }}
+                                    </span>
+                                @endif
+                            </a>
+                        </li>
+                    @else
                         <li class="nav-item me-lg-2">
                             <a class="nav-link position-relative rounded-pill px-3 py-2 bg-white border shadow-sm{{ request()->routeIs('customer.notifications.*') ? ' active' : '' }}" href="{{ route('customer.notifications.index') }}">
                                 <i class="bi bi-bell me-1"></i>Notifications

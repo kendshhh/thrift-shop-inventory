@@ -9,11 +9,48 @@
         </div>
     </x-slot>
 
+    @php
+        $hasFilters = filled($filters['search'] ?? null)
+            || filled($filters['read_state'] ?? null);
+    @endphp
+
     @if (session('status'))
         <div class="alert alert-success alert-dismissible fade show mb-4">
             {{ session('status') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
+
+    @include('partials.filter-bar', [
+        'action' => route('customer.notifications.index'),
+        'resetUrl' => route('customer.notifications.index'),
+        'hasFilters' => $hasFilters,
+        'cardClass' => 'card customer-filter-card mb-4',
+        'fields' => [
+            [
+                'name' => 'search',
+                'id' => 'customer-notification-search',
+                'label' => 'Search',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['search'] ?? '',
+                'placeholder' => 'Title, message, reference, or status',
+                'colClass' => 'col-12 col-lg-8',
+            ],
+            [
+                'name' => 'read_state',
+                'id' => 'customer-notification-state',
+                'type' => 'select',
+                'label' => 'State',
+                'labelClass' => 'form-label fw-medium mb-1',
+                'value' => $filters['read_state'] ?? '',
+                'colClass' => 'col-6 col-lg-2',
+                'options' => [
+                    ['value' => '', 'label' => 'All'],
+                    ['value' => 'unread', 'label' => 'Unread'],
+                    ['value' => 'read', 'label' => 'Read'],
+                ],
+            ],
+        ],
+    ])
 
     <div class="card customer-surface">
         <div class="card-body p-0">
@@ -28,11 +65,7 @@
                         <div>
                             <div class="d-flex align-items-center gap-2 mb-2">
                                 <h6 class="mb-0 fw-semibold">{{ $payload['title'] ?? 'Reservation update' }}</h6>
-                                @if ($isUnread)
-                                    <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis border border-danger-subtle">Unread</span>
-                                @else
-                                    <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">Read</span>
-                                @endif
+                                <x-status-badge type="notification-state" :value="$isUnread ? 'unread' : 'read'" :label="$isUnread ? 'Unread' : 'Read'" />
                             </div>
 
                             <p class="text-muted mb-2">{{ $payload['message'] ?? 'Your reservation has been updated.' }}</p>
@@ -40,7 +73,10 @@
                             <div class="small text-muted d-flex flex-wrap gap-3">
                                 <span><strong>Reference:</strong> {{ $payload['reference'] ?? 'N/A' }}</span>
                                 <span><strong>Pickup:</strong> {{ $payload['pickup_date'] ?? 'N/A' }} ({{ $payload['pickup_slot'] ?? 'N/A' }})</span>
-                                <span><strong>Status:</strong> {{ $payload['status_label'] ?? ucfirst((string) ($payload['status'] ?? 'updated')) }}</span>
+                                <span>
+                                    <strong>Status:</strong>
+                                    <x-status-badge class="ms-1" type="reservation" :value="$payload['status'] ?? null" :label="$payload['status_label'] ?? ucfirst((string) ($payload['status'] ?? 'updated'))" />
+                                </span>
                             </div>
 
                             @if (!empty($payload['notes']))
@@ -50,7 +86,7 @@
                             <div class="small text-muted mt-2">{{ $notification->created_at?->diffForHumans() }}</div>
                         </div>
 
-                        <div class="d-flex flex-wrap gap-2">
+                        <div class="action-row action-row-end">
                             @if ($isUnread)
                                 <form method="POST" action="{{ route('customer.notifications.read', $notification->id) }}">
                                     @csrf
