@@ -27,6 +27,8 @@ class User extends Authenticatable
         'communication_preferences',
         'is_active',
         'suspended_at',
+        'privacy_notice_accepted_at',
+        'terms_accepted_at',
     ];
 
     /**
@@ -50,6 +52,8 @@ class User extends Authenticatable
         'communication_preferences' => 'array',
         'is_active' => 'boolean',
         'suspended_at' => 'datetime',
+        'privacy_notice_accepted_at' => 'datetime',
+        'terms_accepted_at' => 'datetime',
     ];
 
     public function reservations(): HasMany

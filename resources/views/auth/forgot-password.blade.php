@@ -18,7 +18,7 @@
         </div>
 
         <div class="text-center">
-            <a class="text-muted small" href="{{ route('login') }}">Back to login</a>
+            <a class="text-muted small" href="{{ route('auth.role-selection', ['intent' => 'login']) }}">Back to login</a>
         </div>
     </form>
 </x-guest-layout>

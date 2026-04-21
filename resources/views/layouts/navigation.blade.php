@@ -15,6 +15,13 @@
             return ($notification->data['event_type'] ?? null) === 'new_reservation';
         })
         ->count();
+    $routeName = request()->route()?->getName();
+    $authIntent = match ($routeName) {
+        'register' => 'register',
+        'login', 'password.request', 'password.reset' => 'login',
+        'auth.role-selection' => 'login',
+        default => null,
+    };
 @endphp
 
 <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-modern">
@@ -97,10 +104,22 @@
                 </ul>
             @else
                 <ul class="navbar-nav ms-auto align-items-lg-center mt-3 mt-lg-0">
-                    <li class="nav-item"><a class="nav-link me-lg-2" href="{{ route('login') }}">Sign In</a></li>
-                    @if (Route::has('register'))
-                        <li class="nav-item"><a class="btn btn-primary btn-sm px-3 rounded-pill" href="{{ route('register') }}">Register</a></li>
-                    @endif
+                    <li class="nav-item">
+                        <div class="auth-nav-switch">
+                            <a
+                                class="auth-nav-link {{ $authIntent === 'login' ? 'is-active' : '' }}"
+                                href="{{ route('auth.role-selection', ['intent' => 'login']) }}"
+                                @if ($authIntent === 'login') aria-current="page" @endif
+                            >Sign In</a>
+                            @if (Route::has('register'))
+                                <a
+                                    class="auth-nav-link {{ $authIntent === 'register' ? 'is-active' : '' }}"
+                                    href="{{ route('register') }}"
+                                    @if ($authIntent === 'register') aria-current="page" @endif
+                                >Register</a>
+                            @endif
+                        </div>
+                    </li>
                 </ul>
             @endif
         </div>

@@ -65,7 +65,7 @@ class PasswordResetTest extends TestCase
 
             $response
                 ->assertSessionHasNoErrors()
-                ->assertRedirect(route('login'));
+                ->assertRedirect(route('auth.role-selection', ['intent' => 'login']));
 
             return true;
         });

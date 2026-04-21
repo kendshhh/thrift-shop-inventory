@@ -15,9 +15,17 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): View
+    public function create(Request $request): View|RedirectResponse
     {
-        return view('auth.login');
+        $role = $request->query('role');
+
+        if (! in_array($role, ['customer', 'admin'], true)) {
+            return redirect()->route('auth.role-selection', ['intent' => 'login']);
+        }
+
+        return view('auth.login', [
+            'role' => $role,
+        ]);
     }
 
     /**

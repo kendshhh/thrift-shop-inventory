@@ -55,7 +55,7 @@
                         @auth
                             <a class="btn btn-primary rounded-pill px-4" href="{{ route('dashboard') }}">Dashboard</a>
                         @else
-                            <a class="btn btn-outline-custom rounded-pill px-4" href="{{ route('login') }}">Sign In</a>
+                            <a class="btn btn-outline-custom rounded-pill px-4" href="{{ route('auth.role-selection', ['intent' => 'login']) }}">Sign In</a>
                         @endauth
                     </li>
                 </ul>
@@ -137,7 +137,7 @@
                             @auth
                                 <a href="{{ route('dashboard') }}" class="btn btn-outline-custom px-4">Open Dashboard</a>
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-outline-custom px-4">Sign In</a>
+                                <a href="{{ route('auth.role-selection', ['intent' => 'login']) }}" class="btn btn-outline-custom px-4">Sign In</a>
                             @endauth
                         </div>
                     </div>
@@ -165,7 +165,7 @@
                     <h6 class="fw-bold mb-3">Marketplace</h6>
                     <ul class="list-unstyled">
                         <li><a href="{{ route('items.index') }}" class="text-muted text-decoration-none small d-block mb-2">Browse Items</a></li>
-                        <li><a href="{{ route('login') }}" class="text-muted text-decoration-none small d-block mb-2">Sign In</a></li>
+                        <li><a href="{{ route('auth.role-selection', ['intent' => 'login']) }}" class="text-muted text-decoration-none small d-block mb-2">Sign In</a></li>
                         @if (Route::has('register'))
                             <li><a href="{{ route('register') }}" class="text-muted text-decoration-none small d-block mb-2">Create Account</a></li>
                         @endif
@@ -174,7 +174,7 @@
                 <div class="col-6 col-md-3 col-lg-2">
                     <h6 class="fw-bold mb-3">Support</h6>
                     <ul class="list-unstyled">
-                        <li><a href="{{ route('login') }}" class="text-muted text-decoration-none small d-block mb-2">Account Access</a></li>
+                        <li><a href="{{ route('auth.role-selection', ['intent' => 'login']) }}" class="text-muted text-decoration-none small d-block mb-2">Account Access</a></li>
                         <li><a href="{{ route('items.index') }}" class="text-muted text-decoration-none small d-block mb-2">Reservation Guide</a></li>
                         <li><a href="{{ route('items.index') }}" class="text-muted text-decoration-none small d-block mb-2">Available Categories</a></li>
                     </ul>

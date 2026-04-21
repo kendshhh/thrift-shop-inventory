@@ -12,6 +12,13 @@
     $primaryRgb = data_get($branding ?? [], 'primary_rgb', '14, 165, 233');
         $secondaryColor = data_get($branding ?? [], 'secondary_color', '#2563EB');
     $secondaryRgb = data_get($branding ?? [], 'secondary_rgb', '37, 99, 235');
+        $routeName = request()->route()?->getName();
+        $authIntent = match ($routeName) {
+            'register' => 'register',
+            'login', 'password.request', 'password.reset' => 'login',
+            'auth.role-selection' => 'login',
+            default => null,
+        };
     @endphp
     <title>{{ $brandName }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -53,10 +60,22 @@
                     @auth
                         <li class="nav-item"><a class="btn btn-primary btn-sm px-3 rounded-pill" href="{{ route('dashboard') }}">Dashboard</a></li>
                     @else
-                        <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Sign In</a></li>
-                        @if (Route::has('register'))
-                            <li class="nav-item"><a class="btn btn-primary btn-sm px-3 rounded-pill" href="{{ route('register') }}">Register</a></li>
-                        @endif
+                        <li class="nav-item">
+                            <div class="auth-nav-switch">
+                                <a
+                                    class="auth-nav-link {{ $authIntent === 'login' ? 'is-active' : '' }}"
+                                    href="{{ route('auth.role-selection', ['intent' => 'login']) }}"
+                                    @if ($authIntent === 'login') aria-current="page" @endif
+                                >Sign In</a>
+                                @if (Route::has('register'))
+                                    <a
+                                    class="auth-nav-link {{ $authIntent === 'register' ? 'is-active' : '' }}"
+                                        href="{{ route('register') }}"
+                                        @if ($authIntent === 'register') aria-current="page" @endif
+                                    >Register</a>
+                                @endif
+                            </div>
+                        </li>
                     @endauth
                 </ul>
             </div>
@@ -82,6 +101,9 @@
             </div>
         </div>
     </main>
+
+    {{ $overlays ?? '' }}
+    @stack('guest-overlays')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

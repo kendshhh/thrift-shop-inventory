@@ -244,10 +244,89 @@ const initializeCountdowns = () => {
 	window.setInterval(syncCountdowns, 30000);
 };
 
+const initializeLegalModals = () => {
+	const shell = document.querySelector('.auth-legal-modal-shell');
+	const triggers = Array.from(document.querySelectorAll('[data-legal-modal-trigger]'));
+	const modals = Array.from(document.querySelectorAll('[data-legal-modal]'));
+
+	if (!(shell instanceof HTMLElement) || !triggers.length || !modals.length) {
+		return;
+	}
+
+	let activeModal = null;
+	let lastTrigger = null;
+
+	const closeModal = () => {
+		if (!(activeModal instanceof HTMLElement)) {
+			return;
+		}
+
+		activeModal.classList.remove('is-open');
+		activeModal.setAttribute('aria-hidden', 'true');
+		shell.classList.remove('is-open');
+		shell.setAttribute('aria-hidden', 'true');
+		document.body.classList.remove('modal-open');
+
+		const triggerToFocus = lastTrigger;
+		activeModal = null;
+		lastTrigger = null;
+
+		if (triggerToFocus instanceof HTMLElement) {
+			triggerToFocus.focus();
+		}
+	};
+
+	const openModal = (modalId, trigger) => {
+		const modal = document.getElementById(modalId);
+
+		if (!(modal instanceof HTMLElement)) {
+			return;
+		}
+
+		modals.forEach((item) => {
+			item.classList.remove('is-open');
+			item.setAttribute('aria-hidden', 'true');
+		});
+
+		activeModal = modal;
+		lastTrigger = trigger;
+
+		shell.classList.add('is-open');
+		shell.setAttribute('aria-hidden', 'false');
+		modal.classList.add('is-open');
+		modal.setAttribute('aria-hidden', 'false');
+		document.body.classList.add('modal-open');
+		modal.focus();
+	};
+
+	triggers.forEach((trigger) => {
+		trigger.addEventListener('click', (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			openModal(trigger.getAttribute('data-legal-modal-trigger'), trigger);
+		});
+	});
+
+	shell.querySelectorAll('[data-legal-modal-close]').forEach((element) => {
+		element.addEventListener('click', closeModal);
+	});
+
+	document.addEventListener('keydown', (event) => {
+		if (!shell.classList.contains('is-open')) {
+			return;
+		}
+
+		if (event.key === 'Escape') {
+			closeModal();
+		}
+	});
+};
+
 onReady(() => {
 	initializeNavbarScrollState();
 	initializeRevealAnimations();
 	initializeImagePreview();
 	initializeImageLightbox();
 	initializeCountdowns();
+	initializeLegalModals();
 });
