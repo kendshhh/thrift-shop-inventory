@@ -67,26 +67,26 @@
 
     <div class="row g-4">
         <div class="col-lg-5">
-            <div class="card">
+            <div class="card glass-card surface-section">
                 <div class="card-header"><strong>Reservation Summary</strong></div>
                 <div class="card-body">
-                    <dl class="row mb-0 small">
-                        <dt class="col-5 text-muted">Reference</dt><dd class="col-7 font-monospace">{{ $reservation->reference }}</dd>
-                        <dt class="col-5 text-muted">Status</dt><dd class="col-7"><x-status-badge type="reservation" :value="$reservation->status->value" :label="$reservation->status->label()" /></dd>
-                        <dt class="col-5 text-muted">Payment</dt><dd class="col-7"><x-status-badge type="payment" :value="$reservation->payment_status->value" :label="$reservation->payment_status->label()" /></dd>
-                        <dt class="col-5 text-muted">Pickup Date</dt><dd class="col-7">{{ optional($reservation->pickup_date)->format('M d, Y') }}</dd>
-                        <dt class="col-5 text-muted">Pickup Slot</dt><dd class="col-7">{{ ucfirst(str_replace('_', ' ', (string) $reservation->pickup_slot)) }}</dd>
-                        <dt class="col-5 text-muted">Expires</dt><dd class="col-7">{{ optional($reservation->expires_at)->format('M d, Y H:i') }}</dd>
-                        <dt class="col-5 text-muted">Extension Used</dt><dd class="col-7">{{ $reservation->extended_at ? 'Yes' : 'No' }}</dd>
-                        <dt class="col-5 text-muted">Total</dt><dd class="col-7 fw-bold text-success">&#8369;{{ number_format((float) $reservation->total_amount, 2) }}</dd>
-                    </dl>
+                    <div class="row g-3 small">
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Reference</span><div class="data-grid-value font-monospace">{{ $reservation->reference }}</div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Status</span><div class="data-grid-value"><x-status-badge type="reservation" :value="$reservation->status->value" :label="$reservation->status->label()" /></div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Payment</span><div class="data-grid-value"><x-status-badge type="payment" :value="$reservation->payment_status->value" :label="$reservation->payment_status->label()" /></div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Pickup Date</span><div class="data-grid-value">{{ optional($reservation->pickup_date)->format('M d, Y') }}</div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Pickup Slot</span><div class="data-grid-value">{{ ucfirst(str_replace('_', ' ', (string) $reservation->pickup_slot)) }}</div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Expires</span><div class="data-grid-value">{{ optional($reservation->expires_at)->format('M d, Y H:i') }}</div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Extension Used</span><div class="data-grid-value">{{ $reservation->extended_at ? 'Yes' : 'No' }}</div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Total</span><div class="data-grid-value text-success">&#8369;{{ number_format((float) $reservation->total_amount, 2) }}</div></div></div>
+                    </div>
 
                     @if ($canExtendReservation)
                         <hr>
                         <form method="POST" action="{{ route('customer.reservations.extend', $reservation) }}">
                             @csrf
                             @method('PATCH')
-                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                            <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill">
                                 <i class="bi bi-clock-history me-1"></i>Extend Reservation by 24 Hours
                             </button>
                         </form>
@@ -101,7 +101,7 @@
             </div>
 
             @if ($paymentDetails !== [])
-                <div class="card mt-4">
+                <div class="card glass-card surface-section mt-4">
                     <div class="card-header"><strong>Payment Details</strong></div>
                     <div class="card-body">
                         @include('partials.payment-details', [
@@ -116,7 +116,7 @@
                 </div>
             @endif
 
-            <div class="card mt-4">
+            <div class="card glass-card surface-section mt-4">
                 <div class="card-header"><strong>Need Help?</strong></div>
                 <div class="card-body small text-muted">
                     Bring your reservation reference and valid ID during pickup.
@@ -124,11 +124,11 @@
                 </div>
             </div>
 
-            <div class="card mt-4">
+            <div class="card glass-card surface-section mt-4">
                 <div class="card-header"><strong>Self-Service Requests</strong></div>
                 <div class="card-body">
                     @if ($reservation->customer_request_status !== null)
-                        <div class="border rounded-3 p-3 bg-light-subtle mb-3">
+                        <div class="surface-note mb-3">
                             <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
                                 <span class="fw-semibold">Latest Request: {{ $requestTypeLabel }}</span>
                                 <x-status-badge type="request" :value="$reservation->customer_request_status" :label="ucfirst((string) $reservation->customer_request_status)" />
@@ -170,11 +170,11 @@
                                                 @csrf
                                                 @method('PATCH')
                                                 <div class="mb-3">
-                                                    <label class="form-label fw-medium">Reason</label>
-                                                    <textarea name="request_reason" rows="3" class="form-control @error('request_reason') is-invalid @enderror" required>{{ old('request_reason') }}</textarea>
+                                                    <label class="form-label form-label-modern">Reason</label>
+                                                    <textarea name="request_reason" rows="3" class="form-control form-control-modern @error('request_reason') is-invalid @enderror" required>{{ old('request_reason') }}</textarea>
                                                     @error('request_reason') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                                 </div>
-                                                <button type="submit" class="btn btn-outline-danger btn-sm">Submit Cancellation Request</button>
+                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">Submit Cancellation Request</button>
                                             </form>
                                         </div>
                                     </div>
@@ -195,13 +195,13 @@
                                                 @method('PATCH')
                                                 <div class="row g-3">
                                                     <div class="col-sm-6">
-                                                        <label class="form-label fw-medium">Requested Pickup Date</label>
-                                                        <input type="date" name="requested_pickup_date" min="{{ now()->toDateString() }}" value="{{ old('requested_pickup_date') }}" class="form-control @error('requested_pickup_date') is-invalid @enderror" required>
+                                                        <label class="form-label form-label-modern">Requested Pickup Date</label>
+                                                        <input type="date" name="requested_pickup_date" min="{{ now()->addDay()->toDateString() }}" value="{{ old('requested_pickup_date') }}" class="form-control form-control-modern @error('requested_pickup_date') is-invalid @enderror" required>
                                                         @error('requested_pickup_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                                     </div>
                                                     <div class="col-sm-6">
-                                                        <label class="form-label fw-medium">Requested Slot</label>
-                                                        <select name="requested_pickup_slot" class="form-select @error('requested_pickup_slot') is-invalid @enderror" required>
+                                                        <label class="form-label form-label-modern">Requested Slot</label>
+                                                        <select name="requested_pickup_slot" class="form-select form-control-modern @error('requested_pickup_slot') is-invalid @enderror" required>
                                                             <option value="">Select slot</option>
                                                             @foreach (\App\Enums\PickupSlot::cases() as $slot)
                                                                 <option value="{{ $slot->value }}" @selected(old('requested_pickup_slot') === $slot->value)>{{ $slot->label() }}</option>
@@ -210,13 +210,13 @@
                                                         @error('requested_pickup_slot') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                                     </div>
                                                     <div class="col-12">
-                                                        <label class="form-label fw-medium">Reason <span class="text-muted fw-normal">(optional)</span></label>
-                                                        <textarea name="request_reason" rows="3" class="form-control @error('request_reason') is-invalid @enderror">{{ old('request_reason') }}</textarea>
+                                                        <label class="form-label form-label-modern">Reason <span class="text-muted fw-normal">(optional)</span></label>
+                                                        <textarea name="request_reason" rows="3" class="form-control form-control-modern @error('request_reason') is-invalid @enderror">{{ old('request_reason') }}</textarea>
                                                         @error('request_reason') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                                     </div>
                                                 </div>
 
-                                                <button type="submit" class="btn btn-outline-primary btn-sm mt-3">Submit Reschedule Request</button>
+                                                <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill mt-3">Submit Reschedule Request</button>
                                             </form>
                                         </div>
                                     </div>
@@ -232,7 +232,7 @@
             </div>
         </div>
         <div class="col-lg-7">
-            <div class="card">
+            <div class="card glass-card surface-section table-card">
                 <div class="card-header"><strong>Reserved Items</strong></div>
                 <div class="card-body p-0">
                     <table class="table table-sm mb-0">

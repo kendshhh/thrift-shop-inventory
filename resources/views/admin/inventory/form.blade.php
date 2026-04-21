@@ -8,37 +8,38 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card">
-                <div class="card-body">
+            <div class="card glass-card surface-section">
+                <div class="card-body form-shell">
                     <form method="POST" action="{{ $isEditing ? route('admin.inventory.update', $item) : route('admin.inventory.store') }}" enctype="multipart/form-data">
                         @csrf
                         @if ($isEditing) @method('PUT') @endif
 
+                        <div class="form-section-title">Core details</div>
                         <div class="mb-3">
-                            <label class="form-label fw-medium">Name</label>
-                            <input name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $item->name) }}" required>
+                            <label class="form-label form-label-modern">Name</label>
+                            <input name="name" class="form-control form-control-modern @error('name') is-invalid @enderror" value="{{ old('name', $item->name) }}" required>
                             @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">Price</label>
+                                <label class="form-label form-label-modern">Price</label>
                                 <div class="input-group">
                                     <span class="input-group-text">&#8369;</span>
-                                    <input name="price" type="number" step="0.01" min="0" class="form-control @error('price') is-invalid @enderror" value="{{ old('price', $item->price) }}" required>
+                                    <input name="price" type="number" step="0.01" min="0" class="form-control form-control-modern @error('price') is-invalid @enderror" value="{{ old('price', $item->price) }}" required>
                                     @error('price') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">Quantity</label>
-                                <input name="quantity" type="number" min="0" class="form-control @error('quantity') is-invalid @enderror" value="{{ old('quantity', $item->quantity ?? 0) }}" required>
+                                <label class="form-label form-label-modern">Quantity</label>
+                                <input name="quantity" type="number" min="0" class="form-control form-control-modern @error('quantity') is-invalid @enderror" value="{{ old('quantity', $item->quantity ?? 0) }}" required>
                                 @error('quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-medium">Category</label>
-                            <select name="category_id" class="form-select">
+                            <label class="form-label form-label-modern">Category</label>
+                            <select name="category_id" class="form-select form-control-modern">
                                 <option value="">None</option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}" @selected((string) old('category_id', $item->category_id) === (string) $category->id)>{{ $category->name }}</option>
@@ -48,8 +49,8 @@
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">Condition</label>
-                                <select name="condition" class="form-select @error('condition') is-invalid @enderror" required>
+                                <label class="form-label form-label-modern">Condition</label>
+                                <select name="condition" class="form-select form-control-modern @error('condition') is-invalid @enderror" required>
                                     @foreach ($conditions as $condition)
                                         <option value="{{ $condition->value }}" @selected(old('condition', $item->condition?->value ?? \App\Enums\ItemCondition::GENTLY_USED->value) === $condition->value)>{{ $condition->label() }}</option>
                                     @endforeach
@@ -57,8 +58,8 @@
                                 @error('condition') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">Status</label>
-                                <select name="status" class="form-select @error('status') is-invalid @enderror" required>
+                                <label class="form-label form-label-modern">Status</label>
+                                <select name="status" class="form-select form-control-modern @error('status') is-invalid @enderror" required>
                                     @foreach (collect($statuses)->filter(fn ($status) => $status->value !== \App\Enums\ItemStatus::OUT_OF_STOCK->value) as $status)
                                         <option value="{{ $status->value }}" @selected(old('status', $item->status?->value ?? \App\Enums\ItemStatus::ACTIVE->value) === $status->value)>{{ $status->label() }}</option>
                                     @endforeach
@@ -68,12 +69,13 @@
                             </div>
                         </div>
 
+                        <div class="form-section-title">Availability and media</div>
                         <div class="mb-3">
-                            <label class="form-label fw-medium">Restock Date & Time <span class="text-muted fw-normal small">(optional)</span></label>
+                            <label class="form-label form-label-modern">Restock Date & Time <span class="text-muted fw-normal small">(optional)</span></label>
                             <input
                                 name="restock_at"
                                 type="datetime-local"
-                                class="form-control @error('restock_at') is-invalid @enderror"
+                                class="form-control form-control-modern @error('restock_at') is-invalid @enderror"
                                 value="{{ old('restock_at', $item->restock_at?->format('Y-m-d\\TH:i')) }}"
                             >
                             <div class="form-text">Set this when an out-of-stock item is expected back so the countdown can be shown to users.</div>
@@ -81,18 +83,18 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-medium">Tags <span class="text-muted fw-normal small">(comma separated)</span></label>
-                            <input name="tags" class="form-control" value="{{ old('tags', implode(', ', $item->tags ?? [])) }}">
+                            <label class="form-label form-label-modern">Tags <span class="text-muted fw-normal small">(comma separated)</span></label>
+                            <input name="tags" class="form-control form-control-modern" value="{{ old('tags', implode(', ', $item->tags ?? [])) }}">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-medium">Item Thumbnail</label>
+                            <label class="form-label form-label-modern">Item Thumbnail</label>
                             <input
                                 type="file"
                                 name="image"
                                 id="image-input"
                                 accept="image/png,image/jpeg,image/webp"
-                                class="form-control @error('image') is-invalid @enderror"
+                                class="form-control form-control-modern @error('image') is-invalid @enderror"
                             >
                             <div class="alert alert-info py-2 px-3 mt-2 mb-2 small">
                                 16:9 format only. Capture image with white background. JPG, PNG, or WebP up to 3MB.
@@ -120,27 +122,31 @@
                             @endif
                         </div>
 
+                        <div class="form-section-title">Descriptions and seller info</div>
                         <div class="mb-4">
-                            <label class="form-label fw-medium">Description</label>
-                            <textarea name="description" class="form-control" rows="4">{{ old('description', $item->description) }}</textarea>
+                            <label class="form-label form-label-modern">Description</label>
+                            <textarea name="description" class="form-control form-control-modern" rows="4">{{ old('description', $item->description) }}</textarea>
                         </div>
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">Seller Name</label>
+                                <label class="form-label form-label-modern">Seller Name</label>
                                 <input
                                     name="seller_name"
-                                    class="form-control @error('seller_name') is-invalid @enderror"
+                                    class="form-control form-control-modern @error('seller_name') is-invalid @enderror"
                                     value="{{ old('seller_name', $item->seller_name) }}"
                                     required
                                 >
                                 @error('seller_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">Contact Number</label>
+                                <label class="form-label form-label-modern">Contact Number</label>
                                 <input
                                     name="seller_contact_number"
-                                    class="form-control @error('seller_contact_number') is-invalid @enderror"
+                                    type="text"
+                                    inputmode="numeric"
+                                    pattern="[0-9]+"
+                                    class="form-control form-control-modern @error('seller_contact_number') is-invalid @enderror"
                                     value="{{ old('seller_contact_number', $item->seller_contact_number) }}"
                                     required
                                 >
@@ -149,8 +155,8 @@
                         </div>
 
                         <div class="action-row">
-                            <button type="submit" class="btn btn-primary">{{ $isEditing ? 'Update Item' : 'Create Item' }}</button>
-                            <a href="{{ route('admin.inventory.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary rounded-pill">{{ $isEditing ? 'Update Item' : 'Create Item' }}</button>
+                            <a href="{{ route('admin.inventory.index') }}" class="btn btn-outline-secondary rounded-pill">Cancel</a>
                         </div>
                     </form>
                 </div>

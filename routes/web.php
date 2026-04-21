@@ -47,6 +47,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/home', [BrowseController::class, 'home'])->name('home');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::get('/reservations', [CustomerReservationController::class, 'index'])->name('reservations.index');
     Route::post('/reservations', [CustomerReservationController::class, 'store'])->name('reservations.store');

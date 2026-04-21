@@ -9,7 +9,7 @@
     $resolvedLabel = $label ?? \App\Support\StatusBadge::label($value);
     $palette = \App\Support\StatusBadge::palette($type, $value);
     $style = sprintf(
-        'background-color:%s !important;color:%s !important;border:1px solid %s !important;display:inline-flex;align-items:center;',
+        '--status-badge-bg:%s;--status-badge-color:%s;--status-badge-border:%s;display:inline-flex;align-items:center;',
         $palette['background'],
         $palette['color'],
         $palette['border']

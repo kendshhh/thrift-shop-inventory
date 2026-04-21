@@ -22,8 +22,8 @@
 
     <div class="row justify-content-center">
         <div class="col-xl-8">
-            <div class="card">
-                <div class="card-body">
+            <div class="card glass-card surface-section">
+                <div class="card-body form-shell">
                     <div class="alert alert-info mb-4 py-2" role="alert">
                         <i class="bi bi-info-circle me-2"></i>Saved payment details automatically appear on customer reservation details.
                     </div>
@@ -40,7 +40,7 @@
                                 <p class="text-muted small mb-0">{{ $editingPaymentId !== null && $editingPaymentId !== '' ? 'Update the selected payment detail and save to apply the changes.' : 'Add one payment detail at a time. After saving, this form resets so you can add a new one.' }}</p>
                             </div>
                             @if ($editingPaymentId !== null && $editingPaymentId !== '')
-                                <a href="{{ route('admin.payments.edit') }}" class="btn btn-outline-secondary btn-sm">
+                                <a href="{{ route('admin.payments.edit') }}" class="btn btn-outline-secondary btn-sm rounded-pill">
                                     <i class="bi bi-plus-circle me-1"></i>New Payment Detail
                                 </a>
                             @endif
@@ -53,11 +53,11 @@
                         <div class="payment-editor-card">
                             <div class="row g-3">
                                 <div class="col-md-4">
-                                    <label class="form-label fw-medium">Name</label>
+                                    <label class="form-label form-label-modern">Name</label>
                                     <input
                                         type="text"
                                         name="name"
-                                        class="form-control @error('name') is-invalid @enderror"
+                                        class="form-control form-control-modern @error('name') is-invalid @enderror"
                                         value="{{ old('name', data_get($editingPaymentDetail, 'name')) }}"
                                         maxlength="100"
                                         placeholder="Example: Maria Santos"
@@ -65,11 +65,11 @@
                                     @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label fw-medium">Bank</label>
+                                    <label class="form-label form-label-modern">Bank</label>
                                     <input
                                         type="text"
                                         name="bank_name"
-                                        class="form-control @error('bank_name') is-invalid @enderror"
+                                        class="form-control form-control-modern @error('bank_name') is-invalid @enderror"
                                         value="{{ old('bank_name', data_get($editingPaymentDetail, 'bank_name')) }}"
                                         maxlength="120"
                                         placeholder="Example: BDO"
@@ -77,11 +77,11 @@
                                     @error('bank_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label fw-medium">Bank Number</label>
+                                    <label class="form-label form-label-modern">Bank Number</label>
                                     <input
                                         type="text"
                                         name="bank_number"
-                                        class="form-control @error('bank_number') is-invalid @enderror"
+                                        class="form-control form-control-modern @error('bank_number') is-invalid @enderror"
                                         value="{{ old('bank_number', data_get($editingPaymentDetail, 'bank_number')) }}"
                                         maxlength="120"
                                         placeholder="Example: 012345678901"
@@ -91,13 +91,13 @@
                             </div>
 
                             <div class="mt-3">
-                                <label class="form-label fw-medium">QR Code Images</label>
+                                <label class="form-label form-label-modern">QR Code Images</label>
                                 <input
                                     type="file"
                                     name="qr_codes[]"
                                     accept=".jpg,.jpeg,.png,.webp"
                                     multiple
-                                    class="form-control @error('qr_codes') is-invalid @enderror"
+                                    class="form-control form-control-modern @error('qr_codes') is-invalid @enderror"
                                 >
                                 <div class="form-text">Accepted formats: JPG, JPEG, PNG, WEBP. Max size: 3 MB each.</div>
                                 @error('qr_codes') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
@@ -139,8 +139,8 @@
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary">{{ $editingPaymentId !== null && $editingPaymentId !== '' ? 'Update Payment Detail' : 'Add Payment Detail' }}</button>
-                            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-custom">Back to Dashboard</a>
+                            <button type="submit" class="btn btn-primary rounded-pill">{{ $editingPaymentId !== null && $editingPaymentId !== '' ? 'Update Payment Detail' : 'Add Payment Detail' }}</button>
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-custom rounded-pill">Back to Dashboard</a>
                         </div>
                     </form>
                 </div>
@@ -155,16 +155,18 @@
                 @if ($savedPaymentDetails !== [])
                     <div class="d-flex flex-column gap-3">
                         @foreach ($savedPaymentDetails as $savedEntry)
-                            <div class="card saved-payment-card">
+                            <div class="card glass-card surface-section saved-payment-card">
                                 <div class="card-header d-flex justify-content-between align-items-center gap-2 flex-wrap">
                                     <strong>Payment Detail {{ $loop->iteration }}</strong>
                                     <div class="d-flex gap-2">
-                                        <a href="{{ route('admin.payments.edit', ['edit' => $savedEntry['id'] ?? $loop->index]) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
-                                        <form method="POST" action="{{ route('admin.payments.destroy', $savedEntry['id'] ?? $loop->index) }}">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>Delete</button>
-                                        </form>
+                                        @if (!empty($savedEntry['id']))
+                                            <a href="{{ route('admin.payments.edit', ['edit' => $savedEntry['id']]) }}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-pencil me-1"></i>Edit</a>
+                                            <form method="POST" action="{{ route('admin.payments.destroy', $savedEntry['id']) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash me-1"></i>Delete</button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="card-body">
@@ -179,7 +181,7 @@
                         @endforeach
                     </div>
                 @else
-                    <div class="card saved-payment-card">
+                    <div class="card glass-card surface-section saved-payment-card">
                         <div class="card-body">
                             @include('partials.payment-details', [
                                 'paymentDetails' => [],

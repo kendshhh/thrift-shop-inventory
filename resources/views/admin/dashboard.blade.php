@@ -9,7 +9,7 @@
         </div>
     </x-slot>
 
-    <section class="admin-nextgen-hero glass-card p-4 p-lg-5 mb-4">
+    <section class="admin-nextgen-hero glass-card surface-section p-4 p-lg-5 mb-4">
         <div class="row g-4 align-items-center">
             <div class="col-lg-8">
                 <span class="admin-chip mb-3 d-inline-flex align-items-center gap-2">
@@ -21,13 +21,13 @@
             </div>
             <div class="col-lg-4">
                 <div class="d-grid gap-2">
-                    <a href="{{ route('admin.inventory.create') }}" class="btn btn-success">
+                    <a href="{{ route('admin.inventory.create') }}" class="btn btn-success rounded-pill">
                         <i class="bi bi-plus-circle me-2"></i>Add New Item
                     </a>
-                    <a href="{{ route('admin.inventory.index') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.inventory.index') }}" class="btn btn-primary rounded-pill">
                         <i class="bi bi-boxes me-2"></i>View Inventory
                     </a>
-                    <a href="{{ route('admin.reservations.index') }}" class="btn btn-outline-custom">
+                    <a href="{{ route('admin.reservations.index') }}" class="btn btn-outline-custom rounded-pill">
                         <i class="bi bi-calendar-check me-2"></i>Check Reservations
                     </a>
                 </div>
@@ -37,50 +37,50 @@
 
     <div class="row g-4 mb-4">
         <div class="col-sm-6 col-xl-3">
-            <article class="metric-card metric-sky h-100">
-                <div class="d-flex justify-content-between align-items-start mb-3">
+            <article class="customer-stat-card customer-stat-sky admin-stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
                     <span class="metric-title">Total Inventory</span>
                     <span class="metric-icon"><i class="bi bi-boxes"></i></span>
                 </div>
                 <div class="metric-value">{{ $totalInventoryItems }}</div>
-                <p class="metric-caption mb-0">All items in your catalog.</p>
+                <p class="metric-caption mb-0"><i class="bi bi-boxes me-1"></i>All items in your catalog.</p>
             </article>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <article class="metric-card metric-green h-100">
-                <div class="d-flex justify-content-between align-items-start mb-3">
+            <article class="customer-stat-card customer-stat-green admin-stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
                     <span class="metric-title">Active Reservations</span>
                     <span class="metric-icon"><i class="bi bi-calendar-check"></i></span>
                 </div>
                 <div class="metric-value">{{ $activeReservations }}</div>
-                <p class="metric-caption mb-0">Orders currently in progress.</p>
+                <p class="metric-caption mb-0"><i class="bi bi-journal-check me-1"></i>Orders currently in progress.</p>
             </article>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <article class="metric-card metric-red h-100">
-                <div class="d-flex justify-content-between align-items-start mb-3">
+            <article class="customer-stat-card customer-stat-red admin-stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
                     <span class="metric-title">Overdue</span>
                     <span class="metric-icon"><i class="bi bi-exclamation-triangle"></i></span>
                 </div>
                 <div class="metric-value">{{ $overdueReservations }}</div>
-                <p class="metric-caption mb-0">Reservations needing attention.</p>
+                <p class="metric-caption mb-0"><i class="bi bi-alarm me-1"></i>Reservations needing attention.</p>
             </article>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <article class="metric-card metric-amber h-100">
-                <div class="d-flex justify-content-between align-items-start mb-3">
+            <article class="customer-stat-card customer-stat-amber admin-stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
                     <span class="metric-title">Low Stock</span>
                     <span class="metric-icon"><i class="bi bi-bell"></i></span>
                 </div>
                 <div class="metric-value">{{ $lowStockItems }}</div>
-                <p class="metric-caption mb-0">Items close to depletion.</p>
+                <p class="metric-caption mb-0"><i class="bi bi-bell me-1"></i>Items close to depletion.</p>
             </article>
         </div>
     </div>
 
     <div class="row g-4 mb-4">
         <div class="col-lg-7">
-            <div class="card h-100">
+            <div class="card glass-card surface-section customer-surface h-100">
                 <div class="card-header bg-transparent border-0 pb-0 pt-4 px-4">
                     <h6 class="fw-bold mb-1">Payment Workflow</h6>
                     <p class="text-muted small mb-0">Monitor unpaid reservations and keep manual payment details current.</p>
@@ -88,21 +88,21 @@
                 <div class="card-body pt-3">
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <div class="border rounded-4 p-3 h-100 bg-light-subtle">
+                            <div class="data-grid-card">
                                 <div class="small text-muted text-uppercase fw-semibold mb-1">Awaiting Payment</div>
                                 <div class="fs-3 fw-bold">{{ $awaitingPaymentReservations }}</div>
                                 <div class="small text-muted">Active reservations still unpaid.</div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="border rounded-4 p-3 h-100 bg-light-subtle">
+                            <div class="data-grid-card">
                                 <div class="small text-muted text-uppercase fw-semibold mb-1">Ready for Pickup</div>
                                 <div class="fs-3 fw-bold">{{ $readyForPickupReservations }}</div>
                                 <div class="small text-muted">Prepared orders waiting for in-person settlement.</div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="border rounded-4 p-3 h-100 bg-light-subtle">
+                            <div class="data-grid-card">
                                 <div class="small text-muted text-uppercase fw-semibold mb-1">Completed Payments</div>
                                 <div class="fs-3 fw-bold">{{ $completedPayments }}</div>
                                 <div class="small text-muted">Reservations already closed out.</div>
@@ -140,7 +140,7 @@
             </div>
         </div>
         <div class="col-lg-5">
-            <div class="card h-100">
+            <div class="card glass-card surface-section customer-surface h-100">
                 <div class="card-header bg-transparent border-0 pb-0 pt-4 px-4">
                     <h6 class="fw-bold mb-1">Payment Actions</h6>
                     <p class="text-muted small mb-0">Shortcuts for the parts of the flow admins touch most.</p>
@@ -171,7 +171,7 @@
 
     <div class="row g-4">
         <div class="col-12">
-            <div class="card h-100">
+            <div class="card glass-card surface-section customer-surface h-100">
                 <div class="card-header bg-transparent border-0 pb-0 pt-4 px-4">
                     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
                         <div>

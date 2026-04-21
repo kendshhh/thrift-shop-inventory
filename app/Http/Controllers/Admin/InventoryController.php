@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\ItemCondition;
 use App\Enums\ItemStatus;
+use App\Enums\ReservationStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Item;
@@ -101,7 +102,7 @@ class InventoryController extends Controller
             'quantity' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
             'seller_name' => ['required', 'string', 'max:255'],
-            'seller_contact_number' => ['required', 'string', 'max:50'],
+            'seller_contact_number' => ['required', 'string', 'max:50', 'regex:/^[0-9]+$/'],
             'condition' => ['required', Rule::in(ItemCondition::values())],
             'tags' => ['nullable', 'string'],
             'image' => $this->imageRules(),
@@ -167,7 +168,7 @@ class InventoryController extends Controller
             'quantity' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
             'seller_name' => ['required', 'string', 'max:255'],
-            'seller_contact_number' => ['required', 'string', 'max:50'],
+            'seller_contact_number' => ['required', 'string', 'max:50', 'regex:/^[0-9]+$/'],
             'condition' => ['required', Rule::in(ItemCondition::values())],
             'tags' => ['nullable', 'string'],
             'image' => $this->imageRules(),
@@ -199,7 +200,6 @@ class InventoryController extends Controller
 
         unset($validated['image'], $validated['remove_image']);
 
-        $validated['slug'] = $this->makeUniqueSlug($validated['name'], $itemModel->id);
         $validated['tags'] = $this->normalizeTags($request->input('tags'));
         $validated['restock_at'] = $request->filled('restock_at') ? $request->input('restock_at') : null;
 
@@ -260,13 +260,19 @@ class InventoryController extends Controller
     {
         $itemModel = $this->findAdminItemOrFail($item);
 
-        if ($itemModel->reservationItems()->exists()) {
+        $activeReservationItems = $itemModel->reservationItems()->whereHas('reservation', function ($query): void {
+            $query->whereIn('status', ReservationStatus::activeValues());
+        });
+
+        if ($activeReservationItems->exists()) {
             return redirect()
                 ->route('admin.inventory.show', $itemModel)
                 ->withErrors([
-                    'delete' => 'This item cannot be permanently deleted because it is linked to one or more reservations.',
+                    'delete' => 'This item cannot be permanently deleted because it is linked to one or more active reservations.',
                 ]);
         }
+
+        $itemModel->reservationItems()->delete();
 
         if ($itemModel->image_path !== null && $itemModel->image_path !== '') {
             Storage::disk('public')->delete($itemModel->image_path);

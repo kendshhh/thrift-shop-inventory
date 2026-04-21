@@ -5,8 +5,11 @@
         $brandName = data_get($branding ?? [], 'brand_name', config('app.name', 'Everdarling'));
         $brandTagline = data_get($branding ?? [], 'brand_tagline') ?: 'Curated and Personalized Gems';
         $logoUrl = data_get($branding ?? [], 'logo_url');
+    $brandLogo = $logoUrl ?: asset('images/everdarling_logo.png');
         $primaryColor = data_get($branding ?? [], 'primary_color', '#0EA5E9');
+        $primaryRgb = data_get($branding ?? [], 'primary_rgb', '14, 165, 233');
         $secondaryColor = data_get($branding ?? [], 'secondary_color', '#2563EB');
+        $secondaryRgb = data_get($branding ?? [], 'secondary_rgb', '37, 99, 235');
     @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,22 +21,32 @@
     <style>
         :root {
             --accent-color: {{ $primaryColor }};
+            --accent-rgb: {{ $primaryRgb }};
             --accent-deep: {{ $secondaryColor }};
+            --accent-deep-rgb: {{ $secondaryRgb }};
             --accent-gradient: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-deep) 100%);
+            --brand-surface: linear-gradient(145deg, rgba(255, 255, 255, 0.62) 0%, rgba(var(--accent-rgb), 0.14) 18%, rgba(255, 255, 255, 0.58) 52%, rgba(var(--accent-deep-rgb), 0.1) 100%);
+            --brand-surface-strong: linear-gradient(145deg, rgba(255, 255, 255, 0.72) 0%, rgba(var(--accent-rgb), 0.18) 22%, rgba(var(--accent-deep-rgb), 0.12) 58%, rgba(255, 255, 255, 0.84) 100%);
+            --brand-border: rgba(var(--accent-rgb), 0.22);
         }
     </style>
 </head>
-<body>
+<body class="guest-shell">
+    <div class="brand-ambient" aria-hidden="true">
+        <span class="brand-ambient-orb brand-ambient-orb-primary"></span>
+        <span class="brand-ambient-orb brand-ambient-orb-secondary"></span>
+        <span class="brand-ambient-grid"></span>
+    </div>
     <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-modern">
         <div class="container app-container">
             <a class="navbar-brand fw-bold fs-4 d-inline-flex align-items-center" href="{{ url('/') }}">
-<img src="/images/everdarling_logo.png" alt="Everdarling logo" class="navbar-brand-logo">
+                <img src="{{ $brandLogo }}" alt="{{ $brandName }} logo" class="navbar-brand-logo">
                 <!-- Brand text replaced with logo -->
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#welcomeNav" aria-controls="welcomeNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="welcomeNav">
+            <div class="collapse navbar-collapse nav-glass-collapse" id="welcomeNav">
                 <ul class="navbar-nav ms-auto align-items-lg-center">
                     <li class="nav-item"><a class="nav-link mx-lg-2" href="#features">Features</a></li>
                     <li class="nav-item"><a class="nav-link mx-lg-2" href="#solutions">Solutions</a></li>
@@ -54,7 +67,7 @@
         <div class="container app-container text-center">
             <div class="row justify-content-center">
                 <div class="col-lg-10">
-                    <span class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2 mb-4">
+                    <span class="status-badge status-badge-ready rounded-pill px-3 py-2 mb-4 d-inline-flex align-items-center">
                         <i class="bi bi-stars me-2"></i>Curated drops & one-of-a-kind thrift finds
                     </span>
                     <h1 class="display-2 fw-bold mb-4" style="letter-spacing: -0.04em; line-height: 1.1;">
@@ -88,21 +101,21 @@
             </div>
             <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="glass-card p-5 h-100">
+                    <div class="glass-card surface-section p-5 h-100">
                         <div class="feature-icon-wrapper"><i class="bi bi-lightning-charge feature-icon"></i></div>
                         <h4 class="fw-bold mb-3">Fast Reservation Flow</h4>
                         <p class="text-muted mb-0">Reserve items in a few clicks and skip uncertainty at pickup.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="glass-card p-5 h-100">
+                    <div class="glass-card surface-section p-5 h-100">
                         <div class="feature-icon-wrapper"><i class="bi bi-shield-check feature-icon"></i></div>
                         <h4 class="fw-bold mb-3">Trusted Item Status</h4>
                         <p class="text-muted mb-0">Track condition, availability, and reservation status in real time.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="glass-card p-5 h-100">
+                    <div class="glass-card surface-section p-5 h-100">
                         <div class="feature-icon-wrapper"><i class="bi bi-recycle feature-icon"></i></div>
                         <h4 class="fw-bold mb-3">Sustainable by Default</h4>
                         <p class="text-muted mb-0">Extend product lifecycles and reduce waste with every purchase.</p>
@@ -114,7 +127,7 @@
 
     <section id="solutions" class="py-5 mb-5">
         <div class="container app-container">
-            <div class="glass-card p-5 text-center overflow-hidden position-relative border-0 shadow-lg" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);">
+            <div class="glass-card surface-section ambient-panel p-5 text-center overflow-hidden position-relative border-0 shadow-lg">
                 <div class="row justify-content-center py-4">
                     <div class="col-lg-8">
                         <h2 class="display-6 fw-bold mb-4">Find something that feels like you</h2>
@@ -138,7 +151,7 @@
             <div class="row g-5">
                 <div class="col-lg-4">
                     <h5 class="fw-bold mb-4 d-inline-flex align-items-center">
-                        <img src="/images/everdarling_logo.png" alt="Everdarling logo" class="navbar-brand-logo footer-logo">
+                        <img src="{{ $brandLogo }}" alt="{{ $brandName }} logo" class="navbar-brand-logo footer-logo">
                         <!-- Brand text replaced with logo -->
                     </h5>
                     <p class="text-muted">A curated thrift space offering handpicked, personality-filled pieces, and beyond, each one chosen with intention and care.</p>

@@ -7,8 +7,10 @@ use App\Enums\ItemStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\PickupSlot;
 use App\Enums\ReservationStatus;
+use App\Models\Category;
 use App\Models\Item;
 use App\Models\Reservation;
+use App\Models\ReservationItem;
 use App\Models\User;
 use App\Notifications\ReservationStatusUpdatedNotification;
 use Illuminate\Support\Str;
@@ -93,6 +95,45 @@ class AdminUiAndInventoryStatusTest extends TestCase
         $item->refresh();
 
         $this->assertSame(ItemStatus::ARCHIVED, $item->status);
+    }
+
+    public function test_admin_inventory_update_rejects_non_numeric_seller_contact_number(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $item = Item::query()->create([
+            'name' => 'Contact Rule Item',
+            'slug' => 'contact-rule-item',
+            'price' => 150,
+            'quantity' => 2,
+            'reserved_quantity' => 0,
+            'description' => 'Validates contact number input.',
+            'seller_name' => 'Contact Seller',
+            'seller_contact_number' => '09170000016',
+            'condition' => ItemCondition::GENTLY_USED,
+            'status' => ItemStatus::ACTIVE,
+        ]);
+
+        $this
+            ->actingAs($admin)
+            ->from(route('admin.inventory.edit', $item))
+            ->put(route('admin.inventory.update', $item), [
+                'name' => 'Contact Rule Item',
+                'price' => 150,
+                'quantity' => 2,
+                'description' => 'Validates contact number input.',
+                'seller_name' => 'Contact Seller',
+                'seller_contact_number' => '0917ABC1234',
+                'condition' => ItemCondition::GENTLY_USED->value,
+                'status' => ItemStatus::ACTIVE->value,
+            ])
+            ->assertRedirect(route('admin.inventory.edit', $item))
+            ->assertSessionHasErrors('seller_contact_number');
+
+        $item->refresh();
+
+        $this->assertSame('09170000016', $item->seller_contact_number);
     }
 
     public function test_customer_notifications_render_shared_status_badges(): void
@@ -276,5 +317,224 @@ class AdminUiAndInventoryStatusTest extends TestCase
             ->get(route('admin.inventory.show', $item))
             ->assertOk()
             ->assertSee('Out of Stock');
+    }
+
+    public function test_admin_can_permanently_delete_inventory_item_without_reservation_links(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $item = Item::query()->create([
+            'name' => 'Permanent Delete Item',
+            'slug' => 'permanent-delete-item',
+            'price' => 260,
+            'quantity' => 1,
+            'reserved_quantity' => 0,
+            'description' => 'Can be permanently deleted.',
+            'seller_name' => 'Delete Seller',
+            'seller_contact_number' => '09170000017',
+            'condition' => ItemCondition::NEW,
+            'status' => ItemStatus::ARCHIVED,
+        ]);
+
+        $this
+            ->actingAs($admin)
+            ->delete(route('admin.inventory.force-destroy', $item))
+            ->assertRedirect(route('admin.inventory.index'));
+
+        $this->assertDatabaseMissing('items', [
+            'id' => $item->id,
+        ]);
+    }
+
+    public function test_admin_cannot_permanently_delete_inventory_item_linked_to_reservations(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $item = Item::query()->create([
+            'name' => 'Protected Delete Item',
+            'slug' => 'protected-delete-item',
+            'price' => 275,
+            'quantity' => 2,
+            'reserved_quantity' => 1,
+            'description' => 'Linked to an existing reservation.',
+            'seller_name' => 'Protected Seller',
+            'seller_contact_number' => '09170000018',
+            'condition' => ItemCondition::GENTLY_USED,
+            'status' => ItemStatus::ARCHIVED,
+        ]);
+
+        $reservation = Reservation::query()->create([
+            'reference' => 'RSV-DELETE-0001',
+            'user_id' => null,
+            'status' => ReservationStatus::PENDING,
+            'payment_status' => PaymentStatus::PENDING,
+            'pickup_date' => now()->addDay()->toDateString(),
+            'pickup_slot' => PickupSlot::MORNING->value,
+            'expires_at' => now()->addDay(),
+            'total_amount' => 275,
+        ]);
+
+        ReservationItem::query()->create([
+            'reservation_id' => $reservation->id,
+            'item_id' => $item->id,
+            'quantity' => 1,
+            'unit_price' => 275,
+        ]);
+
+        $this
+            ->actingAs($admin)
+            ->delete(route('admin.inventory.force-destroy', $item))
+            ->assertRedirect(route('admin.inventory.show', $item))
+            ->assertSessionHasErrors('delete');
+
+        $this->assertDatabaseHas('items', [
+            'id' => $item->id,
+        ]);
+    }
+
+    public function test_admin_can_permanently_delete_inventory_item_when_only_historical_reservations_exist(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $item = Item::query()->create([
+            'name' => 'Historical Delete Item',
+            'slug' => 'historical-delete-item',
+            'price' => 300,
+            'quantity' => 2,
+            'reserved_quantity' => 0,
+            'description' => 'Only completed reservation history exists.',
+            'seller_name' => 'History Seller',
+            'seller_contact_number' => '09170000020',
+            'condition' => ItemCondition::GENTLY_USED,
+            'status' => ItemStatus::ARCHIVED,
+        ]);
+
+        $reservation = Reservation::query()->create([
+            'reference' => 'RSV-DELETE-0002',
+            'user_id' => null,
+            'status' => ReservationStatus::COMPLETED,
+            'payment_status' => PaymentStatus::COMPLETED,
+            'pickup_date' => now()->subDay()->toDateString(),
+            'pickup_slot' => PickupSlot::AFTERNOON->value,
+            'expires_at' => now()->subDays(2),
+            'paid_at' => now()->subDay(),
+            'completed_at' => now()->subDay(),
+            'total_amount' => 300,
+        ]);
+
+        ReservationItem::query()->create([
+            'reservation_id' => $reservation->id,
+            'item_id' => $item->id,
+            'quantity' => 1,
+            'unit_price' => 300,
+        ]);
+
+        $this
+            ->actingAs($admin)
+            ->delete(route('admin.inventory.force-destroy', $item))
+            ->assertRedirect(route('admin.inventory.index'));
+
+        $this->assertDatabaseMissing('items', [
+            'id' => $item->id,
+        ]);
+    }
+
+    public function test_archiving_category_detaches_linked_items(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $category = Category::query()->create([
+            'name' => 'Archive Category',
+            'slug' => 'archive-category',
+            'description' => 'Will be archived.',
+            'is_active' => true,
+        ]);
+
+        $item = Item::query()->create([
+            'category_id' => $category->id,
+            'name' => 'Category Linked Item',
+            'slug' => 'category-linked-item',
+            'price' => 190,
+            'quantity' => 3,
+            'reserved_quantity' => 0,
+            'description' => 'Should remain accessible after category archive.',
+            'seller_name' => 'Category Seller',
+            'seller_contact_number' => '09170000019',
+            'condition' => ItemCondition::GENTLY_USED,
+            'status' => ItemStatus::ACTIVE,
+        ]);
+
+        $this
+            ->actingAs($admin)
+            ->delete(route('admin.categories.destroy', $category))
+            ->assertRedirect(route('admin.categories.index'));
+
+        $this->assertSoftDeleted('categories', [
+            'id' => $category->id,
+        ]);
+
+        $item->refresh();
+
+        $this->assertNull($item->category_id);
+
+        $this
+            ->get(route('items.show', $item))
+            ->assertOk()
+            ->assertSee('Uncategorized');
+    }
+
+    public function test_admin_can_rename_item_without_changing_its_slug_or_breaking_public_item_page(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $item = Item::query()->create([
+            'name' => 'Original Name',
+            'slug' => 'original-name',
+            'price' => 320,
+            'quantity' => 5,
+            'reserved_quantity' => 0,
+            'description' => 'Rename me safely.',
+            'seller_name' => 'Rename Seller',
+            'seller_contact_number' => '09170000015',
+            'condition' => ItemCondition::GENTLY_USED,
+            'status' => ItemStatus::ACTIVE,
+        ]);
+
+        $oldSlug = $item->slug;
+
+        $this
+            ->actingAs($admin)
+            ->put(route('admin.inventory.update', $item), [
+                'name' => 'Renamed Item',
+                'price' => 320,
+                'quantity' => 5,
+                'description' => 'Rename me safely.',
+                'seller_name' => 'Rename Seller',
+                'seller_contact_number' => '09170000015',
+                'condition' => ItemCondition::GENTLY_USED->value,
+                'status' => ItemStatus::ACTIVE->value,
+            ])
+            ->assertRedirect(route('admin.inventory.show', $item));
+
+        $item->refresh();
+
+        $this->assertSame($oldSlug, $item->slug);
+        $this->assertSame('Renamed Item', $item->name);
+
+        $this
+            ->get(route('items.show', ['item' => $oldSlug]))
+            ->assertOk()
+            ->assertSee('Renamed Item');
+
+        $this
+            ->actingAs($admin)
+            ->get(route('admin.inventory.show', ['item' => $oldSlug]))
+            ->assertOk()
+            ->assertSee('Renamed Item');
     }
 }

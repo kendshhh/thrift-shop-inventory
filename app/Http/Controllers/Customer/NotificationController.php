@@ -43,6 +43,9 @@ class NotificationController extends Controller
                 ->latest()
                 ->paginate(15)
                 ->withQueryString(),
+            'unreadCount' => $request->user()
+                ->unreadNotifications()
+                ->count(),
             'filters' => $request->only(['search', 'read_state']),
         ]);
     }
@@ -59,5 +62,16 @@ class NotificationController extends Controller
         }
 
         return back()->with('status', 'Notification marked as read.');
+    }
+
+    public function markAllAsRead(Request $request): RedirectResponse
+    {
+        $request->user()
+            ->unreadNotifications()
+            ->get()
+            ->each
+            ->markAsRead();
+
+        return back()->with('status', 'All notifications marked as read.');
     }
 }

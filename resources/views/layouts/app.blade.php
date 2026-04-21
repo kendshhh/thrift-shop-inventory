@@ -7,7 +7,9 @@
 @php
         $brandName = data_get($branding ?? [], 'brand_name', config('app.name', 'Everdarling'));
         $primaryColor = data_get($branding ?? [], 'primary_color', '#0EA5E9');
+    $primaryRgb = data_get($branding ?? [], 'primary_rgb', '14, 165, 233');
         $secondaryColor = data_get($branding ?? [], 'secondary_color', '#2563EB');
+    $secondaryRgb = data_get($branding ?? [], 'secondary_rgb', '37, 99, 235');
     @endphp
     <title>{{ $brandName }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,12 +19,24 @@
     <style>
         :root {
             --accent-color: {{ $primaryColor }};
+            --accent-rgb: {{ $primaryRgb }};
             --accent-deep: {{ $secondaryColor }};
+            --accent-deep-rgb: {{ $secondaryRgb }};
             --accent-gradient: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-deep) 100%);
+            --brand-surface: linear-gradient(145deg, rgba(255, 255, 255, 0.62) 0%, rgba(var(--accent-rgb), 0.14) 18%, rgba(255, 255, 255, 0.58) 52%, rgba(var(--accent-deep-rgb), 0.1) 100%);
+            --brand-surface-strong: linear-gradient(145deg, rgba(255, 255, 255, 0.72) 0%, rgba(var(--accent-rgb), 0.18) 22%, rgba(var(--accent-deep-rgb), 0.12) 58%, rgba(255, 255, 255, 0.84) 100%);
+            --brand-border: rgba(var(--accent-rgb), 0.22);
+            --brand-glow-soft: rgba(var(--accent-rgb), 0.2);
+            --brand-glow-strong: rgba(var(--accent-deep-rgb), 0.18);
         }
     </style>
 </head>
-<body>
+<body class="app-shell">
+    <div class="brand-ambient" aria-hidden="true">
+        <span class="brand-ambient-orb brand-ambient-orb-primary"></span>
+        <span class="brand-ambient-orb brand-ambient-orb-secondary"></span>
+        <span class="brand-ambient-grid"></span>
+    </div>
     @include('layouts.navigation')
 
     <main class="app-main">

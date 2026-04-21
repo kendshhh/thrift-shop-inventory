@@ -21,7 +21,7 @@
         </div>
     @enderror
 
-    <div class="card">
+    <div class="card glass-card surface-section">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">{{ $item->name }}</h5>
             <div class="d-flex flex-wrap align-items-center gap-2">
@@ -49,49 +49,67 @@
                 <div class="col-lg-8">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <div class="text-muted small">Category</div>
-                            <div class="fw-medium">{{ $item->category?->name ?? 'Uncategorized' }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="text-muted small">Price</div>
-                            <div class="fw-medium">&#8369;{{ number_format((float) $item->price, 2) }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="text-muted small">Total Quantity</div>
-                            <div class="fw-medium">{{ $item->quantity }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="text-muted small">Reserved</div>
-                            <div class="fw-medium">{{ $item->reserved_quantity }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="text-muted small">Condition</div>
-                            <div class="fw-medium">{{ $item->condition->label() }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="text-muted small">Available</div>
-                            <div class="fw-medium text-success">{{ $item->availableQuantity() }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="text-muted small">Restock</div>
-                            <div class="fw-medium">
-                                @if ($item->hasScheduledRestock())
-                                    <span>{{ $item->restock_at?->format('M d, Y g:i A') }}</span>
-                                    <div class="countdown-chip mt-2" data-countdown-to="{{ $item->restock_at?->toIso8601String() }}">
-                                        Returns in <span data-countdown-label>Loading...</span>
-                                    </div>
-                                @else
-                                    Not scheduled
-                                @endif
+                            <div class="data-grid-card">
+                                <span class="data-grid-label">Category</span>
+                                <div class="data-grid-value">{{ $item->category?->name ?? 'Uncategorized' }}</div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="text-muted small">Seller Name</div>
-                            <div class="fw-medium">{{ $item->seller_name ?: 'Not provided' }}</div>
+                            <div class="data-grid-card">
+                                <span class="data-grid-label">Price</span>
+                                <div class="data-grid-value">&#8369;{{ number_format((float) $item->price, 2) }}</div>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="text-muted small">Contact Number</div>
-                            <div class="fw-medium">{{ $item->seller_contact_number ?: 'Not provided' }}</div>
+                            <div class="data-grid-card">
+                                <span class="data-grid-label">Total Quantity</span>
+                                <div class="data-grid-value">{{ $item->quantity }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="data-grid-card">
+                                <span class="data-grid-label">Reserved</span>
+                                <div class="data-grid-value">{{ $item->reserved_quantity }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="data-grid-card">
+                                <span class="data-grid-label">Condition</span>
+                                <div class="data-grid-value">{{ $item->condition->label() }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="data-grid-card">
+                                <span class="data-grid-label">Available</span>
+                                <div class="data-grid-value text-success">{{ $item->availableQuantity() }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="data-grid-card">
+                                <span class="data-grid-label">Restock</span>
+                                <div class="data-grid-value">
+                                    @if ($item->hasScheduledRestock())
+                                        <span>{{ $item->restock_at?->format('M d, Y g:i A') }}</span>
+                                        <div class="countdown-chip mt-2" data-countdown-to="{{ $item->restock_at?->toIso8601String() }}">
+                                            Returns in <span data-countdown-label>Loading...</span>
+                                        </div>
+                                    @else
+                                        Not scheduled
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="data-grid-card">
+                                <span class="data-grid-label">Seller Name</span>
+                                <div class="data-grid-value">{{ $item->seller_name ?: 'Not provided' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="data-grid-card">
+                                <span class="data-grid-label">Contact Number</span>
+                                <div class="data-grid-value">{{ $item->seller_contact_number ?: 'Not provided' }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -104,25 +122,25 @@
                 </div>
             @endif
 
-            <div class="d-flex gap-2">
-                <a href="{{ route('admin.inventory.edit', $item) }}" class="btn btn-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ route('admin.inventory.edit', $item) }}" class="btn btn-primary rounded-pill"><i class="bi bi-pencil me-1"></i>Edit</a>
                 @if ($item->status === \App\Enums\ItemStatus::ARCHIVED)
                     <form method="POST" action="{{ route('admin.inventory.unarchive', $item) }}">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-success"><i class="bi bi-arrow-counterclockwise me-1"></i>Unarchive</button>
+                        <button type="submit" class="btn btn-success rounded-pill"><i class="bi bi-arrow-counterclockwise me-1"></i>Unarchive</button>
                     </form>
                 @else
                     <form method="POST" action="{{ route('admin.inventory.destroy', $item) }}" onsubmit="return confirm('Archive this item?')">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger"><i class="bi bi-archive me-1"></i>Archive</button>
+                        <button type="submit" class="btn btn-danger rounded-pill"><i class="bi bi-archive me-1"></i>Archive</button>
                     </form>
                 @endif
                 <form method="POST" action="{{ route('admin.inventory.force-destroy', $item) }}" onsubmit="return confirm('Permanently delete this item? This cannot be undone.')">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Delete Permanently</button>
+                    <button type="submit" class="btn btn-outline-danger rounded-pill"><i class="bi bi-trash me-1"></i>Delete Permanently</button>
                 </form>
             </div>
         </div>

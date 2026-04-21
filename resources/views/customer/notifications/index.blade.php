@@ -5,7 +5,16 @@
                 <h5 class="mb-1 fw-bold"><i class="bi bi-bell me-2"></i>Notifications</h5>
                 <p class="text-muted mb-0 small">Track updates from the shop team about your reservations.</p>
             </div>
-            <a href="{{ route('customer.reservations.index') }}" class="btn btn-sm btn-outline-custom"><i class="bi bi-bag-check me-1"></i>My Reservations</a>
+            <div class="action-row">
+                <a href="{{ route('customer.reservations.index') }}" class="btn btn-sm btn-outline-custom"><i class="bi bi-bag-check me-1"></i>My Reservations</a>
+                @if (($unreadCount ?? 0) > 0)
+                    <form method="POST" action="{{ route('customer.notifications.mark-all-read') }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">Mark All Read</button>
+                    </form>
+                @endif
+            </div>
         </div>
     </x-slot>
 
@@ -52,7 +61,7 @@
         ],
     ])
 
-    <div class="card customer-surface">
+    <div class="card glass-card surface-section customer-surface">
         <div class="card-body p-0">
             @forelse ($notifications as $notification)
                 @php
@@ -60,7 +69,7 @@
                     $isUnread = $notification->read_at === null;
                 @endphp
 
-                <div class="border-bottom p-4 {{ $isUnread ? 'bg-light-subtle' : '' }}">
+                <div class="list-row-card {{ $isUnread ? 'is-unread' : '' }}">
                     <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
                         <div>
                             <div class="d-flex align-items-center gap-2 mb-2">
@@ -91,11 +100,11 @@
                                 <form method="POST" action="{{ route('customer.notifications.read', $notification->id) }}">
                                     @csrf
                                     @method('PATCH')
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Mark as Read</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill">Mark as Read</button>
                                 </form>
                             @endif
 
-                            <a href="{{ $payload['action_url'] ?? route('customer.reservations.index') }}" class="btn btn-sm btn-primary">
+                            <a href="{{ $payload['action_url'] ?? route('customer.reservations.index') }}" class="btn btn-sm btn-primary rounded-pill">
                                 {{ $payload['action_label'] ?? 'View Reservation' }}
                             </a>
                         </div>
@@ -110,7 +119,7 @@
         </div>
 
         @if ($notifications->hasPages())
-            <div class="card-footer bg-white">{{ $notifications->links() }}</div>
+            <div class="card-footer bg-transparent border-0 px-3 pb-3 pt-0">{{ $notifications->links() }}</div>
         @endif
     </div>
 </x-app-layout>

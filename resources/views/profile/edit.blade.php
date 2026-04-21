@@ -5,21 +5,21 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card mb-4">
+            <div class="card glass-card surface-section mb-4">
                 <div class="card-header fw-semibold">Profile Information</div>
                 <div class="card-body">
                     @include('profile.partials.update-profile-information-form')
                 </div>
             </div>
 
-            <div class="card mb-4">
+            <div class="card glass-card surface-section mb-4">
                 <div class="card-header fw-semibold">Update Password</div>
                 <div class="card-body">
                     @include('profile.partials.update-password-form')
                 </div>
             </div>
 
-            <div class="card border-danger-subtle">
+            <div class="card glass-card surface-section border-danger-subtle">
                 <div class="card-header text-danger fw-semibold">Delete Account</div>
                 <div class="card-body">
                     @include('profile.partials.delete-user-form')

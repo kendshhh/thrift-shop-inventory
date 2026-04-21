@@ -115,6 +115,56 @@ class ReservationReadyNotificationTest extends TestCase
         $this->assertNotNull($notification->read_at);
     }
 
+    public function test_customer_can_mark_all_notifications_as_read(): void
+    {
+        $customer = User::factory()->create();
+        $customer->assignRole('customer');
+
+        $firstReservation = Reservation::query()->create([
+            'user_id' => $customer->id,
+            'reference' => 'RSV-READY-0101',
+            'status' => ReservationStatus::READY_FOR_PICKUP,
+            'payment_status' => PaymentStatus::PENDING,
+            'pickup_date' => now()->addDay()->toDateString(),
+            'pickup_slot' => PickupSlot::MORNING->value,
+            'expires_at' => now()->addDay(),
+            'total_amount' => 300,
+        ]);
+
+        $secondReservation = Reservation::query()->create([
+            'user_id' => $customer->id,
+            'reference' => 'RSV-READY-0102',
+            'status' => ReservationStatus::READY_FOR_PICKUP,
+            'payment_status' => PaymentStatus::PENDING,
+            'pickup_date' => now()->addDays(2)->toDateString(),
+            'pickup_slot' => PickupSlot::AFTERNOON->value,
+            'expires_at' => now()->addDays(2),
+            'total_amount' => 450,
+        ]);
+
+        $customer->notify(new ReservationStatusUpdatedNotification(
+            $firstReservation,
+            ReservationStatus::PENDING->label(),
+            PaymentStatus::PENDING->label()
+        ));
+
+        $customer->notify(new ReservationStatusUpdatedNotification(
+            $secondReservation,
+            ReservationStatus::PENDING->label(),
+            PaymentStatus::PENDING->label()
+        ));
+
+        $this->assertSame(2, $customer->unreadNotifications()->count());
+
+        $this
+            ->actingAs($customer)
+            ->patch(route('customer.notifications.mark-all-read'))
+            ->assertRedirect();
+
+        $this->assertSame(0, $customer->fresh()->unreadNotifications()->count());
+        $this->assertSame(2, $customer->fresh()->notifications()->whereNotNull('read_at')->count());
+    }
+
     public function test_customer_reservation_creation_creates_customer_and_admin_notifications(): void
     {
         $admin = User::factory()->create();
@@ -192,6 +242,39 @@ class ReservationReadyNotificationTest extends TestCase
             ->assertOk()
             ->assertSee($reservation->reference)
             ->assertDontSee('Mark as Read');
+    }
+
+    public function test_customer_cannot_create_reservation_with_pickup_date_today(): void
+    {
+        $customer = User::factory()->create();
+        $customer->assignRole('customer');
+
+        $item = Item::query()->create([
+            'name' => 'Tomorrow Only Item',
+            'slug' => 'tomorrow-only-item',
+            'price' => 250,
+            'quantity' => 3,
+            'reserved_quantity' => 0,
+            'description' => 'Pickup must be scheduled starting tomorrow.',
+            'seller_name' => 'Ana',
+            'seller_contact_number' => '09170000000',
+            'condition' => ItemCondition::GENTLY_USED,
+            'status' => ItemStatus::ACTIVE,
+        ]);
+
+        $this
+            ->actingAs($customer)
+            ->from(route('items.show', $item))
+            ->post(route('customer.reservations.store'), [
+                'item_id' => $item->id,
+                'quantity' => 1,
+                'pickup_date' => now()->toDateString(),
+                'pickup_slot' => PickupSlot::MORNING->value,
+            ])
+            ->assertRedirect(route('items.show', $item))
+            ->assertSessionHasErrors('pickup_date');
+
+        $this->assertDatabaseCount('reservations', 0);
     }
 
     public function test_customer_is_notified_when_admin_decides_cancellation_request(): void
@@ -307,6 +390,40 @@ class ReservationReadyNotificationTest extends TestCase
 
         $this->assertNull($reservation->customer_request_type);
         $this->assertNull($reservation->customer_request_status);
+    }
+
+    public function test_customer_cannot_request_reschedule_with_pickup_date_today(): void
+    {
+        $customer = User::factory()->create();
+        $customer->assignRole('customer');
+
+        $reservation = Reservation::query()->create([
+            'user_id' => $customer->id,
+            'reference' => 'RSV-READY-0007',
+            'status' => ReservationStatus::PENDING,
+            'payment_status' => PaymentStatus::PENDING,
+            'pickup_date' => now()->addDays(2)->toDateString(),
+            'pickup_slot' => PickupSlot::MORNING->value,
+            'expires_at' => now()->addDay(),
+            'total_amount' => 500,
+        ]);
+
+        $this
+            ->actingAs($customer)
+            ->from(route('customer.reservations.show', $reservation))
+            ->patch(route('customer.reservations.request-reschedule', $reservation), [
+                'requested_pickup_date' => now()->toDateString(),
+                'requested_pickup_slot' => PickupSlot::AFTERNOON->value,
+                'request_reason' => 'Need a different time.',
+            ])
+            ->assertRedirect(route('customer.reservations.show', $reservation))
+            ->assertSessionHasErrors('requested_pickup_date');
+
+        $reservation->refresh();
+
+        $this->assertNull($reservation->customer_request_type);
+        $this->assertNull($reservation->customer_request_status);
+        $this->assertNull($reservation->customer_requested_pickup_date);
     }
 
     public function test_admin_cannot_mark_payment_completed_before_reservation_is_completed(): void

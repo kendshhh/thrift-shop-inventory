@@ -20,6 +20,16 @@ class PaymentSettingsController extends Controller
     {
         $settings = BrandingSetting::query()->find(1) ?? BrandingSetting::query()->first();
         $storedPaymentDetails = is_array($settings?->payment_details) ? array_values($settings->payment_details) : [];
+        [$storedPaymentDetails, $hasAssignedIds] = $this->ensurePaymentDetailIds($storedPaymentDetails);
+
+        if ($settings !== null && $hasAssignedIds) {
+            $settings->forceFill([
+                'payment_details' => $storedPaymentDetails,
+            ])->save();
+
+            Branding::flushCache();
+        }
+
         // Normalize for robust QR preview
         $normalizedPaymentDetails = \App\Support\Branding::normalizePaymentDetails($storedPaymentDetails);
         $editingPaymentId = $request->filled('edit') ? $request->query('edit') : null;
@@ -65,20 +75,36 @@ class PaymentSettingsController extends Controller
 
         $disk = Storage::disk('public');
         $existingPaymentDetails = is_array($settings->payment_details) ? array_values($settings->payment_details) : [];
+        [$existingPaymentDetails] = $this->ensurePaymentDetailIds($existingPaymentDetails);
         $existingQrPaths = $this->collectQrImagePaths($existingPaymentDetails);
         $paymentDetail = $this->preparePaymentDetail($request, $existingPaymentDetails);
         $editId = $request->filled('edit_id') ? $request->input('edit_id') : null;
         $storedQrPaths = [];
 
+        if ($editId !== null && ! collect($existingPaymentDetails)->contains(static fn (array $detail): bool => ($detail['id'] ?? null) === $editId)) {
+            return redirect()
+                ->route('admin.payments.edit')
+                ->withErrors(['payment_details' => 'The selected payment detail no longer exists.'])
+                ->withInput();
+        }
+
         try {
             $storedPaymentDetails = $this->storePaymentDetail($paymentDetail, $storedQrPaths, $editId, $existingPaymentDetails);
 
             if ($editId !== null) {
+                $wasUpdated = false;
                 foreach ($existingPaymentDetails as $i => $detail) {
                     if (isset($detail['id']) && $detail['id'] === $editId) {
                         $existingPaymentDetails[$i] = $storedPaymentDetails;
+                        $wasUpdated = true;
                         break;
                     }
+                }
+
+                if (! $wasUpdated) {
+                    throw ValidationException::withMessages([
+                        'payment_details' => 'The selected payment detail no longer exists.',
+                    ]);
                 }
             } else {
                 $existingPaymentDetails[] = $storedPaymentDetails;
@@ -129,6 +155,13 @@ class PaymentSettingsController extends Controller
         }
 
         $paymentDetails = is_array($settings->payment_details) ? array_values($settings->payment_details) : [];
+        [$paymentDetails, $hasAssignedIds] = $this->ensurePaymentDetailIds($paymentDetails);
+
+        if ($hasAssignedIds) {
+            $settings->forceFill([
+                'payment_details' => $paymentDetails,
+            ])->save();
+        }
 
         $found = false;
         foreach ($paymentDetails as $i => $detail) {
@@ -167,6 +200,37 @@ class PaymentSettingsController extends Controller
         return redirect()
             ->route('admin.payments.edit')
             ->with('status', 'Payment detail deleted successfully.');
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $paymentDetails
+     * @return array{0: array<int, array<string, mixed>>, 1: bool}
+     */
+    private function ensurePaymentDetailIds(array $paymentDetails): array
+    {
+        $hasAssignedIds = false;
+        $knownIds = collect($paymentDetails)
+            ->map(static fn (array $detail): string => trim((string) ($detail['id'] ?? '')))
+            ->filter()
+            ->values();
+
+        foreach ($paymentDetails as $index => $detail) {
+            $id = trim((string) ($detail['id'] ?? ''));
+
+            if ($id !== '') {
+                continue;
+            }
+
+            do {
+                $id = (string) Str::uuid();
+            } while ($knownIds->contains($id));
+
+            $paymentDetails[$index]['id'] = $id;
+            $knownIds->push($id);
+            $hasAssignedIds = true;
+        }
+
+        return [array_values($paymentDetails), $hasAssignedIds];
     }
 
     /**

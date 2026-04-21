@@ -2,6 +2,7 @@
     $user = Auth::user();
     $brandName = data_get($branding, 'brand_name', config('app.name', 'Everdarling'));
     $logoUrl = data_get($branding, 'logo_url');
+    $brandLogo = $logoUrl ?: asset('images/everdarling_logo.png');
     $unreadNotificationCount = $user && !$user->isAdmin()
         ? $user->unreadNotifications()->count()
         : 0;
@@ -19,7 +20,7 @@
 <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-modern">
     <div class="container app-container">
         <a class="navbar-brand fw-bold fs-4 d-inline-flex align-items-center" href="{{ $user ? route('dashboard') : url('/') }}">
-<img src="/images/everdarling_logo.png" alt="Everdarling logo" class="navbar-brand-logo">
+            <img src="{{ $brandLogo }}" alt="{{ $brandName }} logo" class="navbar-brand-logo">
             <!-- Brand text replaced with logo -->
         </a>
 
@@ -27,7 +28,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="mainNav">
+        <div class="collapse navbar-collapse nav-glass-collapse" id="mainNav">
             @if ($user)
                 @if ($user->isAdmin())
                     <ul class="navbar-nav me-auto align-items-lg-center">
@@ -57,7 +58,7 @@
                 <ul class="navbar-nav ms-auto align-items-lg-center mt-3 mt-lg-0">
                     @if ($user->isAdmin())
                         <li class="nav-item me-lg-2">
-                            <a class="nav-link position-relative rounded-pill px-3 py-2 bg-white border shadow-sm{{ request()->routeIs('admin.notifications.*') ? ' active' : '' }}" href="{{ route('admin.notifications.index') }}">
+                            <a class="nav-link navbar-surface-pill position-relative px-3 py-2{{ request()->routeIs('admin.notifications.*') ? ' active' : '' }}" href="{{ route('admin.notifications.index') }}">
                                 <i class="bi bi-bell"></i>
                                 @if ($adminUnreadNotificationCount > 0)
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -68,7 +69,7 @@
                         </li>
                     @else
                         <li class="nav-item me-lg-2">
-                            <a class="nav-link position-relative rounded-pill px-3 py-2 bg-white border shadow-sm{{ request()->routeIs('customer.notifications.*') ? ' active' : '' }}" href="{{ route('customer.notifications.index') }}">
+                            <a class="nav-link navbar-surface-pill position-relative px-3 py-2{{ request()->routeIs('customer.notifications.*') ? ' active' : '' }}" href="{{ route('customer.notifications.index') }}">
                                 <i class="bi bi-bell me-1"></i>Notifications
                                 @if ($unreadNotificationCount > 0)
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -79,10 +80,10 @@
                         </li>
                     @endif
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle rounded-pill px-3 py-2 bg-white border shadow-sm" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link navbar-surface-pill dropdown-toggle px-3 py-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle me-1"></i>{{ $user->name }}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow-lg">
+                        <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow-lg glass-dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>Profile</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
@@ -98,7 +99,7 @@
                 <ul class="navbar-nav ms-auto align-items-lg-center mt-3 mt-lg-0">
                     <li class="nav-item"><a class="nav-link me-lg-2" href="{{ route('login') }}">Sign In</a></li>
                     @if (Route::has('register'))
-                        <li class="nav-item"><a class="btn btn-primary btn-sm px-3" href="{{ route('register') }}">Register</a></li>
+                        <li class="nav-item"><a class="btn btn-primary btn-sm px-3 rounded-pill" href="{{ route('register') }}">Register</a></li>
                     @endif
                 </ul>
             @endif

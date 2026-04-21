@@ -90,8 +90,10 @@ class Branding
         return [
             'brand_name' => $brandName,
             'brand_tagline' => $brandTagline,
-            'primary_color' => self::normalizeHexColor($values['primary_color'] ?? null, $defaults['primary_color']),
-            'secondary_color' => self::normalizeHexColor($values['secondary_color'] ?? null, $defaults['secondary_color']),
+            'primary_color' => $primaryColor = self::normalizeHexColor($values['primary_color'] ?? null, $defaults['primary_color']),
+            'primary_rgb' => self::hexToRgbString($primaryColor),
+            'secondary_color' => $secondaryColor = self::normalizeHexColor($values['secondary_color'] ?? null, $defaults['secondary_color']),
+            'secondary_rgb' => self::hexToRgbString($secondaryColor),
             'logo_path' => $logoPath,
             'logo_url' => self::publicDiskUrl($logoPath),
             'payment_details' => self::normalizePaymentDetails($values['payment_details'] ?? []),
@@ -111,6 +113,7 @@ class Branding
                 continue;
             }
 
+            $id = trim((string) ($entry['id'] ?? ''));
             $name = trim((string) ($entry['name'] ?? ''));
             $bankName = trim((string) ($entry['bank_name'] ?? ''));
             $bankNumber = trim((string) ($entry['bank_number'] ?? ''));
@@ -125,6 +128,7 @@ class Branding
             }
 
             $normalized[] = [
+                'id' => $id !== '' ? $id : null,
                 'name' => $name,
                 'bank_name' => $bankName,
                 'bank_number' => $bankNumber,
@@ -164,6 +168,17 @@ class Branding
         }
 
         return $candidate;
+    }
+
+    private static function hexToRgbString(string $hexColor): string
+    {
+        $hexColor = ltrim(self::normalizeHexColor($hexColor, self::DEFAULT_PRIMARY_COLOR), '#');
+
+        return implode(', ', [
+            hexdec(substr($hexColor, 0, 2)),
+            hexdec(substr($hexColor, 2, 2)),
+            hexdec(substr($hexColor, 4, 2)),
+        ]);
     }
 
     public static function publicDiskUrl(?string $path): ?string

@@ -156,13 +156,17 @@ class ReservationManagementController extends Controller
             $reservation->paid_at = null;
         }
 
+
+        $completedNow = false;
         if ($newStatus === ReservationStatus::COMPLETED && $reservation->completed_at === null) {
             $reservation->completed_at = now();
+            $completedNow = true;
         }
 
         $reservation->save();
 
-        if (!$wasExpired && $newStatus === ReservationStatus::EXPIRED) {
+        // Release reserved items if just completed or expired
+        if ((!$wasExpired && $newStatus === ReservationStatus::EXPIRED) || $completedNow) {
             $this->releaseReservedItems($reservation);
         }
 

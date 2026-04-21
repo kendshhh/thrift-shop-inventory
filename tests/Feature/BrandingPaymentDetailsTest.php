@@ -124,7 +124,7 @@ class BrandingPaymentDetailsTest extends TestCase
             ->assertSee('Maria Santos')
             ->assertSee('BDO')
             ->assertSee('Everdarling Cashier')
-            ->assertSee('Show QR Code');
+            ->assertSee('payment-qr-thumb', false);
     }
 
     public function test_admin_can_edit_and_delete_saved_payment_detail(): void
@@ -200,6 +200,87 @@ class BrandingPaymentDetailsTest extends TestCase
         $this->assertCount(1, $settings->payment_details);
         $this->assertSame('Front Desk Cashier', $settings->payment_details[0]['name']);
         Storage::disk('public')->assertMissing('payment-details/bdo-qr.png');
+    }
+
+    public function test_admin_payments_page_renders_edit_and_delete_links_using_saved_payment_ids(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $firstId = (string) \Illuminate\Support\Str::uuid();
+        $secondId = (string) \Illuminate\Support\Str::uuid();
+
+        BrandingSetting::query()->create([
+            'id' => 1,
+            'brand_name' => 'Everdarling',
+            'primary_color' => '#0EA5E9',
+            'secondary_color' => '#2563EB',
+            'payment_details' => [
+                [
+                    'id' => $firstId,
+                    'name' => 'Maria Santos',
+                    'bank_name' => 'BDO',
+                    'bank_number' => '012345678901',
+                    'qr_image_paths' => [],
+                ],
+                [
+                    'id' => $secondId,
+                    'name' => 'Front Desk',
+                    'bank_name' => 'GCash',
+                    'bank_number' => '09990001111',
+                    'qr_image_paths' => [],
+                ],
+            ],
+        ]);
+
+        $response = $this
+            ->actingAs($admin)
+            ->get(route('admin.payments.edit'));
+
+        $response->assertOk();
+        $response->assertSee(route('admin.payments.edit', ['edit' => $firstId]), false);
+        $response->assertSee(route('admin.payments.edit', ['edit' => $secondId]), false);
+        $response->assertSee(route('admin.payments.destroy', $firstId), false);
+        $response->assertSee(route('admin.payments.destroy', $secondId), false);
+    }
+
+    public function test_admin_payments_page_assigns_ids_to_legacy_payment_entries_without_ids(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        BrandingSetting::query()->create([
+            'id' => 1,
+            'brand_name' => 'Everdarling',
+            'primary_color' => '#0EA5E9',
+            'secondary_color' => '#2563EB',
+            'payment_details' => [
+                [
+                    'name' => 'Legacy Cashier',
+                    'bank_name' => 'BDO',
+                    'bank_number' => '012345678901',
+                    'qr_image_paths' => [],
+                ],
+                [
+                    'name' => 'Legacy GCash',
+                    'bank_name' => 'GCash',
+                    'bank_number' => '09171234567',
+                    'qr_image_paths' => [],
+                ],
+            ],
+        ]);
+
+        $this
+            ->actingAs($admin)
+            ->get(route('admin.payments.edit'))
+            ->assertOk();
+
+        $paymentDetails = BrandingSetting::query()->firstOrFail()->payment_details;
+
+        $this->assertCount(2, $paymentDetails);
+        $this->assertNotEmpty($paymentDetails[0]['id'] ?? null);
+        $this->assertNotEmpty($paymentDetails[1]['id'] ?? null);
+        $this->assertNotSame($paymentDetails[0]['id'], $paymentDetails[1]['id']);
     }
 
     public function test_payment_details_are_visible_on_public_item_and_reservation_pages(): void
@@ -296,14 +377,6 @@ class BrandingPaymentDetailsTest extends TestCase
                 ],
             ],
         ];
-
-        $welcomeHtml = view('welcome', [
-            'branding' => $branding,
-        ])->render();
-
-        $this->assertStringContainsString('Manual Payment Details', $welcomeHtml);
-        $this->assertStringContainsString('Maria Santos', $welcomeHtml);
-        $this->assertStringContainsString('012345678901', $welcomeHtml);
 
         View::share('branding', $branding);
 

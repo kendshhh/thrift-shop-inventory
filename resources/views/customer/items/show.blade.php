@@ -154,7 +154,7 @@
 
                                         <div class="mb-3">
                                             <label class="form-label fw-medium">Pickup Date</label>
-                                            <input name="pickup_date" type="date" min="{{ now()->toDateString() }}" value="{{ old('pickup_date') }}" class="form-control @error('pickup_date') is-invalid @enderror" required>
+                                            <input name="pickup_date" type="date" min="{{ now()->addDay()->toDateString() }}" value="{{ old('pickup_date') }}" class="form-control @error('pickup_date') is-invalid @enderror" required>
                                             @error('pickup_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                         </div>
 

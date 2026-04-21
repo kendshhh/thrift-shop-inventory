@@ -37,22 +37,22 @@
 
     <div class="row g-4">
         <div class="col-lg-5">
-            <div class="card h-100">
+            <div class="card glass-card surface-section h-100">
                 <div class="card-header"><strong>Reservation Info</strong></div>
                 <div class="card-body">
-                    <dl class="row mb-0 small">
-                        <dt class="col-5 text-muted">Reference</dt><dd class="col-7 font-monospace">{{ $reservation->reference }}</dd>
-                        <dt class="col-5 text-muted">Customer</dt><dd class="col-7">{{ $reservation->user?->name ?? 'Deleted User' }}</dd>
-                        <dt class="col-5 text-muted">Email</dt><dd class="col-7">{{ $reservation->user?->email ?? 'N/A' }}</dd>
-                        <dt class="col-5 text-muted">Pickup</dt><dd class="col-7">{{ optional($reservation->pickup_date)->format('M d, Y') }} {{ $reservation->pickup_slot }}</dd>
-                        <dt class="col-5 text-muted">Expires</dt><dd class="col-7">{{ optional($reservation->expires_at)->format('M d, Y H:i') }}</dd>
-                        <dt class="col-5 text-muted">Total</dt><dd class="col-7 fw-bold">&#8369;{{ number_format((float) $reservation->total_amount, 2) }}</dd>
-                    </dl>
+                    <div class="row g-3 small">
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Reference</span><div class="data-grid-value font-monospace">{{ $reservation->reference }}</div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Customer</span><div class="data-grid-value">{{ $reservation->user?->name ?? 'Deleted User' }}</div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Email</span><div class="data-grid-value">{{ $reservation->user?->email ?? 'N/A' }}</div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Pickup</span><div class="data-grid-value">{{ optional($reservation->pickup_date)->format('M d, Y') }} {{ $reservation->pickup_slot }}</div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Expires</span><div class="data-grid-value">{{ optional($reservation->expires_at)->format('M d, Y H:i') }}</div></div></div>
+                        <div class="col-sm-6"><div class="data-grid-card"><span class="data-grid-label">Total</span><div class="data-grid-value">&#8369;{{ number_format((float) $reservation->total_amount, 2) }}</div></div></div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-7">
-            <div class="card">
+            <div class="card glass-card surface-section table-card">
                 <div class="card-header"><strong>Line Items</strong></div>
                 <div class="card-body p-0">
                     <table class="table table-sm mb-0">
@@ -83,11 +83,11 @@
             </div>
         </div>
         <div class="col-12">
-            <div class="card">
+            <div class="card glass-card surface-section">
                 <div class="card-header"><strong>Customer Self-Service Request</strong></div>
                 <div class="card-body">
                     @if ($reservation->customer_request_status !== null)
-                        <div class="border rounded-3 p-3 mb-3 bg-light-subtle">
+                        <div class="surface-note mb-3">
                             <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
                                 <div>
                                     <div class="fw-semibold">{{ $requestTypeLabel }} Request</div>
@@ -119,13 +119,13 @@
                                 @csrf
                                 @method('PATCH')
                                 <div class="mb-3">
-                                    <label class="form-label fw-medium">Admin Note <span class="text-muted fw-normal">(optional)</span></label>
-                                    <textarea name="admin_note" class="form-control @error('admin_note') is-invalid @enderror" rows="3">{{ old('admin_note') }}</textarea>
+                                    <label class="form-label form-label-modern">Admin Note <span class="text-muted fw-normal">(optional)</span></label>
+                                    <textarea name="admin_note" class="form-control form-control-modern @error('admin_note') is-invalid @enderror" rows="3">{{ old('admin_note') }}</textarea>
                                     @error('admin_note') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="action-row">
-                                    <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">Approve Request</button>
-                                    <button type="submit" name="action" value="decline" class="btn btn-sm btn-outline-danger">Decline Request</button>
+                                    <button type="submit" name="action" value="approve" class="btn btn-sm btn-success rounded-pill">Approve Request</button>
+                                    <button type="submit" name="action" value="decline" class="btn btn-sm btn-outline-danger rounded-pill">Decline Request</button>
                                 </div>
                             </form>
                         @endif
@@ -137,7 +137,7 @@
         </div>
 
         <div class="col-12">
-            <div class="card">
+            <div class="card glass-card surface-section">
                 <div class="card-header"><strong>Update Status</strong></div>
                 <div class="card-body">
                     <form method="POST" action="{{ route('admin.reservations.update-status', $reservation) }}">
@@ -145,8 +145,8 @@
                         @method('PATCH')
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label fw-medium">Reservation Status</label>
-                                <select name="status" class="form-select @error('status') is-invalid @enderror" required>
+                                <label class="form-label form-label-modern">Reservation Status</label>
+                                <select name="status" class="form-select form-control-modern @error('status') is-invalid @enderror" required>
                                     @foreach ($statuses as $status)
                                         <option value="{{ $status->value }}" @selected(old('status', $reservation->status->value) === $status->value)>{{ $status->label() }}</option>
                                     @endforeach
@@ -154,8 +154,8 @@
                                 @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-medium">Payment Status</label>
-                                <select name="payment_status" class="form-select @error('payment_status') is-invalid @enderror" required>
+                                <label class="form-label form-label-modern">Payment Status</label>
+                                <select name="payment_status" class="form-select form-control-modern @error('payment_status') is-invalid @enderror" required>
                                     @foreach ($paymentStatuses as $paymentStatus)
                                         <option value="{{ $paymentStatus->value }}" @selected(old('payment_status', $reservation->payment_status->value) === $paymentStatus->value)>{{ $paymentStatus->label() }}</option>
                                     @endforeach
@@ -163,13 +163,13 @@
                                 @error('payment_status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-12">
-                                <label class="form-label fw-medium">Admin Notes</label>
-                                <textarea name="notes" class="form-control @error('notes') is-invalid @enderror" rows="3">{{ old('notes', $reservation->notes) }}</textarea>
+                                <label class="form-label form-label-modern">Admin Notes</label>
+                                <textarea name="notes" class="form-control form-control-modern @error('notes') is-invalid @enderror" rows="3">{{ old('notes', $reservation->notes) }}</textarea>
                                 @error('notes') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 <div class="form-text">Use Ready for Pickup to notify the customer in-app that the item is prepared and awaiting in-person payment.</div>
                             </div>
                             <div class="col-12">
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="submit" class="btn btn-primary rounded-pill">Save Changes</button>
                             </div>
                         </div>
                     </form>

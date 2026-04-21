@@ -104,7 +104,7 @@
         ],
     ])
 
-    <div class="card">
+    <div class="card glass-card surface-section table-card">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -181,7 +181,7 @@
             </div>
         </div>
         @if ($reservations->hasPages())
-            <div class="card-footer bg-white">{{ $reservations->links() }}</div>
+            <div class="card-footer bg-transparent border-0 px-3 pb-3 pt-0">{{ $reservations->links() }}</div>
         @endif
     </div>
 </x-app-layout>

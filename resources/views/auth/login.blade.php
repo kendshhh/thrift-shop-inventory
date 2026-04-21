@@ -20,7 +20,7 @@
             <label for="remember_me" class="form-check-label">{{ __('Remember me') }}</label>
         </div>
         <div class="d-grid mb-3">
-            <x-primary-button>{{ __('Log in') }}</x-primary-button>
+            <x-primary-button class="justify-content-center">{{ __('Log in') }}</x-primary-button>
         </div>
         <div class="text-center">
             @if (Route::has('password.request'))

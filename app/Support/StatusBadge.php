@@ -12,21 +12,21 @@ class StatusBadge
         $class = self::for($type, $value);
 
         return match ($class) {
-            'status-badge-pending' => ['background' => '#f59e0b', 'color' => '#1f2937', 'border' => '#d97706'],
-            'status-badge-pending-subtle' => ['background' => '#fef3c7', 'color' => '#92400e', 'border' => '#f59e0b'],
-            'status-badge-ready' => ['background' => '#0ea5e9', 'color' => '#082f49', 'border' => '#0284c7'],
-            'status-badge-ready-subtle' => ['background' => '#dbeafe', 'color' => '#1d4ed8', 'border' => '#60a5fa'],
-            'status-badge-success' => ['background' => '#16a34a', 'color' => '#ffffff', 'border' => '#15803d'],
-            'status-badge-success-subtle' => ['background' => '#dcfce7', 'color' => '#166534', 'border' => '#4ade80'],
-            'status-badge-overdue' => ['background' => '#dc2626', 'color' => '#ffffff', 'border' => '#b91c1c'],
-            'status-badge-overdue-subtle' => ['background' => '#fee2e2', 'color' => '#991b1b', 'border' => '#f87171'],
-            'status-badge-new' => ['background' => '#2563eb', 'color' => '#ffffff', 'border' => '#1d4ed8'],
-            'status-badge-admin' => ['background' => '#1e293b', 'color' => '#ffffff', 'border' => '#0f172a'],
-            'status-badge-archived' => ['background' => '#334155', 'color' => '#ffffff', 'border' => '#1e293b'],
-            'status-badge-unread' => ['background' => '#dc2626', 'color' => '#ffffff', 'border' => '#b91c1c'],
-            'status-badge-read' => ['background' => '#64748b', 'color' => '#ffffff', 'border' => '#475569'],
-            'status-badge-muted-subtle' => ['background' => '#f1f5f9', 'color' => '#475569', 'border' => '#cbd5e1'],
-            default => ['background' => '#64748b', 'color' => '#ffffff', 'border' => '#475569'],
+            'status-badge-pending' => ['background' => 'rgba(245, 158, 11, 0.2)', 'color' => '#92400e', 'border' => 'rgba(245, 158, 11, 0.3)'],
+            'status-badge-pending-subtle' => ['background' => 'rgba(254, 243, 199, 0.6)', 'color' => '#92400e', 'border' => 'rgba(245, 158, 11, 0.24)'],
+            'status-badge-ready' => ['background' => 'rgba(14, 165, 233, 0.2)', 'color' => '#0c4a6e', 'border' => 'rgba(14, 165, 233, 0.28)'],
+            'status-badge-ready-subtle' => ['background' => 'rgba(219, 234, 254, 0.58)', 'color' => '#1d4ed8', 'border' => 'rgba(96, 165, 250, 0.24)'],
+            'status-badge-success' => ['background' => 'rgba(22, 163, 74, 0.2)', 'color' => '#166534', 'border' => 'rgba(22, 163, 74, 0.28)'],
+            'status-badge-success-subtle' => ['background' => 'rgba(220, 252, 231, 0.62)', 'color' => '#166534', 'border' => 'rgba(74, 222, 128, 0.24)'],
+            'status-badge-overdue' => ['background' => 'rgba(220, 38, 38, 0.2)', 'color' => '#991b1b', 'border' => 'rgba(220, 38, 38, 0.28)'],
+            'status-badge-overdue-subtle' => ['background' => 'rgba(254, 226, 226, 0.62)', 'color' => '#991b1b', 'border' => 'rgba(248, 113, 113, 0.24)'],
+            'status-badge-new' => ['background' => 'rgba(37, 99, 235, 0.22)', 'color' => '#1d4ed8', 'border' => 'rgba(37, 99, 235, 0.28)'],
+            'status-badge-admin' => ['background' => 'rgba(30, 41, 59, 0.22)', 'color' => '#0f172a', 'border' => 'rgba(15, 23, 42, 0.24)'],
+            'status-badge-archived' => ['background' => 'rgba(51, 65, 85, 0.24)', 'color' => '#e2e8f0', 'border' => 'rgba(30, 41, 59, 0.32)'],
+            'status-badge-unread' => ['background' => 'rgba(220, 38, 38, 0.22)', 'color' => '#991b1b', 'border' => 'rgba(220, 38, 38, 0.28)'],
+            'status-badge-read' => ['background' => 'rgba(100, 116, 139, 0.2)', 'color' => '#334155', 'border' => 'rgba(71, 85, 105, 0.24)'],
+            'status-badge-muted-subtle' => ['background' => 'rgba(241, 245, 249, 0.66)', 'color' => '#475569', 'border' => 'rgba(203, 213, 225, 0.28)'],
+            default => ['background' => 'rgba(100, 116, 139, 0.2)', 'color' => '#334155', 'border' => 'rgba(71, 85, 105, 0.24)'],
         };
     }
 

@@ -74,7 +74,7 @@
         'actionsColClass' => 'col-12 col-lg-1 d-flex gap-2',
     ])
 
-    <div class="card">
+    <div class="card glass-card surface-section table-card">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -110,11 +110,11 @@
                                     <form method="POST" action="{{ route('admin.users.update', $user) }}" class="action-row action-row-end">
                                         @csrf
                                         @method('PATCH')
-                                        <select name="is_active" class="form-select form-select-sm" style="width:auto">
+                                        <select name="is_active" class="form-select form-select-sm form-control-modern" style="width:auto">
                                             <option value="1" @selected($user->is_active)>Active</option>
                                             <option value="0" @selected(!$user->is_active)>Suspended</option>
                                         </select>
-                                        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                        <button type="submit" class="btn btn-sm btn-primary rounded-pill">Update</button>
                                     </form>
                                 </td>
                             </tr>
@@ -128,7 +128,7 @@
             </div>
         </div>
         @if ($users->hasPages())
-            <div class="card-footer bg-white">{{ $users->links() }}</div>
+            <div class="card-footer bg-transparent border-0 px-3 pb-3 pt-0">{{ $users->links() }}</div>
         @endif
     </div>
 </x-app-layout>

@@ -82,7 +82,7 @@ class ReservationController extends Controller
         $validated = $request->validate([
             'item_id' => ['required', 'exists:items,id'],
             'quantity' => ['required', 'integer', 'min:1'],
-            'pickup_date' => ['required', 'date', 'after_or_equal:today'],
+            'pickup_date' => ['required', 'date', 'after:today'],
             'pickup_slot' => ['required', Rule::in(PickupSlot::values())],
             'notes' => ['nullable', 'string'],
         ]);
@@ -253,7 +253,7 @@ class ReservationController extends Controller
         }
 
         $validated = $request->validate([
-            'requested_pickup_date' => ['required', 'date', 'after_or_equal:today'],
+            'requested_pickup_date' => ['required', 'date', 'after:today'],
             'requested_pickup_slot' => ['required', Rule::in(PickupSlot::values())],
             'request_reason' => ['nullable', 'string', 'max:1000'],
         ]);

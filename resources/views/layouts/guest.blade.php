@@ -7,8 +7,11 @@
 @php
         $brandName = data_get($branding ?? [], 'brand_name', config('app.name', 'Everdarling'));
         $logoUrl = data_get($branding ?? [], 'logo_url');
+    $brandLogo = $logoUrl ?: asset('images/everdarling_logo.png');
         $primaryColor = data_get($branding ?? [], 'primary_color', '#0EA5E9');
+    $primaryRgb = data_get($branding ?? [], 'primary_rgb', '14, 165, 233');
         $secondaryColor = data_get($branding ?? [], 'secondary_color', '#2563EB');
+    $secondaryRgb = data_get($branding ?? [], 'secondary_rgb', '37, 99, 235');
     @endphp
     <title>{{ $brandName }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -18,29 +21,41 @@
     <style>
         :root {
             --accent-color: {{ $primaryColor }};
+            --accent-rgb: {{ $primaryRgb }};
             --accent-deep: {{ $secondaryColor }};
+            --accent-deep-rgb: {{ $secondaryRgb }};
             --accent-gradient: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-deep) 100%);
+            --brand-surface: linear-gradient(145deg, rgba(255, 255, 255, 0.62) 0%, rgba(var(--accent-rgb), 0.14) 18%, rgba(255, 255, 255, 0.58) 52%, rgba(var(--accent-deep-rgb), 0.1) 100%);
+            --brand-surface-strong: linear-gradient(145deg, rgba(255, 255, 255, 0.72) 0%, rgba(var(--accent-rgb), 0.18) 22%, rgba(var(--accent-deep-rgb), 0.12) 58%, rgba(255, 255, 255, 0.84) 100%);
+            --brand-border: rgba(var(--accent-rgb), 0.22);
+            --brand-glow-soft: rgba(var(--accent-rgb), 0.2);
+            --brand-glow-strong: rgba(var(--accent-deep-rgb), 0.18);
         }
     </style>
 </head>
-<body>
+<body class="guest-shell">
+    <div class="brand-ambient" aria-hidden="true">
+        <span class="brand-ambient-orb brand-ambient-orb-primary"></span>
+        <span class="brand-ambient-orb brand-ambient-orb-secondary"></span>
+        <span class="brand-ambient-grid"></span>
+    </div>
     <nav class="navbar navbar-expand-lg navbar-light fixed-top navbar-modern">
         <div class="container app-container">
             <a class="navbar-brand fw-bold fs-4 d-inline-flex align-items-center" href="{{ url('/') }}">
-<img src="/images/everdarling_logo.png" alt="Everdarling logo" class="navbar-brand-logo">
+                <img src="{{ $brandLogo }}" alt="{{ $brandName }} logo" class="navbar-brand-logo">
                 <!-- Brand text replaced with logo -->
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#guestNavbar" aria-controls="guestNavbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="guestNavbar">
+            <div class="collapse navbar-collapse nav-glass-collapse" id="guestNavbar">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
                     @auth
-                        <li class="nav-item"><a class="btn btn-primary btn-sm px-3" href="{{ route('dashboard') }}">Dashboard</a></li>
+                        <li class="nav-item"><a class="btn btn-primary btn-sm px-3 rounded-pill" href="{{ route('dashboard') }}">Dashboard</a></li>
                     @else
                         <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Sign In</a></li>
                         @if (Route::has('register'))
-                            <li class="nav-item"><a class="btn btn-primary btn-sm px-3" href="{{ route('register') }}">Register</a></li>
+                            <li class="nav-item"><a class="btn btn-primary btn-sm px-3 rounded-pill" href="{{ route('register') }}">Register</a></li>
                         @endif
                     @endauth
                 </ul>
@@ -55,10 +70,10 @@
                     <div class="text-center mb-4">
                         <a href="{{ url('/') }}" class="text-decoration-none text-dark">
                             <i class="bi bi-bag-heart-fill" style="font-size: 2.4rem; color: var(--accent-color);"></i>
-                            <img src="/images/everdarling_logo.png" alt="Everdarling logo" class="navbar-brand-logo footer-logo">
+                            <img src="{{ $brandLogo }}" alt="{{ $brandName }} logo" class="navbar-brand-logo footer-logo">
                         </a>
                     </div>
-                    <div class="card glass-card auth-panel border-0">
+                    <div class="card glass-card auth-panel border-0 ambient-panel overflow-hidden">
                         <div class="card-body p-4 p-lg-5">
                             {{ $slot }}
                         </div>

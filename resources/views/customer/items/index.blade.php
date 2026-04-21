@@ -20,7 +20,7 @@
         'action' => route('items.index'),
         'resetUrl' => route('items.index'),
         'hasFilters' => $hasFilters,
-        'cardClass' => 'card customer-filter-card mb-4',
+        'cardClass' => 'card glass-card customer-filter-card mb-4',
         'fields' => [
             [
                 'name' => 'search',
@@ -140,7 +140,7 @@
             </div>
         @empty
             <div class="col-12">
-                <div class="card">
+                <div class="card empty-state-card">
                     <div class="card-body text-center py-5">
                         <i class="bi bi-search fs-2 d-block mb-2 text-muted"></i>
                         <h6 class="fw-semibold mb-2">No items matched your filters.</h6>

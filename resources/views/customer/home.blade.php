@@ -16,14 +16,6 @@
         $hasFilters = filled($filters['search'] ?? null)
             || filled($filters['category_id'] ?? null)
             || filled($filters['condition'] ?? null);
-
-        $statusBadgeClasses = [
-            'pending' => 'bg-warning text-dark',
-            'ready_for_pickup' => 'bg-info text-dark',
-            'completed' => 'bg-success',
-            'overdue' => 'bg-danger',
-            'expired' => 'bg-secondary',
-        ];
     @endphp
 
     <div class="row g-3 mb-4">
@@ -111,7 +103,7 @@
 
     <div class="row g-4">
         <div class="col-xl-8">
-            <div class="card customer-surface h-100">
+            <div class="card glass-card surface-section customer-surface h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <strong><i class="bi bi-stars me-1"></i>Featured Items</strong>
                     <a class="btn btn-sm btn-outline-custom" href="{{ route('items.index') }}">Browse All <i class="bi bi-arrow-right"></i></a>
@@ -178,12 +170,12 @@
                 </div>
             </div>
 
-            <div class="card customer-surface mt-4">
+            <div class="card glass-card surface-section customer-surface mt-4">
                 <div class="card-header"><strong><i class="bi bi-tags me-1"></i>Browse by Category</strong></div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2">
                         @forelse ($categories as $category)
-                            <a class="btn btn-outline-secondary btn-sm" href="{{ route('items.index', ['category_id' => $category->id]) }}">{{ $category->name }}</a>
+                            <a class="btn btn-outline-secondary btn-sm rounded-pill" href="{{ route('items.index', ['category_id' => $category->id]) }}">{{ $category->name }}</a>
                         @empty
                             <p class="text-muted mb-0">No categories available.</p>
                         @endforelse
@@ -193,7 +185,7 @@
         </div>
 
         <div class="col-xl-4">
-            <div class="card customer-surface h-100">
+            <div class="card glass-card surface-section customer-surface h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <strong><i class="bi bi-calendar2-check me-1"></i>Upcoming Pickups</strong>
                     <a href="{{ route('customer.reservations.index') }}" class="small text-decoration-none">View all</a>
@@ -201,7 +193,6 @@
                 <div class="card-body">
                     @forelse ($upcomingReservations as $reservation)
                         @php
-                            $statusClass = $statusBadgeClasses[$reservation->status->value] ?? 'bg-secondary';
                             $isExpiringSoon = $reservation->status->value === 'pending'
                                 && $reservation->expires_at
                                 && $reservation->expires_at->lte(now()->addDay());
@@ -210,7 +201,7 @@
                         <a href="{{ route('customer.reservations.show', $reservation) }}" class="customer-upcoming-item text-decoration-none text-reset">
                             <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
                                 <span class="fw-semibold font-monospace small">{{ $reservation->reference }}</span>
-                                <span class="badge rounded-pill {{ $statusClass }}">{{ $reservation->status->label() }}</span>
+                                <x-status-badge type="reservation" :value="$reservation->status->value" :label="$reservation->status->label()" />
                             </div>
                             <div class="small text-muted mb-2">
                                 <i class="bi bi-calendar-event me-1"></i>{{ optional($reservation->pickup_date)->format('M d, Y') }}
@@ -234,7 +225,7 @@
                                 <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
                                 No upcoming pickups yet.
                                 <div class="mt-2">
-                                    <a class="btn btn-sm btn-outline-custom" href="{{ route('items.index') }}">Reserve your first item</a>
+                                    <a class="btn btn-sm btn-outline-custom rounded-pill" href="{{ route('items.index') }}">Reserve your first item</a>
                                 </div>
                             </div>
                         @endforelse
