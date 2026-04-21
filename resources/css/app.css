@@ -805,30 +805,6 @@ body.lightbox-open {
 	font-size: 0.95rem;
 }
 
-.admin-checklist li {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 0.78rem 0;
-	border-bottom: 1px solid #e2e8f0;
-	font-family: 'Plus Jakarta Sans', var(--font-base);
-}
-
-.admin-checklist li:last-child {
-	border-bottom: 0;
-	padding-bottom: 0;
-}
-
-.admin-checklist .label {
-	font-size: 0.88rem;
-	color: #475569;
-}
-
-.admin-checklist .value {
-	font-weight: 700;
-	color: #0f172a;
-}
-
 code {
 	background: #e2e8f0;
 	color: #0f172a;

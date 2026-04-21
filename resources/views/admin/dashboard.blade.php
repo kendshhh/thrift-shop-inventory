@@ -170,15 +170,23 @@
     </div>
 
     <div class="row g-4">
-        <div class="col-lg-8">
+        <div class="col-12">
             <div class="card h-100">
                 <div class="card-header bg-transparent border-0 pb-0 pt-4 px-4">
-                    <h6 class="fw-bold mb-1">Quick Actions</h6>
-                    <p class="text-muted small mb-0">Move fast through your most important workflows.</p>
+                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                        <div>
+                            <h6 class="fw-bold mb-1">Quick Actions</h6>
+                            <p class="text-muted small mb-0">Move fast through your most important workflows without leaving the dashboard.</p>
+                        </div>
+                        <span class="admin-chip d-inline-flex align-items-center gap-2 mb-0">
+                            <i class="bi bi-lightning-charge"></i>
+                            5 shortcuts ready
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body pt-3">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-xl-4">
                             <a href="{{ route('admin.inventory.index') }}" class="quick-link-card text-decoration-none h-100">
                                 <span class="quick-link-icon"><i class="bi bi-boxes"></i></span>
                                 <div>
@@ -188,7 +196,7 @@
                                 <i class="bi bi-arrow-right short-arrow"></i>
                             </a>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-xl-4">
                             <a href="{{ route('admin.reservations.index') }}" class="quick-link-card text-decoration-none h-100">
                                 <span class="quick-link-icon"><i class="bi bi-calendar-check"></i></span>
                                 <div>
@@ -198,7 +206,7 @@
                                 <i class="bi bi-arrow-right short-arrow"></i>
                             </a>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-xl-4">
                             <a href="{{ route('admin.inventory.create') }}" class="quick-link-card text-decoration-none h-100">
                                 <span class="quick-link-icon"><i class="bi bi-plus-circle"></i></span>
                                 <div>
@@ -208,7 +216,7 @@
                                 <i class="bi bi-arrow-right short-arrow"></i>
                             </a>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-xl-4">
                             <a href="{{ route('admin.users.index') }}" class="quick-link-card text-decoration-none h-100">
                                 <span class="quick-link-icon"><i class="bi bi-people"></i></span>
                                 <div>
@@ -218,7 +226,7 @@
                                 <i class="bi bi-arrow-right short-arrow"></i>
                             </a>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-xl-4">
                             <a href="{{ route('admin.notifications.index') }}" class="quick-link-card text-decoration-none h-100">
                                 <span class="quick-link-icon"><i class="bi bi-bell"></i></span>
                                 <div>
@@ -230,34 +238,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header bg-transparent border-0 pb-0 pt-4 px-4">
-                    <h6 class="fw-bold mb-1">Operational Snapshot</h6>
-                    <p class="text-muted small mb-0">Real-time counts from current system state.</p>
-                </div>
-                <div class="card-body pt-3">
-                    <ul class="admin-checklist list-unstyled mb-0">
-                        <li>
-                            <span class="label">Inventory Items</span>
-                            <span class="value">{{ $totalInventoryItems }}</span>
-                        </li>
-                        <li>
-                            <span class="label">Active Reservations</span>
-                            <span class="value">{{ $activeReservations }}</span>
-                        </li>
-                        <li>
-                            <span class="label">Overdue Cases</span>
-                            <span class="value text-danger">{{ $overdueReservations }}</span>
-                        </li>
-                        <li>
-                            <span class="label">Low Stock Alerts</span>
-                            <span class="value text-warning-emphasis">{{ $lowStockItems }}</span>
-                        </li>
-                    </ul>
-                    </div>
             </div>
         </div>
     </div>
