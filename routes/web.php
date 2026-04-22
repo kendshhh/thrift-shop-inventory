@@ -31,6 +31,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('/items', [BrowseController::class, 'index'])->name('items.index');
+Route::get('/items/{item}/reserve-now', [BrowseController::class, 'reserveNow'])->name('items.reserve-now');
 Route::get('/items/{item}', [BrowseController::class, 'show'])->name('items.show');
 
 Route::get('/dashboard', function (Request $request) {

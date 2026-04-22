@@ -9,12 +9,27 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\Reservation;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class BrowseController extends Controller
 {
+    public function reserveNow(Request $request, Item $item): RedirectResponse
+    {
+        abort_if($item->status === ItemStatus::ARCHIVED, 404);
+
+        $intended = route('items.show', $item).'?reserve=1';
+        redirect()->setIntendedUrl($intended);
+
+        if (auth()->check()) {
+            return redirect()->to($intended);
+        }
+
+        return redirect()->route('login', ['role' => 'customer']);
+    }
+
     public function home(Request $request): View
     {
         $validated = $request->validate([

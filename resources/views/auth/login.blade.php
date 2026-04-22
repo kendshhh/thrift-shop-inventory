@@ -37,7 +37,18 @@
 
             <div class="mb-3">
                 <x-input-label for="password" :value="__('Password')" />
-                <x-text-input id="password" type="password" name="password" required autocomplete="current-password" />
+                <div class="input-group">
+                    <x-text-input id="password" type="password" name="password" required autocomplete="current-password" />
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        aria-label="Show password"
+                        data-password-toggle
+                        data-password-target="password"
+                    >
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
                 <x-input-error :messages="$errors->get('password')" />
             </div>
 

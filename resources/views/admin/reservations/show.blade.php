@@ -218,10 +218,17 @@
                                 @error('payment_status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-12">
-                                <label class="form-label form-label-modern">Admin Notes</label>
-                                <textarea name="notes" class="form-control form-control-modern @error('notes') is-invalid @enderror" rows="3">{{ old('notes', $reservation->notes) }}</textarea>
-                                @error('notes') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                <div class="form-text">Use Ready for Pickup to notify the customer in-app that the item is prepared and awaiting in-person payment.</div>
+                                <div class="form-label form-label-modern">Admin Notes</div>
+                                <div class="card border-0 bg-light-subtle">
+                                    <div class="card-body py-3">
+                                        @if (!empty($reservation->notes))
+                                            <div class="small text-muted">{{ $reservation->notes }}</div>
+                                        @else
+                                            <div class="small text-muted">No admin notes added.</div>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="form-text">Notes are view-only on this page.</div>
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="btn btn-primary rounded-pill">Save Changes</button>

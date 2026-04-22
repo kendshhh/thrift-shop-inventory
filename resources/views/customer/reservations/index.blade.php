@@ -166,7 +166,7 @@
                                 </td>
                                 <td class="fw-medium">&#8369;{{ number_format((float) $reservation->total_amount, 2) }}</td>
                                 <td class="text-end">
-                                    <a href="{{ route('customer.reservations.show', $reservation) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
+                                    <a href="{{ route('customer.reservations.show', $reservation) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left-right"></i></a>
                                 </td>
                             </tr>
                         @empty

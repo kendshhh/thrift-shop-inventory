@@ -28,14 +28,36 @@
 
             <div class="mb-3">
                 <x-input-label for="password" :value="__('Password')" />
-                <x-text-input id="password" type="password" name="password" required autocomplete="new-password" />
+                <div class="input-group">
+                    <x-text-input id="password" type="password" name="password" required autocomplete="new-password" />
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        aria-label="Show password"
+                        data-password-toggle
+                        data-password-target="password"
+                    >
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
                 <div class="form-text">Password must be at least 8 characters long.</div>
                 <x-input-error :messages="$errors->get('password')" />
             </div>
 
             <div class="mb-4">
                 <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-                <x-text-input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" />
+                <div class="input-group">
+                    <x-text-input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" />
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        aria-label="Show password confirmation"
+                        data-password-toggle
+                        data-password-target="password_confirmation"
+                    >
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
                 <x-input-error :messages="$errors->get('password_confirmation')" />
             </div>
 

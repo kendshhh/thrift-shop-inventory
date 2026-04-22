@@ -585,6 +585,63 @@ const initializeLegalModals = () => {
 	});
 };
 
+const initializeReserveIntent = () => {
+	const url = new URL(window.location.href);
+	if (!url.searchParams.has('reserve')) {
+		return;
+	}
+
+	const reserveCard = document.getElementById('reserve-card');
+	if (!(reserveCard instanceof HTMLElement)) {
+		return;
+	}
+
+	reserveCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+	const quantityInput = reserveCard.querySelector('input[name="quantity"]');
+	if (quantityInput instanceof HTMLElement) {
+		quantityInput.focus({ preventScroll: true });
+	}
+};
+
+const initializePasswordToggles = () => {
+	const toggles = Array.from(document.querySelectorAll('[data-password-toggle]'));
+	if (!toggles.length) {
+		return;
+	}
+
+	toggles.forEach((toggle) => {
+		if (!(toggle instanceof HTMLButtonElement)) {
+			return;
+		}
+
+		const targetId = toggle.getAttribute('data-password-target') ?? '';
+		const field = targetId ? document.getElementById(targetId) : null;
+
+		if (!(field instanceof HTMLInputElement)) {
+			return;
+		}
+
+		const icon = toggle.querySelector('i');
+
+		const sync = () => {
+			const isHidden = field.type === 'password';
+			toggle.setAttribute('aria-label', isHidden ? 'Show password' : 'Hide password');
+
+			if (icon instanceof HTMLElement) {
+				icon.className = `bi ${isHidden ? 'bi-eye' : 'bi-eye-slash'}`;
+			}
+		};
+
+		toggle.addEventListener('click', () => {
+			field.type = field.type === 'password' ? 'text' : 'password';
+			sync();
+		});
+
+		sync();
+	});
+};
+
 onReady(() => {
 	initializeNavbarScrollState();
 	initializeRevealAnimations();
@@ -592,6 +649,8 @@ onReady(() => {
 	initializeImageLightbox();
 	initializeCountdowns();
 	initializeLegalModals();
+	initializeReserveIntent();
+	initializePasswordToggles();
 	initializeFilterForms();
 	initializeDatePickers();
 	initializeOptionDropdowns();

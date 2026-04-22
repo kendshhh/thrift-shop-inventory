@@ -123,7 +123,7 @@
                                 <td><x-status-badge type="payment" :value="$reservation->payment_status->value" :label="$reservation->payment_status->label()" /></td>
                                 <td class="small">{{ optional($reservation->pickup_date)->format('M d, Y') }} {{ $reservation->pickup_slot }}</td>
                                 <td class="text-end">
-                                    <a href="{{ route('admin.reservations.show', $reservation) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
+                                    <a href="{{ route('admin.reservations.show', $reservation) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left-right"></i></a>
                                 </td>
                             </tr>
                         @empty

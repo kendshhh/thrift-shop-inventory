@@ -125,7 +125,7 @@
         @auth
             @if (auth()->user()->hasRole('customer'))
                 <div class="col-lg-6">
-                    <div class="card">
+                    <div class="card" id="reserve-card">
                         <div class="card-header fw-semibold"><i class="bi bi-bag-plus me-1"></i>Reserve This Item</div>
                         <div class="card-body">
                             @if ($isAvailable)
@@ -244,6 +244,45 @@
                     </div>
                 </div>
             @endif
+        @else
+            <div class="col-lg-6">
+                <div class="card" id="reserve-card">
+                    <div class="card-header fw-semibold"><i class="bi bi-bag-plus me-1"></i>Reserve Now</div>
+                    <div class="card-body">
+                        @if ($isAvailable)
+                            @if (request()->boolean('reserve'))
+                                <div class="alert alert-info mb-3">
+                                    Sign in to reserve this item. After signing in, you’ll be brought back here to continue.
+                                </div>
+                            @else
+                                <div class="alert alert-light border mb-3">
+                                    Sign in to reserve this item in a few clicks.
+                                </div>
+                            @endif
+
+                            <div class="d-grid gap-2">
+                                <a href="{{ route('items.reserve-now', $item) }}" class="btn btn-primary">
+                                    <i class="bi bi-bag-check me-1"></i>Reserve Now
+                                </a>
+                                @if (Route::has('register'))
+                                    <a href="{{ route('register') }}" class="btn btn-outline-custom">Create an Account</a>
+                                @endif
+                            </div>
+                        @else
+                            <div class="alert alert-secondary mb-3">
+                                @if ($isReservedOut)
+                                    This item is temporarily reserved by another customer. Please check back once it becomes available again.
+                                @elseif ($item->hasScheduledRestock())
+                                    This item is unavailable right now, but it is scheduled to return on {{ $item->restock_at?->format('M d, Y g:i A') }}.
+                                @else
+                                    This item is currently unavailable.
+                                @endif
+                            </div>
+                            <a href="{{ route('items.index') }}" class="btn btn-outline-secondary w-100"><i class="bi bi-search me-1"></i>Browse Similar Items</a>
+                        @endif
+                    </div>
+                </div>
+            </div>
         @endauth
     </div>
 </x-app-layout>

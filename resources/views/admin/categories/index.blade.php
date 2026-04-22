@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
             <h5 class="mb-0 fw-bold"><i class="bi bi-tags me-2"></i>Categories</h5>
-            <div class="d-flex gap-2">
+            <div class="action-row action-row-end">
                 <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#filterModal-categories" title="Open filters" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;">
                     <i class="bi bi-funnel"></i>
                 </button>

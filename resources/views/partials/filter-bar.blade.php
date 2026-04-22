@@ -8,7 +8,7 @@
 
 <div class="{{ $cardClass }}">
     <div class="card-body form-shell">
-        <form method="GET" action="{{ $action }}" class="{{ $formClass }}">
+        <form method="GET" action="{{ $action }}" class="{{ $formClass }}" data-filter-form>
             @foreach ($fields as $field)
                 @php
                     $fieldId = $field['id'] ?? $field['name'];
@@ -35,6 +35,7 @@
                             class="{{ $fieldClass }}"
                             value="{{ $fieldValue }}"
                             placeholder="{{ $field['placeholder'] ?? '' }}"
+                            @if (in_array($field['name'], ['search', 'reference'], true)) data-live-search="true" data-live-search-delay="350" autocomplete="off" @endif
                         >
                     @endif
                 </div>
