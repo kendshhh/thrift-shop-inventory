@@ -6,6 +6,7 @@ use App\Enums\ItemStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\PickupSlot;
 use App\Enums\ReservationStatus;
+use App\Http\Controllers\Concerns\RequiresConfirmedAction;
 use App\Models\Reservation;
 use App\Models\ReservationItem;
 use App\Models\User;
@@ -24,6 +25,8 @@ use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 class CartController extends Controller
 {
+    use RequiresConfirmedAction;
+
     public function index(Request $request): View
     {
         $cart = Cart::currentForUser($request->user()->id)?->loadMissing('items.item');
@@ -36,6 +39,8 @@ class CartController extends Controller
 
     public function add(Request $request): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $validated = $request->validate([
             'item_id' => 'required|exists:items,id',
             'quantity' => 'required|integer|min:1',
@@ -79,6 +84,8 @@ class CartController extends Controller
 
     public function remove(Request $request): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $validated = $request->validate([
             'item_id' => 'required|exists:items,id',
         ]);
@@ -98,6 +105,8 @@ class CartController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $validated = $request->validate([
             'item_id' => 'required|exists:items,id',
             'quantity' => 'required|integer|min:1',
@@ -151,6 +160,8 @@ class CartController extends Controller
      */
     public function checkout(Request $request): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $validated = $request->validate([
             'pickup_date' => ['required', 'date', 'after:today'],
             'pickup_slot' => ['required', Rule::in(PickupSlot::values())],

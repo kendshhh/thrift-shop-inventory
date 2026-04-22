@@ -105,7 +105,9 @@ class AdminReservationOverviewTest extends TestCase
         $item->increment('reserved_quantity', 2);
 
         $this->actingAs($admin)
-            ->patch(route('admin.reservations.remove-item', [$reservation, $reservationItem]))
+            ->patch(route('admin.reservations.remove-item', [$reservation, $reservationItem]), [
+                'confirmation_text' => 'confirm',
+            ])
             ->assertRedirect();
 
         $item->refresh();
@@ -151,7 +153,9 @@ class AdminReservationOverviewTest extends TestCase
         $item->increment('reserved_quantity', 3);
 
         $this->actingAs($admin)
-            ->patch(route('admin.reservations.cancel-all-for-user', $customer))
+            ->patch(route('admin.reservations.cancel-all-for-user', $customer), [
+                'confirmation_text' => 'confirm',
+            ])
             ->assertRedirect();
 
         $item->refresh();

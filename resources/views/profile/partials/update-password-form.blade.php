@@ -1,6 +1,6 @@
 <p class="text-muted small mb-4">Ensure your account is using a long, random password to stay secure.</p>
 
-<form method="post" action="{{ route('password.update') }}">
+<form method="post" action="{{ route('password.update') }}" data-confirm-action data-confirm-message='Type "confirm" to update your password.'>
     @csrf
     @method('put')
 
@@ -13,6 +13,7 @@
     <div class="mb-3">
         <label for="update_password_password" class="form-label fw-medium">New Password</label>
         <input id="update_password_password" name="password" type="password" class="form-control @error('password', 'updatePassword') is-invalid @enderror" autocomplete="new-password">
+        <div class="form-text">Password must be at least 8 characters long.</div>
         @error('password', 'updatePassword') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 

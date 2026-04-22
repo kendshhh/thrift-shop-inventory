@@ -44,6 +44,7 @@ class CartFlowTest extends TestCase
             ->post(route('cart.add'), [
                 'item_id' => $item->id,
                 'quantity' => 2,
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('cart.index'));
 
@@ -71,6 +72,7 @@ class CartFlowTest extends TestCase
             ->patch(route('cart.update'), [
                 'item_id' => $item->id,
                 'quantity' => 4,
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('cart.index'));
 
@@ -85,6 +87,7 @@ class CartFlowTest extends TestCase
                 'item_id' => $item->id,
                 'quantity' => 4,
                 'adjustment' => 'decrement',
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('cart.index'));
 
@@ -99,6 +102,7 @@ class CartFlowTest extends TestCase
                 'item_id' => $item->id,
                 'quantity' => 3,
                 'adjustment' => 'increment',
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('cart.index'));
 
@@ -111,6 +115,7 @@ class CartFlowTest extends TestCase
             ->actingAs($customer)
             ->post(route('cart.remove'), [
                 'item_id' => $item->id,
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('cart.index'));
 
@@ -136,6 +141,7 @@ class CartFlowTest extends TestCase
             ->post(route('cart.add'), [
                 'item_id' => $item->id,
                 'quantity' => 3,
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('items.show', $item))
             ->assertSessionHasErrors('quantity');
@@ -157,6 +163,7 @@ class CartFlowTest extends TestCase
         $this->actingAs($customer)->post(route('cart.add'), [
             'item_id' => $item->id,
             'quantity' => 1,
+            'confirmation_text' => 'confirm',
         ]);
 
         $this
@@ -165,6 +172,7 @@ class CartFlowTest extends TestCase
             ->patch(route('cart.update'), [
                 'item_id' => $item->id,
                 'quantity' => 4,
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('cart.index'))
             ->assertSessionHasErrors('quantity');
@@ -189,6 +197,7 @@ class CartFlowTest extends TestCase
         $this->actingAs($customer)->post(route('cart.add'), [
             'item_id' => $item->id,
             'quantity' => 3,
+            'confirmation_text' => 'confirm',
         ]);
 
         $this
@@ -224,11 +233,13 @@ class CartFlowTest extends TestCase
         $this->actingAs($customer)->post(route('cart.add'), [
             'item_id' => $firstItem->id,
             'quantity' => 2,
+            'confirmation_text' => 'confirm',
         ]);
 
         $this->actingAs($customer)->post(route('cart.add'), [
             'item_id' => $secondItem->id,
             'quantity' => 3,
+            'confirmation_text' => 'confirm',
         ]);
 
         $response = $this
@@ -237,6 +248,7 @@ class CartFlowTest extends TestCase
                 'pickup_date' => now()->addDay()->toDateString(),
                 'pickup_slot' => PickupSlot::AFTERNOON->value,
                 'notes' => 'Please prepare all pieces together.',
+                'confirmation_text' => 'confirm',
             ]);
 
         $reservation = Reservation::query()->latest('id')->firstOrFail();
@@ -294,6 +306,7 @@ class CartFlowTest extends TestCase
         $this->actingAs($customer)->post(route('cart.add'), [
             'item_id' => $item->id,
             'quantity' => 1,
+            'confirmation_text' => 'confirm',
         ]);
 
         $this
@@ -302,6 +315,7 @@ class CartFlowTest extends TestCase
             ->post(route('cart.checkout'), [
                 'pickup_date' => now()->addDay()->toDateString(),
                 'pickup_slot' => PickupSlot::MIDDAY->value,
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('cart.index'))
             ->assertSessionHasErrors('cart');
@@ -330,6 +344,7 @@ class CartFlowTest extends TestCase
         $this->actingAs($customer)->post(route('cart.add'), [
             'item_id' => $item->id,
             'quantity' => 2,
+            'confirmation_text' => 'confirm',
         ]);
 
         $response = $this
@@ -337,6 +352,7 @@ class CartFlowTest extends TestCase
             ->post(route('cart.checkout'), [
                 'pickup_date' => now()->addDay()->toDateString(),
                 'pickup_slot' => PickupSlot::MORNING->value,
+                'confirmation_text' => 'confirm',
             ]);
 
         $reservation = Reservation::query()->latest('id')->firstOrFail();

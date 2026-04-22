@@ -7,7 +7,7 @@
 <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post" action="{{ route('profile.destroy') }}">
+            <form method="post" action="{{ route('profile.destroy') }}" data-confirm-action data-confirm-message='Type "confirm" to permanently delete your account.'>
                 @csrf
                 @method('delete')
                 <div class="modal-header">

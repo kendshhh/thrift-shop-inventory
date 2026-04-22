@@ -7,6 +7,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\PickupSlot;
 use App\Enums\ReservationStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\RequiresConfirmedAction;
 use App\Models\Item;
 use App\Models\Reservation;
 use App\Models\ReservationItem;
@@ -24,6 +25,8 @@ use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 class ReservationController extends Controller
 {
+    use RequiresConfirmedAction;
+
     public function index(Request $request): View
     {
         $validated = $request->validate([
@@ -80,6 +83,8 @@ class ReservationController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $validated = $request->validate([
             'item_id' => ['required', 'exists:items,id'],
             'quantity' => ['required', 'integer', 'min:1'],
@@ -166,6 +171,7 @@ class ReservationController extends Controller
     public function extend(Request $request, Reservation $reservation): RedirectResponse
     {
         abort_unless($reservation->user_id === $request->user()->id, 403);
+        $this->requireConfirmedAction($request);
 
         if (!$reservation->isExtendable()) {
             return back()->withErrors([
@@ -192,6 +198,7 @@ class ReservationController extends Controller
     public function requestCancellation(Request $request, Reservation $reservation): RedirectResponse
     {
         abort_unless($reservation->user_id === $request->user()->id, 403);
+        $this->requireConfirmedAction($request);
 
         if (!$reservation->canCustomerRequestCancellation()) {
             return back()->withErrors([
@@ -242,6 +249,7 @@ class ReservationController extends Controller
     public function requestReschedule(Request $request, Reservation $reservation): RedirectResponse
     {
         abort_unless($reservation->user_id === $request->user()->id, 403);
+        $this->requireConfirmedAction($request);
 
         if (!$reservation->canCustomerRequestReschedule()) {
             return back()->withErrors([
@@ -305,6 +313,7 @@ class ReservationController extends Controller
     {
         abort_unless($reservation->user_id === $request->user()->id, 403);
         abort_unless($reservationItem->reservation_id === $reservation->id, 404);
+        $this->requireConfirmedAction($request);
 
         // Only allow cancel if reservation is active and item is not already pending cancel
         if (!$reservation->canCustomerRequestCancellation()) {

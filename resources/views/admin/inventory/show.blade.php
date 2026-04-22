@@ -125,19 +125,19 @@
             <div class="d-flex gap-2 flex-wrap">
                 <a href="{{ route('admin.inventory.edit', $item) }}" class="btn btn-primary rounded-pill"><i class="bi bi-pencil me-1"></i>Edit</a>
                 @if ($item->status === \App\Enums\ItemStatus::ARCHIVED)
-                    <form method="POST" action="{{ route('admin.inventory.unarchive', $item) }}">
+                    <form method="POST" action="{{ route('admin.inventory.unarchive', $item) }}" data-confirm-action data-confirm-message='Type "confirm" to restore this inventory item.'>
                         @csrf
                         @method('PATCH')
                         <button type="submit" class="btn btn-success rounded-pill"><i class="bi bi-arrow-counterclockwise me-1"></i>Unarchive</button>
                     </form>
                 @else
-                    <form method="POST" action="{{ route('admin.inventory.destroy', $item) }}" onsubmit="return confirm('Archive this item?')">
+                    <form method="POST" action="{{ route('admin.inventory.destroy', $item) }}" data-confirm-action data-confirm-message='Type "confirm" to archive this inventory item.'>
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger rounded-pill"><i class="bi bi-archive me-1"></i>Archive</button>
                     </form>
                 @endif
-                <form method="POST" action="{{ route('admin.inventory.force-destroy', $item) }}" onsubmit="return confirm('Permanently delete this item? This cannot be undone.')">
+                <form method="POST" action="{{ route('admin.inventory.force-destroy', $item) }}" data-confirm-action data-confirm-message='Type "confirm" to permanently delete this inventory item.'>
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-outline-danger rounded-pill"><i class="bi bi-trash me-1"></i>Delete Permanently</button>

@@ -59,7 +59,7 @@
                         <li class="brand-guidance-item">Wide logos with clean padding render best in the navbar and page footer.</li>
                     </ul>
 
-                    <form method="POST" action="{{ route('admin.branding.update') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('admin.branding.update') }}" enctype="multipart/form-data" data-confirm-action data-confirm-message='Type "confirm" to save the branding changes.'>
                         @csrf
                         @method('PUT')
 

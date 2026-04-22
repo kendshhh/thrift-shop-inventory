@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\PaymentStatus;
 use App\Enums\ReservationStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\RequiresConfirmedAction;
 use App\Models\Cart;
 use App\Models\Item;
 use App\Models\Reservation;
@@ -24,6 +25,8 @@ use Illuminate\View\View;
 
 class ReservationManagementController extends Controller
 {
+    use RequiresConfirmedAction;
+
     public function overview(Request $request): View
     {
         $validated = $request->validate([
@@ -247,6 +250,8 @@ class ReservationManagementController extends Controller
 
     public function updateStatus(Request $request, Reservation $reservation): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $validated = $request->validate([
             'status' => ['required', Rule::in(ReservationStatus::values())],
             'payment_status' => ['required', Rule::in(PaymentStatus::values())],
@@ -338,6 +343,8 @@ class ReservationManagementController extends Controller
 
     public function updateCustomerRequest(Request $request, Reservation $reservation): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $validated = $request->validate([
             'action' => ['required', Rule::in(['approve', 'decline'])],
             'admin_note' => ['nullable', 'string', 'max:1000'],
@@ -438,8 +445,10 @@ class ReservationManagementController extends Controller
             ->with('status', 'Customer request has been '.$reservation->customer_request_status.'.');
     }
 
-    public function extend(Reservation $reservation): RedirectResponse
+    public function extend(Request $request, Reservation $reservation): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         if (!$reservation->isExtendable()) {
             return back()->withErrors([
                 'reservation' => 'This reservation can no longer be extended.',
@@ -454,8 +463,10 @@ class ReservationManagementController extends Controller
         return back()->with('status', 'Reservation timer extended by 24 hours.');
     }
 
-    public function markSold(Reservation $reservation): RedirectResponse
+    public function markSold(Request $request, Reservation $reservation): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         if (!$reservation->status->canTransitionTo(ReservationStatus::COMPLETED)) {
             return back()->withErrors([
                 'reservation' => 'This reservation cannot be marked as sold from its current status.',
@@ -476,6 +487,8 @@ class ReservationManagementController extends Controller
 
     public function handleItemCancelRequest(Request $request, Reservation $reservation, ReservationItem $reservationItem): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         if ($reservationItem->reservation_id !== $reservation->id) {
             return back()->withErrors(['reservation_item' => 'Item does not belong to this reservation.']);
         }
@@ -532,8 +545,10 @@ class ReservationManagementController extends Controller
         return back();
     }
 
-    public function removeItem(Reservation $reservation, ReservationItem $reservationItem): RedirectResponse
+    public function removeItem(Request $request, Reservation $reservation, ReservationItem $reservationItem): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         if ($reservationItem->reservation_id !== $reservation->id) {
             return back()->withErrors([
                 'reservation_item' => 'The selected reservation item does not belong to this reservation.',
@@ -579,8 +594,10 @@ class ReservationManagementController extends Controller
         return back()->with('status', 'Reserved item released and user notified.');
     }
 
-    public function cancelAllForUser(User $user): RedirectResponse
+    public function cancelAllForUser(Request $request, User $user): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $activeReservations = Reservation::query()
             ->where('user_id', $user->id)
             ->whereIn('status', ReservationStatus::activeValues())

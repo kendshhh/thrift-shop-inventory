@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\RequiresConfirmedAction;
 use App\Models\BrandingSetting;
 use App\Support\Branding;
 use Illuminate\Http\RedirectResponse;
@@ -12,6 +13,8 @@ use Illuminate\View\View;
 
 class BrandingController extends Controller
 {
+    use RequiresConfirmedAction;
+
     public function edit(): View
     {
         return view('admin.branding.edit', [
@@ -22,6 +25,8 @@ class BrandingController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $settings = BrandingSetting::query()->find(1) ?? BrandingSetting::query()->first() ?? tap(new BrandingSetting(), static function (BrandingSetting $settings): void {
             $settings->id = 1;
         });

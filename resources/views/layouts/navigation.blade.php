@@ -46,10 +46,10 @@
                         <li class="nav-item"><a class="nav-link mx-lg-2{{ request()->routeIs('admin.inventory.*') ? ' active' : '' }}" href="{{ route('admin.inventory.index') }}">Inventory</a></li>
                         <li class="nav-item"><a class="nav-link mx-lg-2{{ request()->routeIs('admin.categories.*') ? ' active' : '' }}" href="{{ route('admin.categories.index') }}">Categories</a></li>
                         <li class="nav-item">
-                            <a class="nav-link mx-lg-2 position-relative{{ request()->routeIs('admin.reservations.*') ? ' active' : '' }}" href="{{ route('admin.reservations.overview') }}">
-                                Reservations
+                            <a class="nav-link nav-link-with-badge mx-lg-2{{ request()->routeIs('admin.reservations.*') ? ' active' : '' }}" href="{{ route('admin.reservations.overview') }}">
+                                <span>Reservations</span>
                                 @if ($newReservationAlertCount > 0)
-                                    <span class="badge rounded-pill bg-danger ms-1">{{ $newReservationAlertCount > 99 ? '99+' : $newReservationAlertCount }}</span>
+                                    <span class="badge rounded-pill bg-danger nav-link-badge">{{ $newReservationAlertCount > 99 ? '99+' : $newReservationAlertCount }}</span>
                                 @endif
                             </a>
                         </li>

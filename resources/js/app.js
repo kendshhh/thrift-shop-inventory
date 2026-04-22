@@ -354,6 +354,159 @@ const initializeOptionDropdowns = () => {
 	});
 };
 
+const initializeConfirmationForms = () => {
+	const forms = Array.from(document.querySelectorAll('form[data-confirm-action]'));
+
+	if (!forms.length) {
+		return;
+	}
+
+	forms.forEach((form) => {
+		let lastSubmitter = null;
+
+		form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach((submitter) => {
+			submitter.addEventListener('click', () => {
+				lastSubmitter = submitter;
+			});
+		});
+
+		form.addEventListener('submit', (event) => {
+			if (form.dataset.confirmed === 'true') {
+				form.dataset.confirmed = 'false';
+				return;
+			}
+
+			event.preventDefault();
+
+			const expectedPhrase = (form.getAttribute('data-confirm-phrase') ?? 'confirm').trim();
+			const normalizedExpectedPhrase = expectedPhrase.toLowerCase();
+			const message =
+				form.getAttribute('data-confirm-message') ??
+				`Type "${expectedPhrase}" to continue with this action.`;
+			const enteredValue = window.prompt(message, '');
+
+			if (enteredValue === null) {
+				return;
+			}
+
+			if (enteredValue.trim().toLowerCase() !== normalizedExpectedPhrase) {
+				window.alert(`Please type "${expectedPhrase}" exactly to continue.`);
+				return;
+			}
+
+			let confirmationInput = form.querySelector('input[name="confirmation_text"]');
+
+			if (!(confirmationInput instanceof HTMLInputElement)) {
+				confirmationInput = document.createElement('input');
+				confirmationInput.type = 'hidden';
+				confirmationInput.name = 'confirmation_text';
+				form.appendChild(confirmationInput);
+			}
+
+			confirmationInput.value = enteredValue.trim();
+			form.dataset.confirmed = 'true';
+
+			if (typeof form.requestSubmit === 'function') {
+				form.requestSubmit(lastSubmitter ?? undefined);
+				return;
+			}
+
+			form.submit();
+		});
+	});
+};
+
+const initializeInlineFieldWarnings = () => {
+	const fields = Array.from(document.querySelectorAll('[data-live-validate]'));
+
+	if (!fields.length) {
+		return;
+	}
+
+	const showWarning = (field, message) => {
+		const warningId = field.getAttribute('data-warning-target');
+		const warning = warningId ? document.getElementById(warningId) : null;
+
+		if (!(warning instanceof HTMLElement)) {
+			return;
+		}
+
+		warning.textContent = message;
+		warning.style.display = message ? 'block' : 'none';
+		field.classList.toggle('is-invalid', Boolean(message));
+	};
+
+	const clearWarning = (field) => {
+		showWarning(field, '');
+	};
+
+	const isControlKey = (event) =>
+		event.ctrlKey ||
+		event.metaKey ||
+		['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter'].includes(event.key);
+
+	fields.forEach((field) => {
+		if (!(field instanceof HTMLInputElement)) {
+			return;
+		}
+
+		const mode = field.getAttribute('data-live-validate');
+		const invalidMessage = field.getAttribute('data-warning-message-invalid') ?? 'Invalid value.';
+		const negativeMessage = field.getAttribute('data-warning-message-negative') ?? invalidMessage;
+
+		const validate = () => {
+			const value = field.value.trim();
+
+			if (!value) {
+				clearWarning(field);
+				return;
+			}
+
+			if (mode === 'nonnegative-number' || mode === 'nonnegative-integer') {
+				const normalizedValue = value.replace(/,/g, '');
+				const isNegative = normalizedValue.startsWith('-') || Number(normalizedValue) < 0;
+				const isInvalidNumber = normalizedValue === '-' || Number.isNaN(Number(normalizedValue));
+				const requiresWholeNumber = mode === 'nonnegative-integer' && !/^\d+$/.test(normalizedValue);
+
+				if (isNegative) {
+					showWarning(field, negativeMessage);
+					return;
+				}
+
+				if (isInvalidNumber || requiresWholeNumber) {
+					showWarning(field, invalidMessage);
+					return;
+				}
+			}
+
+			if (mode === 'digits-only' && /[^0-9]/.test(value)) {
+				showWarning(field, invalidMessage);
+				return;
+			}
+
+			clearWarning(field);
+		};
+
+		field.addEventListener('input', validate);
+		field.addEventListener('blur', validate);
+
+		if (mode === 'nonnegative-number' || mode === 'nonnegative-integer') {
+			field.addEventListener('keydown', (event) => {
+				if (isControlKey(event)) {
+					return;
+				}
+
+				if (event.key === '-' || event.key === 'Subtract') {
+					event.preventDefault();
+					showWarning(field, negativeMessage);
+				}
+			});
+		}
+
+		validate();
+	});
+};
+
 const initializeLegalModals = () => {
 	const shell = document.querySelector('.auth-legal-modal-shell');
 	const triggers = Array.from(document.querySelectorAll('[data-legal-modal-trigger]'));
@@ -442,4 +595,6 @@ onReady(() => {
 	initializeFilterForms();
 	initializeDatePickers();
 	initializeOptionDropdowns();
+	initializeConfirmationForms();
+	initializeInlineFieldWarnings();
 });

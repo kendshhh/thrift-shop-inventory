@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\RequiresConfirmedAction;
 use App\Models\BrandingSetting;
 use App\Support\Branding;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,8 @@ use Throwable;
 
 class PaymentSettingsController extends Controller
 {
+    use RequiresConfirmedAction;
+
     public function edit(Request $request): View
     {
         $settings = BrandingSetting::query()->find(1) ?? BrandingSetting::query()->first();
@@ -55,6 +58,8 @@ class PaymentSettingsController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $settings = BrandingSetting::query()->find(1) ?? BrandingSetting::query()->first() ?? tap(new BrandingSetting(), static function (BrandingSetting $settings): void {
             $settings->id = 1;
         });
@@ -144,8 +149,10 @@ class PaymentSettingsController extends Controller
             ->with('status', 'Payment settings updated successfully.');
     }
 
-    public function destroy(string $paymentId): RedirectResponse
+    public function destroy(Request $request, string $paymentId): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $settings = BrandingSetting::query()->find(1) ?? BrandingSetting::query()->first();
 
         if (! $settings) {
@@ -182,7 +189,7 @@ class PaymentSettingsController extends Controller
 
         $settings->fill([
             'payment_details' => array_values($paymentDetails),
-            'updated_by' => request()->user()?->id,
+            'updated_by' => $request->user()?->id,
         ]);
 
         $settings->save();

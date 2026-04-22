@@ -2,7 +2,7 @@
 
 <form id="send-verification" method="post" action="{{ route('verification.send') }}">@csrf</form>
 
-<form method="post" action="{{ route('profile.update') }}">
+<form method="post" action="{{ route('profile.update') }}" data-confirm-action data-confirm-message='Type "confirm" to save your profile changes.'>
     @csrf
     @method('patch')
 
@@ -15,6 +15,7 @@
     <div class="mb-4">
         <label for="email" class="form-label fw-medium">Email address</label>
         <input id="email" name="email" type="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required autocomplete="username">
+        <div class="form-text">Uppercase letters are accepted, but the system will save your email in lowercase.</div>
         @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
         @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())

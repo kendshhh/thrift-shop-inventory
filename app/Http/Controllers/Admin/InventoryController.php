@@ -6,6 +6,7 @@ use App\Enums\ItemCondition;
 use App\Enums\ItemStatus;
 use App\Enums\ReservationStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\RequiresConfirmedAction;
 use App\Models\Category;
 use App\Models\Item;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +19,8 @@ use Illuminate\View\View;
 
 class InventoryController extends Controller
 {
+    use RequiresConfirmedAction;
+
     /**
      * Display a listing of the resource.
      */
@@ -95,20 +98,9 @@ class InventoryController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'quantity' => ['required', 'integer', 'min:0'],
-            'description' => ['nullable', 'string'],
-            'seller_name' => ['required', 'string', 'max:255'],
-            'seller_contact_number' => ['required', 'string', 'max:50', 'regex:/^[0-9]+$/'],
-            'condition' => ['required', Rule::in(ItemCondition::values())],
-            'tags' => ['nullable', 'string'],
-            'image' => $this->imageRules(),
-            'status' => ['required', Rule::in(ItemStatus::values())],
-            'restock_at' => ['nullable', 'date'],
-        ]);
+        $this->requireConfirmedAction($request);
+
+        $validated = $request->validate($this->inventoryRules(), $this->inventoryValidationMessages());
 
         if ($request->hasFile('image')) {
             $validated['image_path'] = $request->file('image')->store('inventory', 'public');
@@ -159,23 +151,16 @@ class InventoryController extends Controller
      */
     public function update(Request $request, string $item): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $itemModel = $this->findAdminItemOrFail($item);
 
-        $validated = $request->validate([
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'quantity' => ['required', 'integer', 'min:0'],
-            'description' => ['nullable', 'string'],
-            'seller_name' => ['required', 'string', 'max:255'],
-            'seller_contact_number' => ['required', 'string', 'max:50', 'regex:/^[0-9]+$/'],
-            'condition' => ['required', Rule::in(ItemCondition::values())],
-            'tags' => ['nullable', 'string'],
-            'image' => $this->imageRules(),
-            'remove_image' => ['nullable', 'boolean'],
-            'status' => ['required', Rule::in(ItemStatus::values())],
-            'restock_at' => ['nullable', 'date'],
-        ]);
+        $validated = $request->validate(
+            $this->inventoryRules([
+                'remove_image' => ['nullable', 'boolean'],
+            ]),
+            $this->inventoryValidationMessages()
+        );
 
         if ((int) $validated['quantity'] < $itemModel->reserved_quantity) {
             return back()
@@ -219,6 +204,8 @@ class InventoryController extends Controller
      */
     public function destroy(string $item): RedirectResponse
     {
+        $this->requireConfirmedAction(request());
+
         $itemModel = $this->findAdminItemOrFail($item);
 
         if ($itemModel->trashed()) {
@@ -235,6 +222,8 @@ class InventoryController extends Controller
 
     public function unarchive(string $item): RedirectResponse
     {
+        $this->requireConfirmedAction(request());
+
         $itemModel = $this->findAdminItemOrFail($item);
 
         if ($itemModel->trashed()) {
@@ -258,6 +247,8 @@ class InventoryController extends Controller
 
     public function forceDestroy(string $item): RedirectResponse
     {
+        $this->requireConfirmedAction(request());
+
         $itemModel = $this->findAdminItemOrFail($item);
 
         $activeReservationItems = $itemModel->reservationItems()->whereHas('reservation', function ($query): void {
@@ -325,6 +316,42 @@ class InventoryController extends Controller
         return Item::withTrashed()
             ->where('slug', $slug)
             ->firstOrFail();
+    }
+
+    /**
+     * @param  array<string, mixed>  $overrides
+     * @return array<string, mixed>
+     */
+    private function inventoryRules(array $overrides = []): array
+    {
+        return array_merge([
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'quantity' => ['required', 'integer', 'min:0'],
+            'description' => ['nullable', 'string'],
+            'seller_name' => ['required', 'string', 'max:255'],
+            'seller_contact_number' => ['required', 'string', 'max:50', 'regex:/^[0-9]+$/'],
+            'condition' => ['required', Rule::in(ItemCondition::values())],
+            'tags' => ['nullable', 'string'],
+            'image' => $this->imageRules(),
+            'status' => ['required', Rule::in(ItemStatus::values())],
+            'restock_at' => ['nullable', 'date'],
+        ], $overrides);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function inventoryValidationMessages(): array
+    {
+        return [
+            'price.numeric' => 'Price must use numbers only.',
+            'price.min' => 'Price cannot be negative. Enter 0 or a higher amount.',
+            'quantity.integer' => 'Quantity must be a whole number.',
+            'quantity.min' => 'Quantity cannot be negative. Enter 0 or a higher value.',
+            'seller_contact_number.regex' => 'Contact number must contain numbers only.',
+        ];
     }
 
     /**

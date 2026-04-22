@@ -61,6 +61,13 @@ class User extends Authenticatable
         return $this->hasMany(Reservation::class);
     }
 
+    public function setEmailAttribute(?string $value): void
+    {
+        $this->attributes['email'] = $value === null
+            ? null
+            : strtolower(trim($value));
+    }
+
     public function isAdmin(): bool
     {
         return $this->hasRole('admin');

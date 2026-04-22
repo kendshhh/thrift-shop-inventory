@@ -28,10 +28,14 @@
             @endforeach
         </div>
 
+        <div class="auth-inline-note small">
+            Customer accounts can be created through public registration. Admin access is limited to the default admin account.
+        </div>
+
         @if (app()->environment(['local', 'testing']))
             <hr class="mt-4">
-            <div class="small text-muted text-center">
-                <div class="fw-semibold mb-1">Default accounts</div>
+            <div class="small text-muted text-center auth-demo-credentials">
+                <div class="fw-semibold mb-1">Local demo credentials</div>
                 <div>Admin: <code>{{ env('DEFAULT_ADMIN_EMAIL', 'admin@thriftshop.local') }}</code> / <code>{{ env('DEFAULT_ADMIN_PASSWORD', '123') }}</code></div>
                 <div>Customer: <code>{{ env('DEFAULT_CUSTOMER_EMAIL', 'customer@thriftshop.local') }}</code> / <code>{{ env('DEFAULT_CUSTOMER_PASSWORD', '123') }}</code></div>
             </div>

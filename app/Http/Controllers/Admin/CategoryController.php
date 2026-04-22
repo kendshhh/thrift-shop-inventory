@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\RequiresConfirmedAction;
 use App\Models\Category;
 use App\Models\Item;
 use Illuminate\Http\RedirectResponse;
@@ -13,6 +14,8 @@ use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
+    use RequiresConfirmedAction;
+
     public function index(Request $request): View
     {
         $validated = $request->validate([
@@ -61,6 +64,8 @@ class CategoryController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
             'description' => ['nullable', 'string'],
@@ -92,6 +97,8 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')->ignore($category->id)],
             'description' => ['nullable', 'string'],
@@ -110,6 +117,8 @@ class CategoryController extends Controller
 
     public function destroy(Category $category): RedirectResponse
     {
+        $this->requireConfirmedAction(request());
+
         Item::withTrashed()
             ->where('category_id', $category->id)
             ->update(['category_id' => null]);

@@ -10,7 +10,7 @@
         <div class="col-lg-8">
             <div class="card glass-card surface-section">
                 <div class="card-body form-shell">
-                    <form method="POST" action="{{ $isEditing ? route('admin.inventory.update', $item) : route('admin.inventory.store') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ $isEditing ? route('admin.inventory.update', $item) : route('admin.inventory.store') }}" enctype="multipart/form-data" data-confirm-action data-confirm-message='Type "confirm" to save this inventory item.'>
                         @csrf
                         @if ($isEditing) @method('PUT') @endif
 
@@ -26,13 +26,41 @@
                                 <label class="form-label form-label-modern">Price</label>
                                 <div class="input-group">
                                     <span class="input-group-text">&#8369;</span>
-                                    <input name="price" type="number" step="0.01" min="0" class="form-control form-control-modern @error('price') is-invalid @enderror" value="{{ old('price', $item->price) }}" required>
+                                    <input
+                                        name="price"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        class="form-control form-control-modern @error('price') is-invalid @enderror"
+                                        value="{{ old('price', $item->price) }}"
+                                        data-live-validate="nonnegative-number"
+                                        data-warning-target="inventory-price-warning"
+                                        data-warning-message-invalid="Price must use numbers only."
+                                        data-warning-message-negative="Price cannot be negative. Enter 0 or a higher amount."
+                                        required
+                                    >
                                     @error('price') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
+                                <div class="form-text">Numbers only. Negative values like "-1" are not allowed.</div>
+                                <div id="inventory-price-warning" class="text-danger small mt-2" style="display: none;"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label form-label-modern">Quantity</label>
-                                <input name="quantity" type="number" min="0" class="form-control form-control-modern @error('quantity') is-invalid @enderror" value="{{ old('quantity', $item->quantity ?? 0) }}" required>
+                                <input
+                                    name="quantity"
+                                    type="number"
+                                    step="1"
+                                    min="0"
+                                    class="form-control form-control-modern @error('quantity') is-invalid @enderror"
+                                    value="{{ old('quantity', $item->quantity ?? 0) }}"
+                                    data-live-validate="nonnegative-integer"
+                                    data-warning-target="inventory-quantity-warning"
+                                    data-warning-message-invalid="Quantity must be a whole number."
+                                    data-warning-message-negative="Quantity cannot be negative. Enter 0 or a higher value."
+                                    required
+                                >
+                                <div class="form-text">Whole numbers only. Negative values like "-1" are not allowed.</div>
+                                <div id="inventory-quantity-warning" class="text-danger small mt-2" style="display: none;"></div>
                                 @error('quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
@@ -148,8 +176,13 @@
                                     pattern="[0-9]+"
                                     class="form-control form-control-modern @error('seller_contact_number') is-invalid @enderror"
                                     value="{{ old('seller_contact_number', $item->seller_contact_number) }}"
+                                    data-live-validate="digits-only"
+                                    data-warning-target="inventory-contact-warning"
+                                    data-warning-message-invalid="Contact number must contain numbers only."
                                     required
                                 >
+                                <div class="form-text">Numbers only. Do not enter letters, spaces, or special characters.</div>
+                                <div id="inventory-contact-warning" class="text-danger small mt-2" style="display: none;"></div>
                                 @error('seller_contact_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>

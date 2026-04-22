@@ -3,14 +3,17 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\DefaultAccountManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AuthFlowController extends Controller
 {
-    public function show(Request $request): View|RedirectResponse
+    public function show(Request $request, DefaultAccountManager $defaultAccountManager): View|RedirectResponse
     {
+        $defaultAccountManager->ensureDefaultAccounts();
+
         $intent = $this->normalizeIntent($request->query('intent'));
 
         if ($intent === 'register') {
@@ -37,14 +40,14 @@ class AuthFlowController extends Controller
             [
                 'role' => 'customer',
                 'title' => 'Customer',
-                'description' => 'Browse items and manage your reservations.',
+                'description' => 'Browse finds and manage reservations.',
                 'icon' => 'bi-bag-heart',
                 'href' => route('login', ['role' => 'customer']),
             ],
             [
                 'role' => 'admin',
                 'title' => 'Admin',
-                'description' => 'Access inventory, reservations, and store controls.',
+                'description' => 'Manage inventory, reservations, and users.',
                 'icon' => 'bi-shield-lock',
                 'href' => route('login', ['role' => 'admin']),
             ],

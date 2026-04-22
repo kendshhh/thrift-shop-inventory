@@ -55,6 +55,7 @@ class AdminUiAndInventoryStatusTest extends TestCase
             ->actingAs($admin)
             ->patch(route('admin.users.update', $customer), [
                 'is_active' => '0',
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('admin.users.index'));
 
@@ -127,13 +128,42 @@ class AdminUiAndInventoryStatusTest extends TestCase
                 'seller_contact_number' => '0917ABC1234',
                 'condition' => ItemCondition::GENTLY_USED->value,
                 'status' => ItemStatus::ACTIVE->value,
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('admin.inventory.edit', $item))
-            ->assertSessionHasErrors('seller_contact_number');
+            ->assertSessionHasErrors([
+                'seller_contact_number' => 'Contact number must contain numbers only.',
+            ]);
 
         $item->refresh();
 
         $this->assertSame('09170000016', $item->seller_contact_number);
+    }
+
+    public function test_admin_inventory_create_rejects_negative_price_and_quantity_with_clear_messages(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $this
+            ->actingAs($admin)
+            ->from(route('admin.inventory.create'))
+            ->post(route('admin.inventory.store'), [
+                'name' => 'Invalid Number Item',
+                'price' => -50,
+                'quantity' => -1,
+                'description' => 'Testing negative validation.',
+                'seller_name' => 'Test Seller',
+                'seller_contact_number' => '09170000021',
+                'condition' => ItemCondition::GENTLY_USED->value,
+                'status' => ItemStatus::ACTIVE->value,
+                'confirmation_text' => 'confirm',
+            ])
+            ->assertRedirect(route('admin.inventory.create'))
+            ->assertSessionHasErrors([
+                'price' => 'Price cannot be negative. Enter 0 or a higher amount.',
+                'quantity' => 'Quantity cannot be negative. Enter 0 or a higher value.',
+            ]);
     }
 
     public function test_customer_notifications_render_shared_status_badges(): void
@@ -187,7 +217,9 @@ class AdminUiAndInventoryStatusTest extends TestCase
 
         $this
             ->actingAs($admin)
-            ->delete(route('admin.inventory.destroy', $item))
+            ->delete(route('admin.inventory.destroy', $item), [
+                'confirmation_text' => 'confirm',
+            ])
             ->assertRedirect(route('admin.inventory.index'));
 
         $item->refresh();
@@ -268,7 +300,9 @@ class AdminUiAndInventoryStatusTest extends TestCase
         $this
             ->actingAs($admin)
             ->from(route('admin.inventory.index', ['status' => ItemStatus::ARCHIVED->value]))
-            ->patch(route('admin.inventory.unarchive', $item))
+            ->patch(route('admin.inventory.unarchive', $item), [
+                'confirmation_text' => 'confirm',
+            ])
             ->assertRedirect(route('admin.inventory.index', ['status' => ItemStatus::ARCHIVED->value]));
 
         $item->refresh();
@@ -304,7 +338,9 @@ class AdminUiAndInventoryStatusTest extends TestCase
         $this
             ->actingAs($admin)
             ->from(route('admin.inventory.show', $item))
-            ->patch(route('admin.inventory.unarchive', $item))
+            ->patch(route('admin.inventory.unarchive', $item), [
+                'confirmation_text' => 'confirm',
+            ])
             ->assertRedirect(route('admin.inventory.show', $item));
 
         $item->refresh();
@@ -339,7 +375,9 @@ class AdminUiAndInventoryStatusTest extends TestCase
 
         $this
             ->actingAs($admin)
-            ->delete(route('admin.inventory.force-destroy', $item))
+            ->delete(route('admin.inventory.force-destroy', $item), [
+                'confirmation_text' => 'confirm',
+            ])
             ->assertRedirect(route('admin.inventory.index'));
 
         $this->assertDatabaseMissing('items', [
@@ -385,7 +423,9 @@ class AdminUiAndInventoryStatusTest extends TestCase
 
         $this
             ->actingAs($admin)
-            ->delete(route('admin.inventory.force-destroy', $item))
+            ->delete(route('admin.inventory.force-destroy', $item), [
+                'confirmation_text' => 'confirm',
+            ])
             ->assertRedirect(route('admin.inventory.show', $item))
             ->assertSessionHasErrors('delete');
 
@@ -434,7 +474,9 @@ class AdminUiAndInventoryStatusTest extends TestCase
 
         $this
             ->actingAs($admin)
-            ->delete(route('admin.inventory.force-destroy', $item))
+            ->delete(route('admin.inventory.force-destroy', $item), [
+                'confirmation_text' => 'confirm',
+            ])
             ->assertRedirect(route('admin.inventory.index'));
 
         $this->assertDatabaseMissing('items', [
@@ -470,7 +512,9 @@ class AdminUiAndInventoryStatusTest extends TestCase
 
         $this
             ->actingAs($admin)
-            ->delete(route('admin.categories.destroy', $category))
+            ->delete(route('admin.categories.destroy', $category), [
+                'confirmation_text' => 'confirm',
+            ])
             ->assertRedirect(route('admin.categories.index'));
 
         $this->assertSoftDeleted('categories', [
@@ -518,6 +562,7 @@ class AdminUiAndInventoryStatusTest extends TestCase
                 'seller_contact_number' => '09170000015',
                 'condition' => ItemCondition::GENTLY_USED->value,
                 'status' => ItemStatus::ACTIVE->value,
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('admin.inventory.show', $item));
 

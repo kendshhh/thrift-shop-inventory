@@ -10,7 +10,7 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-body">
-                    <form method="POST" action="{{ $isEditing ? route('admin.categories.update', $category) : route('admin.categories.store') }}">
+                    <form method="POST" action="{{ $isEditing ? route('admin.categories.update', $category) : route('admin.categories.store') }}" data-confirm-action data-confirm-message='Type "confirm" to save this category.'>
                         @csrf
                         @if ($isEditing)
                             @method('PUT')

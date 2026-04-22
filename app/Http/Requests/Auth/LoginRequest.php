@@ -60,12 +60,24 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        if (! Auth::user()?->hasRole($this->string('role')->toString())) {
+        $user = Auth::user();
+        $selectedRole = $this->string('role')->toString();
+
+        if ($user !== null && ! $user->is_active) {
             Auth::logout();
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => 'Use the correct role selection for this account before signing in.',
+                'email' => 'This account is currently suspended. Please contact the shop administrator.',
+            ]);
+        }
+
+        if ($user !== null && ! $user->hasRole($selectedRole)) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => $this->roleSelectionMessage($selectedRole),
             ]);
         }
 
@@ -101,5 +113,14 @@ class LoginRequest extends FormRequest
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+    }
+
+    private function roleSelectionMessage(string $selectedRole): string
+    {
+        return match ($selectedRole) {
+            'customer' => 'You must be an admin in order to sign in with these credentials.',
+            'admin' => 'This account is not registered for admin sign-in. Please use the customer sign-in option.',
+            default => 'Use the correct role selection for this account before signing in.',
+        };
     }
 }

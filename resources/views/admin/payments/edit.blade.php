@@ -29,7 +29,7 @@
                     </div>
                     <p class="text-muted small mb-4">Customers will see these payment details on the public site, item pages, and reservation pages.</p>
 
-                    <form method="POST" action="{{ route('admin.payments.update') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('admin.payments.update') }}" enctype="multipart/form-data" data-confirm-action data-confirm-message='Type "confirm" to save the payment detail changes.'>
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="edit_id" value="{{ $editingPaymentId }}">
@@ -161,7 +161,7 @@
                                     <div class="d-flex gap-2">
                                         @if (!empty($savedEntry['id']))
                                             <a href="{{ route('admin.payments.edit', ['edit' => $savedEntry['id']]) }}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-pencil me-1"></i>Edit</a>
-                                            <form method="POST" action="{{ route('admin.payments.destroy', $savedEntry['id']) }}">
+                                            <form method="POST" action="{{ route('admin.payments.destroy', $savedEntry['id']) }}" data-confirm-action data-confirm-message='Type "confirm" to delete this payment detail.'>
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash me-1"></i>Delete</button>

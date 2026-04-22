@@ -90,16 +90,36 @@ class AuthenticationTest extends TestCase
         $this->seed(RolesAndAdminSeeder::class);
 
         $user = User::factory()->create();
-        $user->assignRole('customer');
+        $user->assignRole('admin');
 
         $response = $this->post('/login', [
-            'role' => 'admin',
+            'role' => 'customer',
             'email' => $user->email,
             'password' => 'password',
         ]);
 
         $this->assertGuest();
-        $response->assertSessionHasErrors('email');
+        $response->assertSessionHasErrors([
+            'email' => 'You must be an admin in order to sign in with these credentials.',
+        ]);
+    }
+
+    public function test_default_admin_account_is_restored_when_admin_sign_in_is_requested(): void
+    {
+        $this->seed(RolesAndAdminSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@thriftshop.local')->firstOrFail();
+        $admin->delete();
+
+        $response = $this->post('/login', [
+            'role' => 'admin',
+            'email' => 'admin@thriftshop.local',
+            'password' => '123',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(RouteServiceProvider::HOME);
+        $this->assertNotNull(User::query()->where('email', 'admin@thriftshop.local')->first());
     }
 
     public function test_users_can_logout(): void

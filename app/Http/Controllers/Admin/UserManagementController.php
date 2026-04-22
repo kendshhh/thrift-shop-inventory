@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\RequiresConfirmedAction;
 use App\Models\User;
+use App\Support\DefaultAccountManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -11,6 +13,8 @@ use Illuminate\View\View;
 
 class UserManagementController extends Controller
 {
+    use RequiresConfirmedAction;
+
     public function index(Request $request): View
     {
         $validated = $request->validate([
@@ -61,12 +65,20 @@ class UserManagementController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(Request $request, User $user, DefaultAccountManager $defaultAccountManager): RedirectResponse
     {
+        $this->requireConfirmedAction($request);
+
         $validated = $request->validate([
             'is_active' => ['required', 'boolean'],
             'suspended_at' => ['nullable', 'date'],
         ]);
+
+        if ($defaultAccountManager->isDefaultAdmin($user) && ! (bool) $validated['is_active']) {
+            return back()->withErrors([
+                'app' => 'The default system admin account must remain active.',
+            ]);
+        }
 
         $user->is_active = (bool) $validated['is_active'];
         $user->suspended_at = $validated['is_active'] ? null : ($validated['suspended_at'] ?? now());

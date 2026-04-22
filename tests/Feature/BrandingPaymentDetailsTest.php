@@ -50,6 +50,7 @@ class BrandingPaymentDetailsTest extends TestCase
                 'brand_tagline' => 'Curated thrift finds',
                 'primary_color' => '#0EA5E9',
                 'secondary_color' => '#2563EB',
+                'confirmation_text' => 'confirm',
             ]);
 
         $response->assertRedirect(route('admin.branding.edit'));
@@ -77,6 +78,7 @@ class BrandingPaymentDetailsTest extends TestCase
                 'name' => 'Maria Santos',
                 'bank_name' => 'BDO',
                 'bank_number' => '012345678901',
+                'confirmation_text' => 'confirm',
                 'qr_codes' => [
                     $this->fakeQrUpload('bdo-1.png'),
                     $this->fakeQrUpload('bdo-2.png'),
@@ -91,6 +93,7 @@ class BrandingPaymentDetailsTest extends TestCase
                 'name' => 'Everdarling Cashier',
                 'bank_name' => 'GCash',
                 'bank_number' => '09171234567',
+                'confirmation_text' => 'confirm',
                 'qr_codes' => [
                     $this->fakeQrUpload('gcash.png'),
                 ],
@@ -180,6 +183,7 @@ class BrandingPaymentDetailsTest extends TestCase
                 'bank_name' => 'GCash',
                 'bank_number' => '09990001111',
                 'existing_qr_paths' => ['payment-details/gcash-qr.png'],
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('admin.payments.edit'))
             ->assertSessionHasNoErrors();
@@ -192,7 +196,9 @@ class BrandingPaymentDetailsTest extends TestCase
 
         $this
             ->actingAs($admin)
-            ->delete(route('admin.payments.destroy', $id1))
+            ->delete(route('admin.payments.destroy', $id1), [
+                'confirmation_text' => 'confirm',
+            ])
             ->assertRedirect(route('admin.payments.edit'));
 
         $settings->refresh();

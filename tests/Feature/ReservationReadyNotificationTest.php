@@ -56,6 +56,7 @@ class ReservationReadyNotificationTest extends TestCase
                 'status' => ReservationStatus::READY_FOR_PICKUP->value,
                 'payment_status' => PaymentStatus::PENDING->value,
                 'notes' => 'Please proceed to the cashier during pickup.',
+                'confirmation_text' => 'confirm',
             ]);
 
         $response->assertRedirect(route('admin.reservations.show', $reservation));
@@ -194,6 +195,7 @@ class ReservationReadyNotificationTest extends TestCase
                 'pickup_date' => now()->addDay()->toDateString(),
                 'pickup_slot' => PickupSlot::MORNING->value,
                 'notes' => 'Please hold until noon.',
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect();
 
@@ -270,6 +272,7 @@ class ReservationReadyNotificationTest extends TestCase
                 'quantity' => 1,
                 'pickup_date' => now()->toDateString(),
                 'pickup_slot' => PickupSlot::MORNING->value,
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('items.show', $item))
             ->assertSessionHasErrors('pickup_date');
@@ -300,6 +303,7 @@ class ReservationReadyNotificationTest extends TestCase
             ->actingAs($customer)
             ->patch(route('customer.reservations.request-cancellation', $reservation), [
                 'request_reason' => 'Cannot make the pickup schedule.',
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('customer.reservations.show', $reservation));
 
@@ -308,6 +312,7 @@ class ReservationReadyNotificationTest extends TestCase
             ->patch(route('admin.reservations.update-customer-request', $reservation), [
                 'action' => 'approve',
                 'admin_note' => 'Request approved by the shop team.',
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('admin.reservations.show', $reservation));
 
@@ -347,6 +352,7 @@ class ReservationReadyNotificationTest extends TestCase
             ->actingAs($customer)
             ->patch(route('customer.reservations.request-cancellation', $reservation), [
                 'request_reason' => 'I can no longer pick this up.',
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('customer.reservations.show', $reservation));
 
@@ -375,7 +381,9 @@ class ReservationReadyNotificationTest extends TestCase
 
         $this
             ->actingAs($customer)
-            ->patch(route('customer.reservations.request-cancellation', $reservation))
+            ->patch(route('customer.reservations.request-cancellation', $reservation), [
+                'confirmation_text' => 'confirm',
+            ])
             ->assertRedirect(route('customer.reservations.show', $reservation));
 
         $reservation->refresh();
@@ -408,6 +416,7 @@ class ReservationReadyNotificationTest extends TestCase
             ->from(route('customer.reservations.show', $reservation))
             ->patch(route('customer.reservations.request-cancellation', $reservation), [
                 'request_reason' => 'Should not be allowed.',
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('customer.reservations.show', $reservation))
             ->assertSessionHasErrors([
@@ -443,6 +452,7 @@ class ReservationReadyNotificationTest extends TestCase
                 'requested_pickup_date' => now()->toDateString(),
                 'requested_pickup_slot' => PickupSlot::AFTERNOON->value,
                 'request_reason' => 'Need a different time.',
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('customer.reservations.show', $reservation))
             ->assertSessionHasErrors('requested_pickup_date');
@@ -480,6 +490,7 @@ class ReservationReadyNotificationTest extends TestCase
                 'status' => ReservationStatus::READY_FOR_PICKUP->value,
                 'payment_status' => PaymentStatus::COMPLETED->value,
                 'notes' => 'Tried to mark as paid too early.',
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('admin.reservations.show', $reservation))
             ->assertSessionHasErrors([

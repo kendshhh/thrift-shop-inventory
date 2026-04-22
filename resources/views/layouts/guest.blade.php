@@ -19,6 +19,17 @@
             'auth.role-selection' => 'login',
             default => null,
         };
+        $isAuthScreen = in_array($routeName, [
+            'auth.role-selection',
+            'login',
+            'register',
+            'password.request',
+            'password.reset',
+            'verification.notice',
+            'password.confirm',
+        ], true);
+        $isRoleSelection = $routeName === 'auth.role-selection';
+        $isRegisterScreen = $routeName === 'register';
     @endphp
     <title>{{ $brandName }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -40,7 +51,7 @@
         }
     </style>
 </head>
-<body class="guest-shell">
+<body class="guest-shell{{ $isAuthScreen ? ' guest-shell-auth' : '' }}{{ $isRoleSelection ? ' guest-shell-role-selection' : '' }}{{ $isRegisterScreen ? ' guest-shell-register' : '' }}">
     <div class="brand-ambient" aria-hidden="true">
         <span class="brand-ambient-orb brand-ambient-orb-primary"></span>
         <span class="brand-ambient-orb brand-ambient-orb-secondary"></span>
@@ -82,11 +93,11 @@
         </div>
     </nav>
 
-    <main class="guest-main">
+    <main class="guest-main{{ $isAuthScreen ? ' guest-main-auth' : '' }}{{ $isRoleSelection ? ' guest-main-role-selection' : '' }}{{ $isRegisterScreen ? ' guest-main-register' : '' }}">
         <div class="container app-container">
             <div class="row justify-content-center">
-                <div class="col-12 col-md-9 col-lg-6 col-xl-5">
-                    <div class="text-center mb-4">
+                <div class="col-12 col-sm-11 col-md-10 {{ $isRoleSelection ? 'col-lg-8 col-xl-7' : ($isAuthScreen ? 'col-lg-7 col-xl-6' : 'col-lg-6 col-xl-5') }}">
+                    <div class="text-center auth-brand-lockup">
                         <a href="{{ url('/') }}" class="text-decoration-none text-dark">
                             <i class="bi bi-bag-heart-fill" style="font-size: 2.4rem; color: var(--accent-color);"></i>
                             <img src="{{ $brandLogo }}" alt="{{ $brandName }} logo" class="navbar-brand-logo footer-logo">
@@ -94,6 +105,22 @@
                     </div>
                     <div class="card glass-card auth-panel border-0 ambient-panel overflow-hidden">
                         <div class="card-body p-4 p-lg-5">
+                            @if (session('error'))
+                                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                                    {{ session('error') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            @endif
+
+                            @if ($errors->has('app'))
+                                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                                    {{ $errors->first('app') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            @endif
+
+                            <x-validation-summary />
+
                             {{ $slot }}
                         </div>
                     </div>

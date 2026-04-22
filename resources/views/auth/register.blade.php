@@ -22,12 +22,14 @@
             <div class="mb-3">
                 <x-input-label for="email" :value="__('Email address')" />
                 <x-text-input id="email" type="email" name="email" :value="old('email')" required autocomplete="username" />
+                <div class="form-text">You can type uppercase or lowercase letters. We will save the email in lowercase.</div>
                 <x-input-error :messages="$errors->get('email')" />
             </div>
 
             <div class="mb-3">
                 <x-input-label for="password" :value="__('Password')" />
                 <x-text-input id="password" type="password" name="password" required autocomplete="new-password" />
+                <div class="form-text">Password must be at least 8 characters long.</div>
                 <x-input-error :messages="$errors->get('password')" />
             </div>
 

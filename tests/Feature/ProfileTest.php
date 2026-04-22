@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Database\Seeders\RolesAndAdminSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -29,7 +30,8 @@ class ProfileTest extends TestCase
             ->actingAs($user)
             ->patch('/profile', [
                 'name' => 'Test User',
-                'email' => 'test@example.com',
+                'email' => 'Test@Example.COM',
+                'confirmation_text' => 'confirm',
             ]);
 
         $response
@@ -52,6 +54,7 @@ class ProfileTest extends TestCase
             ->patch('/profile', [
                 'name' => 'Test User',
                 'email' => $user->email,
+                'confirmation_text' => 'confirm',
             ]);
 
         $response
@@ -69,6 +72,7 @@ class ProfileTest extends TestCase
             ->actingAs($user)
             ->delete('/profile', [
                 'password' => 'password',
+                'confirmation_text' => 'confirm',
             ]);
 
         $response
@@ -88,6 +92,7 @@ class ProfileTest extends TestCase
             ->from('/profile')
             ->delete('/profile', [
                 'password' => 'wrong-password',
+                'confirmation_text' => 'confirm',
             ]);
 
         $response
@@ -95,5 +100,28 @@ class ProfileTest extends TestCase
             ->assertRedirect('/profile');
 
         $this->assertNotNull($user->fresh());
+    }
+
+    public function test_default_admin_account_can_not_be_deleted(): void
+    {
+        $this->seed(RolesAndAdminSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@thriftshop.local')->firstOrFail();
+
+        $response = $this
+            ->actingAs($admin)
+            ->from('/profile')
+            ->delete('/profile', [
+                'password' => '123',
+                'confirmation_text' => 'confirm',
+            ]);
+
+        $response
+            ->assertSessionHasErrors([
+                'app' => 'The default system admin account cannot be deleted.',
+            ])
+            ->assertRedirect('/profile');
+
+        $this->assertNotNull($admin->fresh());
     }
 }

@@ -92,7 +92,7 @@
                                 <td class="small text-muted">{{ $category->updated_at->format('M d, Y') }}</td>
                                 <td class="text-end">
                                     <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></a>
-                                    <form method="POST" action="{{ route('admin.categories.destroy', $category) }}" class="d-inline" onsubmit="return confirm('Archive this category?');">
+                                    <form method="POST" action="{{ route('admin.categories.destroy', $category) }}" class="d-inline" data-confirm-action data-confirm-message='Type "confirm" to archive this category.'>
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-archive"></i></button>

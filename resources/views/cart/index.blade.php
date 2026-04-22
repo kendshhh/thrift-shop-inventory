@@ -72,7 +72,7 @@
                                                 <span>Line Total: <strong>&#8369;{{ number_format((float) $cartItem->item->price * $cartItem->quantity, 2) }}</strong></span>
                                             </div>
 
-                                            <form action="{{ route('cart.update') }}" method="POST" class="row g-2 align-items-end mt-3">
+                                            <form action="{{ route('cart.update') }}" method="POST" class="row g-2 align-items-end mt-3" data-confirm-action data-confirm-message='Type "confirm" to update this cart item.'>
                                                 @csrf
                                                 @method('PATCH')
                                                 <input type="hidden" name="item_id" value="{{ $cartItem->item_id }}">
@@ -109,7 +109,7 @@
                                         </div>
                                         <div class="d-flex flex-md-column gap-2 justify-content-between align-items-md-end">
                                             <a href="{{ route('items.show', $cartItem->item) }}" class="btn btn-sm btn-outline-secondary">View Item</a>
-                                            <form action="{{ route('cart.remove') }}" method="POST">
+                                            <form action="{{ route('cart.remove') }}" method="POST" data-confirm-action data-confirm-message='Type "confirm" to remove this item from your cart.'>
                                                 @csrf
                                                 <input type="hidden" name="item_id" value="{{ $cartItem->item_id }}">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
@@ -148,7 +148,7 @@
                             <p class="small text-muted mb-0">Submitting checkout creates one reservation for all items in this cart. Inventory is revalidated when you submit.</p>
                         </div>
 
-                        <form action="{{ route('cart.checkout') }}" method="POST" class="vstack gap-3">
+                        <form action="{{ route('cart.checkout') }}" method="POST" class="vstack gap-3" data-confirm-action data-confirm-message='Type "confirm" to check out this cart as a reservation.'>
                             @csrf
 
                             @php

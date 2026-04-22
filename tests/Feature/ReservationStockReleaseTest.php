@@ -67,6 +67,7 @@ class ReservationStockReleaseTest extends TestCase
                 'status' => ReservationStatus::COMPLETED->value,
                 'payment_status' => PaymentStatus::COMPLETED->value,
                 'notes' => 'Picked up and paid.',
+                'confirmation_text' => 'confirm',
             ])
             ->assertRedirect(route('admin.reservations.show', $reservation));
 
