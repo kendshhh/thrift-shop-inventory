@@ -16,12 +16,14 @@ class ReservationItem extends Model
         'quantity',
         'unit_price',
         'line_total',
+        'cancel_pending',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
         'unit_price' => 'decimal:2',
         'line_total' => 'decimal:2',
+        'cancel_pending' => 'boolean',
     ];
 
     protected static function booted(): void

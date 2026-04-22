@@ -1,6 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <h5 class="mb-0 fw-bold"><i class="bi bi-people me-2"></i>User Management</h5>
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-people me-2"></i>User Management</h5>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#filterModal-users" title="Open filters" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-funnel"></i>
+            </button>
+        </div>
     </x-slot>
 
     @php
@@ -16,7 +21,8 @@
         </div>
     @endif
 
-    @include('partials.filter-bar', [
+    @include('partials.filter-modal', [
+        'modalId' => 'filterModal-users',
         'action' => route('admin.users.index'),
         'resetUrl' => route('admin.users.index'),
         'hasFilters' => $hasFilters,
@@ -27,7 +33,6 @@
                 'label' => 'Search',
                 'value' => $filters['search'] ?? '',
                 'placeholder' => 'Name, email, or phone',
-                'colClass' => 'col-12 col-lg-4',
             ],
             [
                 'name' => 'role',
@@ -35,7 +40,6 @@
                 'type' => 'select',
                 'label' => 'Role',
                 'value' => $filters['role'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => [
                     ['value' => '', 'label' => 'All'],
                     ['value' => 'admin', 'label' => 'Admin'],
@@ -48,7 +52,6 @@
                 'type' => 'select',
                 'label' => 'State',
                 'value' => $filters['state'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => [
                     ['value' => '', 'label' => 'All'],
                     ['value' => 'active', 'label' => 'Active'],
@@ -61,7 +64,6 @@
                 'type' => 'select',
                 'label' => 'Sort',
                 'value' => $filters['sort'] ?? 'latest',
-                'colClass' => 'col-6 col-lg-3',
                 'options' => [
                     ['value' => 'latest', 'label' => 'Newest'],
                     ['value' => 'name_asc', 'label' => 'Name: A to Z'],
@@ -71,7 +73,6 @@
                 ],
             ],
         ],
-        'actionsColClass' => 'col-12 col-lg-1 d-flex gap-2',
     ])
 
     <div class="card glass-card surface-section table-card">
@@ -107,15 +108,39 @@
                                     />
                                 </td>
                                 <td class="text-end">
-                                    <form method="POST" action="{{ route('admin.users.update', $user) }}" class="action-row action-row-end">
-                                        @csrf
-                                        @method('PATCH')
-                                        <select name="is_active" class="form-select form-select-sm form-control-modern" style="width:auto">
-                                            <option value="1" @selected($user->is_active)>Active</option>
-                                            <option value="0" @selected(!$user->is_active)>Suspended</option>
-                                        </select>
-                                        <button type="submit" class="btn btn-sm btn-primary rounded-pill">Update</button>
-                                    </form>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-custom rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            {{ $user->is_active ? 'Active' : 'Suspended' }}
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow-lg glass-dropdown-menu">
+                                            <li>
+                                                <form method="POST" action="{{ route('admin.users.update', $user) }}">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="hidden" name="is_active" value="1">
+                                                    <button type="submit" class="dropdown-item text-start w-100">
+                                                        <span class="text-success">Active</span>
+                                                        @if ($user->is_active)
+                                                            <i class="bi bi-check2 ms-1"></i>
+                                                        @endif
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form method="POST" action="{{ route('admin.users.update', $user) }}">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="hidden" name="is_active" value="0">
+                                                    <button type="submit" class="dropdown-item text-start w-100">
+                                                        <span class="text-danger">Suspended</span>
+                                                        @if (!$user->is_active)
+                                                            <i class="bi bi-check2 ms-1"></i>
+                                                        @endif
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

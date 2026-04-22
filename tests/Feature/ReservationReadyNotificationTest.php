@@ -357,6 +357,34 @@ class ReservationReadyNotificationTest extends TestCase
         $this->assertSame('I can no longer pick this up.', $reservation->customer_request_reason);
     }
 
+    public function test_customer_can_request_cancellation_without_reason(): void
+    {
+        $customer = User::factory()->create();
+        $customer->assignRole('customer');
+
+        $reservation = Reservation::query()->create([
+            'user_id' => $customer->id,
+            'reference' => 'RSV-READY-0005A',
+            'status' => ReservationStatus::PENDING,
+            'payment_status' => PaymentStatus::PENDING,
+            'pickup_date' => now()->addDay()->toDateString(),
+            'pickup_slot' => PickupSlot::AFTERNOON->value,
+            'expires_at' => now()->addDay(),
+            'total_amount' => 500,
+        ]);
+
+        $this
+            ->actingAs($customer)
+            ->patch(route('customer.reservations.request-cancellation', $reservation))
+            ->assertRedirect(route('customer.reservations.show', $reservation));
+
+        $reservation->refresh();
+
+        $this->assertSame('cancellation', $reservation->customer_request_type);
+        $this->assertSame('pending', $reservation->customer_request_status);
+        $this->assertSame('Customer requested cancellation via self-service.', $reservation->customer_request_reason);
+    }
+
     public function test_customer_cannot_request_cancellation_for_completed_reservation(): void
     {
         $customer = User::factory()->create();

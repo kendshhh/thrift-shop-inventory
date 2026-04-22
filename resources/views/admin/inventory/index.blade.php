@@ -10,6 +10,9 @@
             <div class="action-row action-row-end">
                 <a href="{{ route('admin.inventory.index') }}" class="btn btn-sm {{ ($filters['status'] ?? '') === '' ? 'btn-outline-dark' : 'btn-outline-secondary' }}">All Items</a>
                 <a href="{{ route('admin.inventory.index', ['status' => 'archived']) }}" class="btn btn-sm {{ ($filters['status'] ?? '') === 'archived' ? 'btn-outline-dark' : 'btn-outline-secondary' }}"><i class="bi bi-archive me-1"></i>Archived</a>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#filterModal-inventory" title="Open filters" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-funnel"></i>
+                </button>
                 <a href="{{ route('admin.inventory.create') }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Item</a>
             </div>
         </div>
@@ -30,7 +33,8 @@
         </div>
     @endif
 
-    @include('partials.filter-bar', [
+    @include('partials.filter-modal', [
+        'modalId' => 'filterModal-inventory',
         'action' => route('admin.inventory.index'),
         'resetUrl' => route('admin.inventory.index'),
         'hasFilters' => $hasFilters,
@@ -41,7 +45,6 @@
                 'label' => 'Search',
                 'value' => $filters['search'] ?? '',
                 'placeholder' => 'Name, description, or slug',
-                'colClass' => 'col-12 col-lg-3',
             ],
             [
                 'name' => 'category_id',
@@ -49,7 +52,6 @@
                 'type' => 'select',
                 'label' => 'Category',
                 'value' => $filters['category_id'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => collect([['value' => '', 'label' => 'All']])
                     ->merge($categories->map(fn ($category) => ['value' => (string) $category->id, 'label' => $category->name]))
                     ->all(),
@@ -60,7 +62,6 @@
                 'type' => 'select',
                 'label' => 'Condition',
                 'value' => $filters['condition'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => collect([['value' => '', 'label' => 'All']])
                     ->merge(collect($conditions)->map(fn ($condition) => ['value' => $condition->value, 'label' => $condition->label()]))
                     ->all(),
@@ -71,7 +72,6 @@
                 'type' => 'select',
                 'label' => 'Status',
                 'value' => $filters['status'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => collect([['value' => '', 'label' => 'All']])
                     ->merge(collect($statuses)->map(fn ($status) => ['value' => $status->value, 'label' => $status->label()]))
                     ->all(),
@@ -82,7 +82,6 @@
                 'type' => 'select',
                 'label' => 'Sort',
                 'value' => $filters['sort'] ?? 'latest',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => [
                     ['value' => 'latest', 'label' => 'Newest'],
                     ['value' => 'name_asc', 'label' => 'Name: A to Z'],
@@ -94,7 +93,6 @@
                 ],
             ],
         ],
-        'actionsColClass' => 'col-12 col-lg-1 d-flex gap-2',
     ])
 
     <div class="card glass-card surface-section">

@@ -19,6 +19,18 @@ class Kernel extends ConsoleKernel
         $schedule->command('reservations:mark-overdue')
             ->dailyAt('01:00')
             ->withoutOverlapping();
+
+        $schedule->command('carts:expire')->hourly();
+
+        // Add a scheduled task to release expired reservations
+        $schedule->call(function () {
+            CartItem::where('expires_at', '<', now())->each(function ($cartItem) {
+                $user = $cartItem->cart->user;
+                $user->notify(new HoldExpiredNotification($cartItem->item->name));
+                $cartItem->delete();
+                Item::where('id', $cartItem->item_id)->update(['status' => 'available']);
+            });
+        })->everyMinute();
     }
 
     /**

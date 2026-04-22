@@ -5,7 +5,12 @@
                 <h5 class="mb-1 fw-bold"><i class="bi bi-grid me-2"></i>Browse Items</h5>
                 <p class="text-muted mb-0 small">Use filters to find thrift pieces that match your style and budget.</p>
             </div>
-            <a href="{{ route('customer.reservations.index') }}" class="btn btn-sm btn-outline-custom"><i class="bi bi-bag-check me-1"></i>My Reservations</a>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#filterModal-customer-items" title="Open filters" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+                <a href="{{ route('customer.reservations.index') }}" class="btn btn-sm btn-outline-custom"><i class="bi bi-bag-check me-1"></i>My Reservations</a>
+            </div>
         </div>
     </x-slot>
 
@@ -16,11 +21,11 @@
             || filled($filters['sort'] ?? null);
     @endphp
 
-    @include('partials.filter-bar', [
+    @include('partials.filter-modal', [
+        'modalId' => 'filterModal-customer-items',
         'action' => route('items.index'),
         'resetUrl' => route('items.index'),
         'hasFilters' => $hasFilters,
-        'cardClass' => 'card glass-card customer-filter-card mb-4',
         'fields' => [
             [
                 'name' => 'search',
@@ -29,7 +34,6 @@
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['search'] ?? '',
                 'placeholder' => 'Item name or description',
-                'colClass' => 'col-12 col-lg-4',
             ],
             [
                 'name' => 'category_id',
@@ -38,7 +42,6 @@
                 'label' => 'Category',
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['category_id'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => collect([['value' => '', 'label' => 'All']])
                     ->merge($categories->map(fn ($category) => ['value' => (string) $category->id, 'label' => $category->name]))
                     ->all(),
@@ -50,7 +53,6 @@
                 'label' => 'Condition',
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['condition'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => collect([['value' => '', 'label' => 'All']])
                     ->merge(collect($conditions)->map(fn ($condition) => ['value' => $condition->value, 'label' => $condition->label()]))
                     ->all(),
@@ -62,7 +64,6 @@
                 'label' => 'Sort',
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['sort'] ?? 'latest',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => [
                     ['value' => 'latest', 'label' => 'Newest'],
                     ['value' => 'price_asc', 'label' => 'Price: Low to High'],

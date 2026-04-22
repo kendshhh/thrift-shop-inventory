@@ -5,7 +5,12 @@
                 <h5 class="mb-1 fw-bold"><i class="bi bi-bag me-2"></i>My Reservations</h5>
                 <p class="text-muted mb-0 small">Track your reservation status, payment state, and pickup schedule.</p>
             </div>
-            <a href="{{ route('items.index') }}" class="btn btn-sm btn-outline-custom"><i class="bi bi-grid me-1"></i>Browse More Items</a>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#filterModal-customer-reservations" title="Open filters" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+                <a href="{{ route('items.index') }}" class="btn btn-sm btn-outline-custom"><i class="bi bi-grid me-1"></i>Browse More Items</a>
+            </div>
         </div>
     </x-slot>
 
@@ -62,11 +67,11 @@
         </div>
     @endif
 
-    @include('partials.filter-bar', [
+    @include('partials.filter-modal', [
+        'modalId' => 'filterModal-customer-reservations',
         'action' => route('customer.reservations.index'),
         'resetUrl' => route('customer.reservations.index'),
         'hasFilters' => $hasFilters,
-        'cardClass' => 'card customer-filter-card mb-4',
         'fields' => [
             [
                 'name' => 'reference',
@@ -75,7 +80,6 @@
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['reference'] ?? '',
                 'placeholder' => 'Search by reference',
-                'colClass' => 'col-12 col-lg-4',
             ],
             [
                 'name' => 'status',
@@ -84,7 +88,6 @@
                 'label' => 'Status',
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['status'] ?? '',
-                'colClass' => 'col-6 col-lg-3',
                 'options' => collect([['value' => '', 'label' => 'All']])
                     ->merge(collect($statuses)->map(fn ($status) => ['value' => $status->value, 'label' => $status->label()]))
                     ->all(),
@@ -96,7 +99,6 @@
                 'label' => 'Payment',
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['payment_status'] ?? '',
-                'colClass' => 'col-6 col-lg-3',
                 'options' => collect([['value' => '', 'label' => 'All']])
                     ->merge(collect($paymentStatuses)->map(fn ($paymentStatus) => ['value' => $paymentStatus->value, 'label' => $paymentStatus->label()]))
                     ->all(),
@@ -122,7 +124,10 @@
                     <tbody>
                         @forelse ($reservations as $reservation)
                             @php
-                                $previewItem = $reservation->reservationItems->first()?->item;
+                                $lineItems = $reservation->reservationItems;
+                                $totalItemCount = (int) $lineItems->sum('quantity');
+                                $visibleLineItems = $lineItems->take(3);
+                                $hiddenLineItemCount = max(0, $lineItems->count() - $visibleLineItems->count());
                                 $isExpiringSoon = $reservation->status->value === 'pending'
                                     && $reservation->expires_at
                                     && $reservation->expires_at->lte(now()->addDay())
@@ -132,16 +137,19 @@
                             <tr>
                                 <td class="fw-medium font-monospace">{{ $reservation->reference }}</td>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        @if ($previewItem?->imageUrl())
-                                            <img src="{{ $previewItem->imageUrl() }}" alt="{{ $previewItem->name }}" class="inventory-thumb-sm" data-lightbox-image tabindex="0">
-                                        @else
-                                            <span class="inventory-thumb-fallback"><i class="bi bi-image"></i></span>
+                                    <div class="small">
+                                        <div class="text-muted mb-1">{{ $totalItemCount }} item{{ $totalItemCount > 1 ? 's' : '' }}</div>
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach ($visibleLineItems as $lineItem)
+                                                <li class="text-dark">
+                                                    {{ $lineItem->item?->name ?? 'Archived Item' }}
+                                                    <span class="text-muted">x{{ $lineItem->quantity }}</span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                        @if ($hiddenLineItemCount > 0)
+                                            <div class="text-muted">+{{ $hiddenLineItemCount }} more</div>
                                         @endif
-                                        <div class="small">
-                                            <div class="fw-medium text-dark">{{ $previewItem?->name ?? 'Archived Item' }}</div>
-                                            <div class="text-muted">{{ $reservation->reservationItems->sum('quantity') }} item{{ $reservation->reservationItems->sum('quantity') > 1 ? 's' : '' }}</div>
-                                        </div>
                                     </div>
                                 </td>
                                 <td><x-status-badge type="reservation" :value="$reservation->status->value" :label="$reservation->status->label()" /></td>

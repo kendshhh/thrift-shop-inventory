@@ -1,7 +1,7 @@
 <x-guest-layout>
     <x-auth-session-status class="mb-3" :status="session('status')" />
 
-    <div class="auth-role-selection">
+    <div class="auth-glass auth-role-selection">
         <div class="text-center auth-role-header">
             <h3 class="fw-bold mb-0">Please select your role</h3>
         </div>

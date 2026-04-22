@@ -6,6 +6,9 @@
                 <p class="text-muted mb-0 small">Track new reservations and customer requests that need shop attention.</p>
             </div>
             <div class="action-row">
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#filterModal-admin-notifications" title="Open filters" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-funnel"></i>
+                </button>
                 <a href="{{ route('admin.reservations.index') }}" class="btn btn-sm btn-outline-custom"><i class="bi bi-calendar-check me-1"></i>Reservations</a>
                 @if ($unreadCount > 0)
                     <form method="POST" action="{{ route('admin.notifications.mark-all-read') }}">
@@ -31,11 +34,11 @@
         </div>
     @endif
 
-    @include('partials.filter-bar', [
+    @include('partials.filter-modal', [
+        'modalId' => 'filterModal-admin-notifications',
         'action' => route('admin.notifications.index'),
         'resetUrl' => route('admin.notifications.index'),
         'hasFilters' => $hasFilters,
-        'cardClass' => 'card glass-card mb-4',
         'fields' => [
             [
                 'name' => 'search',
@@ -43,7 +46,6 @@
                 'label' => 'Search',
                 'value' => $filters['search'] ?? '',
                 'placeholder' => 'Title, message, reference, customer, or item',
-                'colClass' => 'col-12 col-lg-4',
             ],
             [
                 'name' => 'read_state',
@@ -51,7 +53,6 @@
                 'type' => 'select',
                 'label' => 'State',
                 'value' => $filters['read_state'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => [
                     ['value' => '', 'label' => 'All'],
                     ['value' => 'unread', 'label' => 'Unread'],
@@ -64,7 +65,6 @@
                 'type' => 'select',
                 'label' => 'Type',
                 'value' => $filters['event_type'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => [
                     ['value' => '', 'label' => 'All'],
                     ['value' => 'new_reservation', 'label' => 'New Reservation'],
@@ -80,14 +80,12 @@
                 'type' => 'select',
                 'label' => 'Sort',
                 'value' => $filters['sort'] ?? 'latest',
-                'colClass' => 'col-6 col-lg-3',
                 'options' => [
                     ['value' => 'latest', 'label' => 'Newest'],
                     ['value' => 'oldest', 'label' => 'Oldest'],
                 ],
             ],
         ],
-        'actionsColClass' => 'col-12 col-lg-1 d-flex gap-2',
     ])
 
     <div class="card glass-card surface-section customer-surface">

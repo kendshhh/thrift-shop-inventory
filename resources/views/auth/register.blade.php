@@ -1,80 +1,84 @@
 <x-guest-layout>
-    <div class="text-center mb-4">
-        <span class="status-badge status-badge-ready rounded-pill px-3 py-2 mb-3 d-inline-flex align-items-center">
-            <i class="bi bi-bag-heart me-2"></i>Customer registration
-        </span>
-        <h4 class="mb-2 fw-bold">Create an account</h4>
-        <p class="text-muted mb-0">Set up your customer profile to browse finds, reserve pieces, and receive order updates.</p>
-    </div>
-
-    <form method="POST" action="{{ route('register') }}">
-        @csrf
-
-        <div class="mb-3">
-            <x-input-label for="name" :value="__('Full Name')" />
-            <x-text-input id="name" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" />
+    <div class="auth-glass">
+        <div class="text-center mb-4">
+            <span class="status-badge status-badge-ready rounded-pill px-3 py-2 mb-3 d-inline-flex align-items-center">
+                <i class="bi bi-bag-heart me-2"></i>Customer registration
+            </span>
+            <h4 class="mb-2 fw-bold">Create an account</h4>
+            <p class="text-muted mb-0">Set up your customer profile to browse finds, reserve pieces, and receive order updates.</p>
         </div>
 
-        <div class="mb-3">
-            <x-input-label for="email" :value="__('Email address')" />
-            <x-text-input id="email" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" />
-        </div>
 
-        <div class="mb-3">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" type="password" name="password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" />
-        </div>
+        <form method="POST" action="{{ route('register') }}">
+            @csrf
+            <input type="hidden" name="role" value="customer">
 
-        <div class="mb-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-            <x-text-input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password_confirmation')" />
-        </div>
-
-        <div class="auth-legal-inline mb-4">
-            <div class="form-check auth-consent-check mb-0">
-                <input
-                    id="legal_consent"
-                    type="checkbox"
-                    class="form-check-input"
-                    name="legal_consent"
-                    value="1"
-                    aria-describedby="legal-consent-copy"
-                    {{ old('legal_consent') ? 'checked' : '' }}
-                >
-                <div id="legal-consent-copy" class="form-check-label small text-muted">
-                    <span class="mb-0">I agree to the</span>
-                    <button
-                        type="button"
-                        class="auth-legal-link"
-                        aria-haspopup="dialog"
-                        aria-controls="privacy-notice-modal"
-                        data-legal-modal-trigger="privacy-notice-modal"
-                    >Privacy Notice</button>
-                    and
-                    <button
-                        type="button"
-                        class="auth-legal-link"
-                        aria-haspopup="dialog"
-                        aria-controls="terms-modal"
-                        data-legal-modal-trigger="terms-modal"
-                    >Terms and Conditions</button>.
-                </div>
+            <div class="mb-3">
+                <x-input-label for="name" :value="__('Full Name')" />
+                <x-text-input id="name" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+                <x-input-error :messages="$errors->get('name')" />
             </div>
-            <x-input-error :messages="$errors->get('legal_consent')" />
-        </div>
 
-        <div class="d-grid mb-3">
-            <x-primary-button>{{ __('Create Account') }}</x-primary-button>
-        </div>
+            <div class="mb-3">
+                <x-input-label for="email" :value="__('Email address')" />
+                <x-text-input id="email" type="email" name="email" :value="old('email')" required autocomplete="username" />
+                <x-input-error :messages="$errors->get('email')" />
+            </div>
 
-        <div class="text-center">
-            <a class="text-muted small" href="{{ route('login', ['role' => 'customer']) }}">{{ __('Already have an account?') }}</a>
-        </div>
-    </form>
+            <div class="mb-3">
+                <x-input-label for="password" :value="__('Password')" />
+                <x-text-input id="password" type="password" name="password" required autocomplete="new-password" />
+                <x-input-error :messages="$errors->get('password')" />
+            </div>
+
+            <div class="mb-4">
+                <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+                <x-text-input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" />
+                <x-input-error :messages="$errors->get('password_confirmation')" />
+            </div>
+
+            <div class="auth-legal-inline mb-4">
+                <div class="form-check auth-consent-check mb-0">
+                    <input
+                        id="legal_consent"
+                        type="checkbox"
+                        class="form-check-input"
+                        name="legal_consent"
+                        value="1"
+                        aria-describedby="legal-consent-copy"
+                        {{ old('legal_consent') ? 'checked' : '' }}
+                    >
+                    <div id="legal-consent-copy" class="form-check-label small text-muted">
+                        <span class="mb-0">I agree to the</span>
+                        <button
+                            type="button"
+                            class="auth-legal-link"
+                            aria-haspopup="dialog"
+                            aria-controls="privacy-notice-modal"
+                            data-legal-modal-trigger="privacy-notice-modal"
+                        >Privacy Notice</button>
+                        and
+                        <button
+                            type="button"
+                            class="auth-legal-link"
+                            aria-haspopup="dialog"
+                            aria-controls="terms-modal"
+                            data-legal-modal-trigger="terms-modal"
+                        >Terms and Conditions</button>.
+                    </div>
+                </div>
+                <x-input-error :messages="$errors->get('legal_consent')" />
+            </div>
+
+            <div class="d-grid mb-3">
+                <x-primary-button>{{ __('Create Account') }}</x-primary-button>
+            </div>
+
+            <div class="text-center">
+                <a class="text-muted small" href="{{ route('login', ['role' => 'customer']) }}">{{ __('Already have an account?') }}</a>
+            </div>
+        </form>
+    </div>
     <x-slot name="overlays">
         <div class="auth-legal-modal-shell" aria-hidden="true">
             <div class="auth-legal-modal-backdrop" data-legal-modal-close></div>

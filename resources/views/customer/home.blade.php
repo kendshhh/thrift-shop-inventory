@@ -5,8 +5,11 @@
                 <h5 class="mb-1 fw-bold"><i class="bi bi-house-heart me-2"></i>Customer Home</h5>
                 <p class="text-muted mb-0 small">Discover available items and keep track of your pickup schedule.</p>
             </div>
-            <div class="d-flex flex-wrap gap-2">
+            <div class="d-flex flex-wrap align-items-center gap-2">
                 <a class="btn btn-sm btn-outline-custom" href="{{ route('items.index') }}"><i class="bi bi-search me-1"></i>Browse Items</a>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#filterModal-customer-home" title="Open filters" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-funnel"></i>
+                </button>
                 <a class="btn btn-sm btn-primary" href="{{ route('customer.reservations.index') }}"><i class="bi bi-bag-check me-1"></i>My Reservations</a>
             </div>
         </div>
@@ -59,11 +62,11 @@
         </div>
     @endif
 
-    @include('partials.filter-bar', [
+    @include('partials.filter-modal', [
+        'modalId' => 'filterModal-customer-home',
         'action' => route('customer.home'),
         'resetUrl' => route('customer.home'),
         'hasFilters' => $hasFilters,
-        'cardClass' => 'card customer-filter-card mb-4',
         'fields' => [
             [
                 'name' => 'search',
@@ -72,7 +75,6 @@
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['search'] ?? '',
                 'placeholder' => 'Item name or description',
-                'colClass' => 'col-12 col-lg-5',
             ],
             [
                 'name' => 'category_id',
@@ -81,7 +83,6 @@
                 'label' => 'Category',
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['category_id'] ?? '',
-                'colClass' => 'col-6 col-lg-3',
                 'options' => collect([['value' => '', 'label' => 'All']])
                     ->merge($categories->map(fn ($category) => ['value' => (string) $category->id, 'label' => $category->name]))
                     ->all(),
@@ -93,7 +94,6 @@
                 'label' => 'Condition',
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['condition'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => collect([['value' => '', 'label' => 'All']])
                     ->merge(collect($conditions)->map(fn ($condition) => ['value' => $condition->value, 'label' => $condition->label()]))
                     ->all(),

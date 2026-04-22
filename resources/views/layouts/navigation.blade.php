@@ -3,6 +3,9 @@
     $brandName = data_get($branding, 'brand_name', config('app.name', 'Everdarling'));
     $logoUrl = data_get($branding, 'logo_url');
     $brandLogo = $logoUrl ?: asset('images/everdarling_logo.png');
+    $customerCartCount = $user && !$user->isAdmin()
+        ? \App\Models\Cart::currentForUser($user->id)?->totalQuantity() ?? 0
+        : 0;
     $unreadNotificationCount = $user && !$user->isAdmin()
         ? $user->unreadNotifications()->count()
         : 0;
@@ -43,7 +46,7 @@
                         <li class="nav-item"><a class="nav-link mx-lg-2{{ request()->routeIs('admin.inventory.*') ? ' active' : '' }}" href="{{ route('admin.inventory.index') }}">Inventory</a></li>
                         <li class="nav-item"><a class="nav-link mx-lg-2{{ request()->routeIs('admin.categories.*') ? ' active' : '' }}" href="{{ route('admin.categories.index') }}">Categories</a></li>
                         <li class="nav-item">
-                            <a class="nav-link mx-lg-2 position-relative{{ request()->routeIs('admin.reservations.*') ? ' active' : '' }}" href="{{ route('admin.reservations.index') }}">
+                            <a class="nav-link mx-lg-2 position-relative{{ request()->routeIs('admin.reservations.*') ? ' active' : '' }}" href="{{ route('admin.reservations.overview') }}">
                                 Reservations
                                 @if ($newReservationAlertCount > 0)
                                     <span class="badge rounded-pill bg-danger ms-1">{{ $newReservationAlertCount > 99 ? '99+' : $newReservationAlertCount }}</span>
@@ -63,7 +66,7 @@
                 @endif
 
                 <ul class="navbar-nav ms-auto align-items-lg-center mt-3 mt-lg-0">
-                    @if ($user->isAdmin())
+                    @if (isset($user) && $user && $user->isAdmin())
                         <li class="nav-item me-lg-2">
                             <a class="nav-link navbar-surface-pill position-relative px-3 py-2{{ request()->routeIs('admin.notifications.*') ? ' active' : '' }}" href="{{ route('admin.notifications.index') }}">
                                 <i class="bi bi-bell"></i>
@@ -75,6 +78,16 @@
                             </a>
                         </li>
                     @else
+                        <li class="nav-item me-lg-2">
+                            <a class="nav-link navbar-surface-pill position-relative px-3 py-2{{ request()->routeIs('cart.*') ? ' active' : '' }}" href="{{ route('cart.index') }}">
+                                <i class="bi bi-cart me-1"></i>Cart
+                                @if ($customerCartCount > 0)
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {{ $customerCartCount > 99 ? '99+' : $customerCartCount }}
+                                    </span>
+                                @endif
+                            </a>
+                        </li>
                         <li class="nav-item me-lg-2">
                             <a class="nav-link navbar-surface-pill position-relative px-3 py-2{{ request()->routeIs('customer.notifications.*') ? ' active' : '' }}" href="{{ route('customer.notifications.index') }}">
                                 <i class="bi bi-bell me-1"></i>Notifications

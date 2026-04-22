@@ -33,7 +33,20 @@
             'reschedule' => 'Reschedule',
             default => 'N/A',
         };
+        $pendingCancelItems = $reservation->reservationItems->where('cancel_pending', true);
     @endphp
+
+    @if ($pendingCancelItems->isNotEmpty())
+        <div class="alert alert-warning d-flex align-items-start gap-2 mb-4" role="alert">
+            <i class="bi bi-x-circle-fill fs-5 mt-1"></i>
+            <div>
+                <strong>{{ $reservation->user?->name ?? 'Customer' }}</strong> has requested cancellation for
+                {{ $pendingCancelItems->count() }} item{{ $pendingCancelItems->count() > 1 ? 's' : '' }}:
+                <strong>{{ $pendingCancelItems->map(fn($i) => $i->item?->name ?? 'Archived Item')->join(', ') }}</strong>.
+                Review the <a href="#line-items" class="alert-link">Line Items</a> table below to approve or decline.
+            </div>
+        </div>
+    @endif
 
     <div class="row g-4">
         <div class="col-lg-5">
@@ -51,13 +64,13 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-7">
+        <div class="col-lg-7" id="line-items">
             <div class="card glass-card surface-section table-card">
                 <div class="card-header"><strong>Line Items</strong></div>
                 <div class="card-body p-0">
                     <table class="table table-sm mb-0">
                         <thead class="table-light">
-                            <tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Line Total</th></tr>
+                            <tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Line Total</th><th>Cancel Request</th></tr>
                         </thead>
                         <tbody>
                             @foreach ($reservation->reservationItems as $lineItem)
@@ -75,6 +88,9 @@
                                     <td>{{ $lineItem->quantity }}</td>
                                     <td>&#8369;{{ number_format((float) $lineItem->unit_price, 2) }}</td>
                                     <td>&#8369;{{ number_format((float) $lineItem->line_total, 2) }}</td>
+                                    <td>
+                                        {{-- Per-item approve/decline removed; use self-service only --}}
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -118,6 +134,7 @@
                             <form method="POST" action="{{ route('admin.reservations.update-customer-request', $reservation) }}">
                                 @csrf
                                 @method('PATCH')
+                                <input type="hidden" name="from_self_service" value="1">
                                 <div class="mb-3">
                                     <label class="form-label form-label-modern">Admin Note <span class="text-muted fw-normal">(optional)</span></label>
                                     <textarea name="admin_note" class="form-control form-control-modern @error('admin_note') is-invalid @enderror" rows="3">{{ old('admin_note') }}</textarea>
@@ -129,6 +146,44 @@
                                 </div>
                             </form>
                         @endif
+                    @elseif ($reservation->reservationItems->where('cancel_pending', true)->count() > 0)
+                        <div class="surface-note mb-3">
+                            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                <span class="fw-semibold">Latest Request: Per-Item Cancellation</span>
+                                <x-status-badge type="request" value="pending" label="Pending" />
+                            </div>
+                            <div class="small text-muted mb-2">
+                                Cancellation request(s) for the following item(s) are pending admin approval:
+                                <strong>{{ $reservation->reservationItems->where('cancel_pending', true)->map(fn($i) => $i->item?->name ?? 'Archived Item')->join(', ') }}</strong>
+                            </div>
+                            <div class="mt-3">
+                                <table class="table table-sm mb-0">
+                                    <thead class="table-light">
+                                        <tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Line Total</th><th>Action</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($reservation->reservationItems as $lineItem)
+                                            @if ($lineItem->cancel_pending)
+                                                <tr>
+                                                    <td>{{ $lineItem->item?->name ?? 'Archived Item' }}</td>
+                                                    <td>{{ $lineItem->quantity }}</td>
+                                                    <td>&#8369;{{ number_format((float) $lineItem->unit_price, 2) }}</td>
+                                                    <td>&#8369;{{ number_format((float) $lineItem->line_total, 2) }}</td>
+                                                    <td>
+                                                        <form method="POST" action="{{ route('admin.reservations.item-cancel-request', [$reservation, $lineItem]) }}" class="d-flex gap-1 flex-wrap">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="submit" name="action" value="approve" class="btn btn-sm btn-success rounded-pill">Approve</button>
+                                                            <button type="submit" name="action" value="decline" class="btn btn-sm btn-outline-danger rounded-pill">Decline</button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     @else
                         <p class="text-muted mb-0">No customer self-service request has been submitted yet.</p>
                     @endif

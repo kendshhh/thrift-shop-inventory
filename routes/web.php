@@ -14,6 +14,7 @@ use App\Http\Controllers\Customer\ReservationController as CustomerReservationCo
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,6 +59,8 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
         ->name('reservations.request-cancellation');
     Route::patch('/reservations/{reservation}/request-reschedule', [CustomerReservationController::class, 'requestReschedule'])
         ->name('reservations.request-reschedule');
+    Route::patch('/reservations/{reservation}/items/{reservationItem}/cancel', [CustomerReservationController::class, 'cancelItem'])
+        ->name('reservations.cancel-item');
 });
 
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -83,14 +86,33 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         ->except(['show']);
 
     Route::get('/reservations', [ReservationManagementController::class, 'index'])->name('reservations.index');
+    Route::get('/reservations/overview', [ReservationManagementController::class, 'overview'])->name('reservations.overview');
     Route::get('/reservations/{reservation}', [ReservationManagementController::class, 'show'])->name('reservations.show');
     Route::patch('/reservations/{reservation}/status', [ReservationManagementController::class, 'updateStatus'])
         ->name('reservations.update-status');
     Route::patch('/reservations/{reservation}/customer-request', [ReservationManagementController::class, 'updateCustomerRequest'])
         ->name('reservations.update-customer-request');
+    Route::patch('/reservations/{reservation}/extend', [ReservationManagementController::class, 'extend'])
+        ->name('reservations.extend');
+    Route::patch('/reservations/{reservation}/mark-sold', [ReservationManagementController::class, 'markSold'])
+        ->name('reservations.mark-sold');
+    Route::patch('/reservations/{reservation}/items/{reservationItem}/remove', [ReservationManagementController::class, 'removeItem'])
+        ->name('reservations.remove-item');
+    Route::patch('/reservations/{reservation}/items/{reservationItem}/cancel-request', [ReservationManagementController::class, 'handleItemCancelRequest'])
+        ->name('reservations.item-cancel-request');
+    Route::patch('/reservations/users/{user}/cancel-all', [ReservationManagementController::class, 'cancelAllForUser'])
+        ->name('reservations.cancel-all-for-user');
 
     Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
+});
+
+Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::patch('/cart/update', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 });
 
 require __DIR__.'/auth.php';

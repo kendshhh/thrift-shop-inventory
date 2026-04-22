@@ -8,7 +8,10 @@
                     <p class="mb-0 text-muted small">Review details and reserve while stock is available.</p>
                 </div>
             </div>
-            <a href="{{ route('customer.reservations.index') }}" class="btn btn-sm btn-outline-custom"><i class="bi bi-bag-check me-1"></i>My Reservations</a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('cart.index') }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-cart me-1"></i>View Cart</a>
+                <a href="{{ route('customer.reservations.index') }}" class="btn btn-sm btn-outline-custom"><i class="bi bi-bag-check me-1"></i>My Reservations</a>
+            </div>
         </div>
     </x-slot>
 
@@ -137,6 +140,12 @@
                                         @csrf
                                         <input type="hidden" name="item_id" value="{{ $item->id }}">
 
+                                        @php
+                                            $pickupSlots = \App\Enums\PickupSlot::cases();
+                                            $selectedPickupSlot = old('pickup_slot', $pickupSlots[0]->value ?? null);
+                                            $selectedPickupSlotLabel = collect($pickupSlots)->firstWhere('value', $selectedPickupSlot)?->label() ?? 'Select slot';
+                                        @endphp
+
                                         <div class="mb-3">
                                             <label class="form-label fw-medium">Quantity</label>
                                             <input
@@ -154,17 +163,25 @@
 
                                         <div class="mb-3">
                                             <label class="form-label fw-medium">Pickup Date</label>
-                                            <input name="pickup_date" type="date" min="{{ now()->addDay()->toDateString() }}" value="{{ old('pickup_date') }}" class="form-control @error('pickup_date') is-invalid @enderror" required>
+                                            <input name="pickup_date" type="text" data-flatpickr-date data-min-date="{{ now()->addDay()->toDateString() }}" value="{{ old('pickup_date') }}" class="form-control form-control-modern @error('pickup_date') is-invalid @enderror" required>
                                             @error('pickup_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label fw-medium">Pickup Slot</label>
-                                            <select name="pickup_slot" class="form-select @error('pickup_slot') is-invalid @enderror" required>
-                                                @foreach (\App\Enums\PickupSlot::cases() as $slot)
-                                                    <option value="{{ $slot->value }}" @selected(old('pickup_slot') === $slot->value)>{{ $slot->label() }}</option>
-                                                @endforeach
-                                            </select>
+                                            <div class="dropdown" data-option-dropdown>
+                                                <input type="hidden" name="pickup_slot" value="{{ $selectedPickupSlot }}" data-option-input required>
+                                                <button class="btn btn-outline-custom w-100 d-flex justify-content-between align-items-center rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <span data-option-label>{{ $selectedPickupSlotLabel }}</span>
+                                                </button>
+                                                <ul class="dropdown-menu w-100 mt-2 border-0 shadow-lg glass-dropdown-menu">
+                                                    @foreach ($pickupSlots as $slot)
+                                                        <li>
+                                                            <button type="button" class="dropdown-item" data-option-value="{{ $slot->value }}" data-option-text="{{ $slot->label() }}">{{ $slot->label() }}</button>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
                                             @error('pickup_slot') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                         </div>
 
@@ -175,6 +192,35 @@
 
                                         <button type="submit" class="btn btn-primary w-100"><i class="bi bi-bag-check me-1"></i>Reserve Item</button>
                                     </form>
+
+                                    <hr>
+
+                                    <div>
+                                        <h6 class="fw-semibold">Save This Item to Cart</h6>
+                                        <p class="small text-muted mb-3">Use the cart when you want to combine multiple items into a single reservation checkout.</p>
+
+                                        <form method="POST" action="{{ route('cart.add') }}">
+                                            @csrf
+                                            <input type="hidden" name="item_id" value="{{ $item->id }}">
+
+                                            <div class="mb-3">
+                                                <label class="form-label fw-medium">Cart Quantity</label>
+                                                <input
+                                                    name="quantity"
+                                                    type="number"
+                                                    min="1"
+                                                    max="{{ $availableQuantity }}"
+                                                    value="{{ old('quantity', 1) }}"
+                                                    class="form-control @error('quantity') is-invalid @enderror"
+                                                    required
+                                                >
+                                                <div class="form-text">Maximum addable quantity right now: {{ $availableQuantity }}.</div>
+                                                @error('quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                            </div>
+
+                                            <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-cart-plus me-1"></i>Add to Cart</button>
+                                        </form>
+                                    </div>
                                 @endif
                             @elseif ($isReservationLocked)
                                 <div class="alert alert-warning mb-3">

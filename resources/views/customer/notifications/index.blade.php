@@ -6,6 +6,9 @@
                 <p class="text-muted mb-0 small">Track updates from the shop team about your reservations.</p>
             </div>
             <div class="action-row">
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#filterModal-customer-notifications" title="Open filters" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-funnel"></i>
+                </button>
                 <a href="{{ route('customer.reservations.index') }}" class="btn btn-sm btn-outline-custom"><i class="bi bi-bag-check me-1"></i>My Reservations</a>
                 @if (($unreadCount ?? 0) > 0)
                     <form method="POST" action="{{ route('customer.notifications.mark-all-read') }}">
@@ -29,11 +32,11 @@
         </div>
     @endif
 
-    @include('partials.filter-bar', [
+    @include('partials.filter-modal', [
+        'modalId' => 'filterModal-customer-notifications',
         'action' => route('customer.notifications.index'),
         'resetUrl' => route('customer.notifications.index'),
         'hasFilters' => $hasFilters,
-        'cardClass' => 'card customer-filter-card mb-4',
         'fields' => [
             [
                 'name' => 'search',
@@ -42,7 +45,6 @@
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['search'] ?? '',
                 'placeholder' => 'Title, message, reference, or status',
-                'colClass' => 'col-12 col-lg-8',
             ],
             [
                 'name' => 'read_state',
@@ -51,7 +53,6 @@
                 'label' => 'State',
                 'labelClass' => 'form-label fw-medium mb-1',
                 'value' => $filters['read_state'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => [
                     ['value' => '', 'label' => 'All'],
                     ['value' => 'unread', 'label' => 'Unread'],

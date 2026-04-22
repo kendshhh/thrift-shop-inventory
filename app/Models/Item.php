@@ -160,4 +160,20 @@ class Item extends Model
             ])->saveQuietly();
         }
     }
+
+    public function reserve(): bool
+    {
+        if ($this->status !== 'available') {
+            return false;
+        }
+
+        $this->status = 'reserved';
+        return $this->save();
+    }
+
+    public function release(): void
+    {
+        $this->status = 'available';
+        $this->save();
+    }
 }

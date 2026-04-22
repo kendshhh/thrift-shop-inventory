@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 class ReservationController extends Controller
 {
@@ -205,13 +206,15 @@ class ReservationController extends Controller
         }
 
         $validated = $request->validate([
-            'request_reason' => ['required', 'string', 'max:1000'],
+            'request_reason' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $reservation->update([
             'customer_request_type' => 'cancellation',
             'customer_request_status' => 'pending',
-            'customer_request_reason' => trim($validated['request_reason']),
+            'customer_request_reason' => filled($validated['request_reason'] ?? null)
+                ? trim((string) $validated['request_reason'])
+                : 'Customer requested cancellation via self-service.',
             'customer_requested_pickup_date' => null,
             'customer_requested_pickup_slot' => null,
             'customer_requested_at' => now(),
@@ -295,12 +298,44 @@ class ReservationController extends Controller
             ->with('status', 'Pickup reschedule request submitted. We will review it shortly.');
     }
 
+    /**
+     * Cancel a single item from a reservation (per-line-item cancel)
+     */
+    public function cancelItem(Request $request, Reservation $reservation, ReservationItem $reservationItem): RedirectResponse
+    {
+        abort_unless($reservation->user_id === $request->user()->id, 403);
+        abort_unless($reservationItem->reservation_id === $reservation->id, 404);
+
+        // Only allow cancel if reservation is active and item is not already pending cancel
+        if (!$reservation->canCustomerRequestCancellation()) {
+            return back()->withErrors(['customer_request' => 'You cannot cancel items for this reservation.']);
+        }
+
+        if ($reservationItem->cancel_pending) {
+            return back()->withErrors(['customer_request' => 'A cancellation request for this item is already pending.']);
+        }
+
+        $reservationItem->update(['cancel_pending' => true]);
+
+        // Optionally, notify admins here if not already done elsewhere
+        // $this->notifyAdmins($reservation, 'customer_request_submitted');
+
+        // Redirect to self-service section with status
+        return redirect()
+            ->route('customer.reservations.show', [$reservation, '#self-service-requests'])
+            ->with('status', 'Cancellation request submitted for this item. Awaiting admin approval.');
+    }
+
     private function notifyAdmins(Reservation $reservation, string $eventType): void
     {
-        User::role('admin')
-            ->get()
-            ->each(static function (User $admin) use ($reservation, $eventType): void {
-                $admin->notify(new AdminReservationNotification($reservation, $eventType));
-            });
+        try {
+            User::role('admin')
+                ->get()
+                ->each(static function (User $admin) use ($reservation, $eventType): void {
+                    $admin->notify(new AdminReservationNotification($reservation, $eventType));
+                });
+        } catch (RoleDoesNotExist $exception) {
+            report($exception);
+        }
     }
 }

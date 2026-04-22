@@ -9,6 +9,7 @@
                 </div>
             </div>
             <a href="{{ route('items.index') }}" class="btn btn-sm btn-outline-custom"><i class="bi bi-grid me-1"></i>Browse Items</a>
+            <a href="{{ route('cart.index') }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-cart"></i> View Cart</a>
         </div>
     </x-slot>
 
@@ -124,7 +125,8 @@
                 </div>
             </div>
 
-            <div class="card glass-card surface-section mt-4">
+
+            <div id="self-service-requests" class="card glass-card surface-section mt-4">
                 <div class="card-header"><strong>Self-Service Requests</strong></div>
                 <div class="card-body">
                     @if ($reservation->customer_request_status !== null)
@@ -133,55 +135,51 @@
                                 <span class="fw-semibold">Latest Request: {{ $requestTypeLabel }}</span>
                                 <x-status-badge type="request" :value="$reservation->customer_request_status" :label="ucfirst((string) $reservation->customer_request_status)" />
                             </div>
-
                             @if ($reservation->customer_request_reason)
                                 <p class="small text-muted mb-2">{{ $reservation->customer_request_reason }}</p>
                             @endif
-
                             @if ($reservation->customer_request_type === 'reschedule' && $reservation->customer_requested_pickup_date)
                                 <div class="small mb-2">
                                     Requested pickup: <strong>{{ optional($reservation->customer_requested_pickup_date)->format('M d, Y') }}</strong>
                                     ({{ ucfirst(str_replace('_', ' ', (string) $reservation->customer_requested_pickup_slot)) }})
                                 </div>
                             @endif
-
                             @if ($reservation->customer_request_admin_note)
                                 <div class="small text-muted">Admin note: {{ $reservation->customer_request_admin_note }}</div>
                             @endif
-
                             @if ($reservation->customer_requested_at)
                                 <div class="small text-muted mt-2">Submitted {{ optional($reservation->customer_requested_at)->diffForHumans() }}</div>
                             @endif
                         </div>
+                    @elseif ($reservation->reservationItems->where('cancel_pending', true)->count() > 0)
+                        <div class="surface-note mb-3">
+                            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                <span class="fw-semibold">Latest Request: Per-Item Cancellation</span>
+                                <x-status-badge type="request" value="pending" label="Pending" />
+                            </div>
+                            <div class="small text-muted mb-2">
+                                Cancellation request(s) for the following item(s) are pending admin approval:
+                                <strong>{{ $reservation->reservationItems->where('cancel_pending', true)->map(fn($i) => $i->item?->name ?? 'Archived Item')->join(', ') }}</strong>
+                            </div>
+                        </div>
                     @endif
 
                     @if (($canRequestCancellation || $canRequestReschedule) && $reservation->customer_request_status !== 'pending')
-                        <div class="accordion" id="customerRequestActions">
-                            @if ($canRequestCancellation)
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="cancelRequestHeading">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cancelRequestCollapse" aria-expanded="false" aria-controls="cancelRequestCollapse">
-                                            Request Cancellation
-                                        </button>
-                                    </h2>
-                                    <div id="cancelRequestCollapse" class="accordion-collapse collapse" aria-labelledby="cancelRequestHeading" data-bs-parent="#customerRequestActions">
-                                        <div class="accordion-body">
-                                            <form method="POST" action="{{ route('customer.reservations.request-cancellation', $reservation) }}">
-                                                @csrf
-                                                @method('PATCH')
-                                                <div class="mb-3">
-                                                    <label class="form-label form-label-modern">Reason</label>
-                                                    <textarea name="request_reason" rows="3" class="form-control form-control-modern @error('request_reason') is-invalid @enderror" required>{{ old('request_reason') }}</textarea>
-                                                    @error('request_reason') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                                </div>
-                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">Submit Cancellation Request</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
+                        @if ($canRequestCancellation)
+                            <form id="request-cancellation" method="POST" action="{{ route('customer.reservations.request-cancellation', $reservation) }}" class="mb-3">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">Request Cancellation</button>
+                            </form>
+                        @endif
 
+                        <div class="accordion" id="customerRequestActions">
                             @if ($canRequestReschedule)
+                                @php
+                                    $rescheduleSlots = \App\Enums\PickupSlot::cases();
+                                    $selectedRescheduleSlot = old('requested_pickup_slot', $rescheduleSlots[0]->value ?? null);
+                                    $selectedRescheduleSlotLabel = collect($rescheduleSlots)->firstWhere('value', $selectedRescheduleSlot)?->label() ?? 'Select slot';
+                                @endphp
                                 <div class="accordion-item">
                                     <h2 class="accordion-header" id="rescheduleRequestHeading">
                                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#rescheduleRequestCollapse" aria-expanded="false" aria-controls="rescheduleRequestCollapse">
@@ -196,17 +194,24 @@
                                                 <div class="row g-3">
                                                     <div class="col-sm-6">
                                                         <label class="form-label form-label-modern">Requested Pickup Date</label>
-                                                        <input type="date" name="requested_pickup_date" min="{{ now()->addDay()->toDateString() }}" value="{{ old('requested_pickup_date') }}" class="form-control form-control-modern @error('requested_pickup_date') is-invalid @enderror" required>
+                                                        <input type="text" name="requested_pickup_date" data-flatpickr-date data-min-date="{{ now()->addDay()->toDateString() }}" value="{{ old('requested_pickup_date') }}" class="form-control form-control-modern @error('requested_pickup_date') is-invalid @enderror" required>
                                                         @error('requested_pickup_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                                     </div>
                                                     <div class="col-sm-6">
                                                         <label class="form-label form-label-modern">Requested Slot</label>
-                                                        <select name="requested_pickup_slot" class="form-select form-control-modern @error('requested_pickup_slot') is-invalid @enderror" required>
-                                                            <option value="">Select slot</option>
-                                                            @foreach (\App\Enums\PickupSlot::cases() as $slot)
-                                                                <option value="{{ $slot->value }}" @selected(old('requested_pickup_slot') === $slot->value)>{{ $slot->label() }}</option>
-                                                            @endforeach
-                                                        </select>
+                                                        <div class="dropdown" data-option-dropdown>
+                                                            <input type="hidden" name="requested_pickup_slot" value="{{ $selectedRescheduleSlot }}" data-option-input required>
+                                                            <button class="btn btn-outline-custom w-100 d-flex justify-content-between align-items-center rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                <span data-option-label>{{ $selectedRescheduleSlotLabel }}</span>
+                                                            </button>
+                                                            <ul class="dropdown-menu w-100 mt-2 border-0 shadow-lg glass-dropdown-menu">
+                                                                @foreach ($rescheduleSlots as $slot)
+                                                                    <li>
+                                                                        <button type="button" class="dropdown-item" data-option-value="{{ $slot->value }}" data-option-text="{{ $slot->label() }}">{{ $slot->label() }}</button>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        </div>
                                                         @error('requested_pickup_slot') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                                     </div>
                                                     <div class="col-12">
@@ -237,7 +242,7 @@
                 <div class="card-body p-0">
                     <table class="table table-sm mb-0">
                         <thead class="table-light">
-                            <tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Line Total</th></tr>
+                            <tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Line Total</th><th>Action</th></tr>
                         </thead>
                         <tbody>
                             @foreach ($reservation->reservationItems as $lineItem)
@@ -255,6 +260,19 @@
                                     <td>{{ $lineItem->quantity }}</td>
                                     <td>&#8369;{{ number_format((float) $lineItem->unit_price, 2) }}</td>
                                     <td>&#8369;{{ number_format((float) $lineItem->line_total, 2) }}</td>
+                                    <td>
+                                        @if($reservation->canCustomerRequestCancellation() && $lineItem->item)
+                                            @if($lineItem->cancel_pending)
+                                                <span class="badge text-bg-warning">Cancellation Requested (Pending)</span>
+                                            @else
+                                                <form action="{{ route('customer.reservations.cancel-item', [$reservation, $lineItem]) }}" method="POST" style="display:inline">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="window.location.hash='self-service-requests'">Request Cancellation</button>
+                                                </form>
+                                            @endif
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

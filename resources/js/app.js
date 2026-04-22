@@ -1,4 +1,6 @@
 import './bootstrap';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 const onReady = (callback) => {
 	if (document.readyState === 'loading') {
@@ -201,23 +203,28 @@ const initializeCountdowns = () => {
 		const diffMs = target.getTime() - Date.now();
 
 		if (diffMs <= 0) {
-			return 'available now';
+			return 'expired';
 		}
 
 		const totalSeconds = Math.floor(diffMs / 1000);
 		const days = Math.floor(totalSeconds / 86400);
 		const hours = Math.floor((totalSeconds % 86400) / 3600);
 		const minutes = Math.floor((totalSeconds % 3600) / 60);
+		const seconds = totalSeconds % 60;
 
 		if (days > 0) {
 			return `${days}d ${hours}h`;
 		}
 
 		if (hours > 0) {
-			return `${hours}h ${minutes}m`;
+			return `${hours}h ${minutes}m ${seconds}s`;
 		}
 
-		return `${Math.max(minutes, 0)}m`;
+		if (minutes > 0) {
+			return `${minutes}m ${seconds}s`;
+		}
+
+		return `${seconds}s`;
 	};
 
 	const syncCountdowns = () => {
@@ -236,12 +243,115 @@ const initializeCountdowns = () => {
 				return;
 			}
 
+			const secondsLeft = Math.floor((target.getTime() - Date.now()) / 1000);
+			const urgencyMinutes = Number(countdown.getAttribute('data-countdown-urgent-minutes') ?? '60');
+
+			countdown.classList.toggle('is-urgent', secondsLeft > 0 && secondsLeft <= urgencyMinutes * 60);
+			countdown.classList.toggle('is-expired', secondsLeft <= 0);
+
 			label.textContent = formatCountdown(target);
 		});
 	};
 
+	const useLiveSecondTick = countdowns.some((countdown) => countdown.getAttribute('data-countdown-mode') === 'live-second');
+
 	syncCountdowns();
-	window.setInterval(syncCountdowns, 30000);
+	window.setInterval(syncCountdowns, useLiveSecondTick ? 1000 : 30000);
+};
+
+const initializeFilterForms = () => {
+	const forms = Array.from(document.querySelectorAll('[data-filter-form]'));
+
+	if (!forms.length) {
+		return;
+	}
+
+	forms.forEach((form) => {
+		const liveSearchInput = form.querySelector('[data-live-search="true"]');
+
+		if (!(liveSearchInput instanceof HTMLInputElement)) {
+			return;
+		}
+
+		let timeoutId;
+		const delay = Number(liveSearchInput.getAttribute('data-live-search-delay') ?? '350');
+
+		liveSearchInput.addEventListener('input', () => {
+			window.clearTimeout(timeoutId);
+			timeoutId = window.setTimeout(() => {
+				form.requestSubmit();
+			}, Number.isFinite(delay) ? delay : 350);
+		});
+	});
+};
+
+const initializeDatePickers = () => {
+	const dateFields = Array.from(document.querySelectorAll('[data-flatpickr-date]'));
+
+	if (!dateFields.length) {
+		return;
+	}
+
+	dateFields.forEach((field) => {
+		if (!(field instanceof HTMLInputElement)) {
+			return;
+		}
+
+		const minDate = field.getAttribute('data-min-date') ?? undefined;
+
+		flatpickr(field, {
+			dateFormat: 'Y-m-d',
+			altInput: true,
+			altFormat: 'F j, Y',
+			minDate,
+			disableMobile: true,
+			allowInput: false,
+		});
+	});
+};
+
+const initializeOptionDropdowns = () => {
+	const dropdowns = Array.from(document.querySelectorAll('[data-option-dropdown]'));
+
+	if (!dropdowns.length) {
+		return;
+	}
+
+	dropdowns.forEach((dropdown) => {
+		const input = dropdown.querySelector('[data-option-input]');
+		const label = dropdown.querySelector('[data-option-label]');
+		const options = Array.from(dropdown.querySelectorAll('[data-option-value]'));
+
+		if (!(input instanceof HTMLInputElement) || !(label instanceof HTMLElement) || !options.length) {
+			return;
+		}
+
+		const labelsByValue = new Map(
+			options.map((option) => [
+				option.getAttribute('data-option-value') ?? '',
+				option.getAttribute('data-option-text') ?? option.textContent?.trim() ?? 'Select option',
+			])
+		);
+
+		const syncSelectedLabel = () => {
+			const selectedLabel = labelsByValue.get(input.value) ?? 'Select option';
+			label.textContent = selectedLabel;
+		};
+
+		syncSelectedLabel();
+
+		options.forEach((option) => {
+			option.addEventListener('click', () => {
+				const value = option.getAttribute('data-option-value');
+				if (value === null) {
+					return;
+				}
+
+				input.value = value;
+				syncSelectedLabel();
+			});
+		});
+	});
 };
 
 const initializeLegalModals = () => {
@@ -329,4 +439,7 @@ onReady(() => {
 	initializeImageLightbox();
 	initializeCountdowns();
 	initializeLegalModals();
+	initializeFilterForms();
+	initializeDatePickers();
+	initializeOptionDropdowns();
 });

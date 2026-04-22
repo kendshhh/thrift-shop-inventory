@@ -2,7 +2,12 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
             <h5 class="mb-0 fw-bold"><i class="bi bi-tags me-2"></i>Categories</h5>
-            <a href="{{ route('admin.categories.create') }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Category</a>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#filterModal-categories" title="Open filters" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-funnel"></i>
+                </button>
+                <a href="{{ route('admin.categories.create') }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Category</a>
+            </div>
         </div>
     </x-slot>
 
@@ -19,7 +24,8 @@
             || (($filters['sort'] ?? 'latest') !== 'latest');
     @endphp
 
-    @include('partials.filter-bar', [
+    @include('partials.filter-modal', [
+        'modalId' => 'filterModal-categories',
         'action' => route('admin.categories.index'),
         'resetUrl' => route('admin.categories.index'),
         'hasFilters' => $hasFilters,
@@ -30,7 +36,6 @@
                 'label' => 'Search',
                 'value' => $filters['search'] ?? '',
                 'placeholder' => 'Search by name, slug, or description',
-                'colClass' => 'col-12 col-lg-5',
             ],
             [
                 'name' => 'is_active',
@@ -38,7 +43,6 @@
                 'type' => 'select',
                 'label' => 'Status',
                 'value' => $filters['is_active'] ?? '',
-                'colClass' => 'col-6 col-lg-2',
                 'options' => [
                     ['value' => '', 'label' => 'All'],
                     ['value' => '1', 'label' => 'Active'],
@@ -51,7 +55,6 @@
                 'type' => 'select',
                 'label' => 'Sort',
                 'value' => $filters['sort'] ?? 'latest',
-                'colClass' => 'col-6 col-lg-3',
                 'options' => [
                     ['value' => 'latest', 'label' => 'Newest'],
                     ['value' => 'name_asc', 'label' => 'Name: A to Z'],
