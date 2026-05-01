@@ -4,6 +4,7 @@
     @php
         $isAdmin = isset($role) && $role === 'admin';
         $roleLabel = $isAdmin ? 'Admin' : 'Customer';
+        $rememberId = $isAdmin ? 'admin-remember' : 'customer-remember';
     @endphp
 
     <div class="auth-glass">
@@ -53,12 +54,10 @@
             </div>
 
             <div class="mb-3 d-flex justify-content-between align-items-center">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                    <label class="form-check-label small" for="remember">
-                        {{ __('Remember me') }}
-                    </label>
-                </div>
+                <label class="form-check auth-remember-check" for="{{ $rememberId }}">
+                    <input class="form-check-input" type="checkbox" name="remember" id="{{ $rememberId }}" value="1" {{ old('remember') ? 'checked' : '' }}>
+                    <span class="form-check-label small">{{ __('Remember me') }}</span>
+                </label>
                 @if (Route::has('password.request'))
                     <a class="text-muted small" href="{{ route('password.request') }}">
                         {{ __('Forgot your password?') }}
