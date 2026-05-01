@@ -21,7 +21,18 @@
 
             <div class="mb-3">
                 <x-input-label for="email" :value="__('Email address')" />
-                <x-text-input id="email" type="email" name="email" :value="old('email')" required autocomplete="username" />
+                <x-text-input
+                    id="email"
+                    type="email"
+                    name="email"
+                    :value="old('email')"
+                    required
+                    autocomplete="username"
+                    pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+                    title="Enter a valid email address, such as example@email.com."
+                    oninvalid="this.setCustomValidity('Enter a valid email address, such as example@email.com.')"
+                    oninput="this.setCustomValidity('')"
+                />
                 <div class="form-text">You can type uppercase or lowercase letters. We will save the email in lowercase.</div>
                 <x-input-error :messages="$errors->get('email')" />
             </div>
@@ -62,18 +73,21 @@
             </div>
 
             <div class="auth-legal-inline mb-4">
-                <div class="form-check auth-consent-check mb-0">
+                <div class="auth-consent-check mb-0">
                     <input
                         id="legal_consent"
                         type="checkbox"
-                        class="form-check-input"
+                        class="auth-consent-input"
                         name="legal_consent"
                         value="1"
+                        required
                         aria-describedby="legal-consent-copy"
+                        oninvalid="this.setCustomValidity('You must agree to the Privacy Policy and Terms & Conditions before creating an account.')"
+                        oninput="this.setCustomValidity('')"
                         {{ old('legal_consent') ? 'checked' : '' }}
                     >
-                    <div id="legal-consent-copy" class="form-check-label small text-muted">
-                        <span class="mb-0">I agree to the</span>
+                    <div id="legal-consent-copy" class="auth-consent-copy small text-muted">
+                        <label for="legal_consent" class="mb-0">I agree to the</label>
                         <button
                             type="button"
                             class="auth-legal-link"

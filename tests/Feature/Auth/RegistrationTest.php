@@ -71,4 +71,38 @@ class RegistrationTest extends TestCase
 
         $this->assertGuest();
     }
+
+    public function test_registration_rejects_invalid_email_without_a_top_level_domain(): void
+    {
+        $response = $this->from('/register')->post('/register', [
+            'name' => 'Test User',
+            'email' => 'test@example',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'legal_consent' => '1',
+        ]);
+
+        $response
+            ->assertRedirect('/register')
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertGuest();
+    }
+
+    public function test_registration_rejects_invalid_email_without_an_at_symbol(): void
+    {
+        $response = $this->from('/register')->post('/register', [
+            'name' => 'Test User',
+            'email' => 'testexample.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'legal_consent' => '1',
+        ]);
+
+        $response
+            ->assertRedirect('/register')
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertGuest();
+    }
 }
