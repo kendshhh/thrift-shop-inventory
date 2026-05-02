@@ -140,6 +140,28 @@ class AdminUiAndInventoryStatusTest extends TestCase
         $this->assertSame('09170000016', $item->seller_contact_number);
     }
 
+    public function test_admin_inventory_rejects_numbers_in_seller_name(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $this
+            ->actingAs($admin)
+            ->from(route('admin.inventory.create'))
+            ->post(route('admin.inventory.store'), [
+                'name' => 'Seller Name Rule Item',
+                'price' => 150,
+                'quantity' => 2,
+                'description' => 'Validates seller name input.',
+                'seller_name' => 'Seller 123',
+                'seller_contact_number' => '09170000016',
+                'condition' => ItemCondition::GENTLY_USED->value,
+                'status' => ItemStatus::ACTIVE->value,
+            ])
+            ->assertRedirect(route('admin.inventory.create'))
+            ->assertSessionHasErrors(['seller_name']);
+    }
+
     public function test_admin_inventory_create_rejects_negative_price_and_quantity_with_clear_messages(): void
     {
         $admin = User::factory()->create();

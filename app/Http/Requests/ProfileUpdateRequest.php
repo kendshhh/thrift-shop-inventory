@@ -24,8 +24,15 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', "regex:/^[\p{L}\p{M}][\p{L}\p{M}\s'.-]*$/u"],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.regex' => 'Name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed.',
         ];
     }
 }

@@ -131,7 +131,7 @@
                         </div>
 
                         @if ($reservation->customer_request_status === 'pending')
-                            <form method="POST" action="{{ route('admin.reservations.update-customer-request', $reservation) }}" data-confirm-action data-confirm-message='Type "confirm" to process this customer request.'>
+                            <form method="POST" action="{{ route('admin.reservations.update-customer-request', $reservation) }}" data-confirm-action data-confirm-message='Process this customer request?' data-confirm-variant='primary' data-confirm-label='Confirm'>
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="from_self_service" value="1">
@@ -170,7 +170,7 @@
                                                     <td>&#8369;{{ number_format((float) $lineItem->unit_price, 2) }}</td>
                                                     <td>&#8369;{{ number_format((float) $lineItem->line_total, 2) }}</td>
                                                     <td>
-                                                        <form method="POST" action="{{ route('admin.reservations.item-cancel-request', [$reservation, $lineItem]) }}" class="d-flex gap-1 flex-wrap" data-confirm-action data-confirm-message='Type "confirm" to process this item cancellation request.'>
+                                                        <form method="POST" action="{{ route('admin.reservations.item-cancel-request', [$reservation, $lineItem]) }}" class="d-flex gap-1 flex-wrap" data-confirm-action data-confirm-message='Process this item cancellation request?' data-confirm-variant='danger' data-confirm-label='Confirm'>
                                                             @csrf
                                                             @method('PATCH')
                                                             <button type="submit" name="action" value="approve" class="btn btn-sm btn-success rounded-pill">Approve</button>
@@ -195,7 +195,7 @@
             <div class="card glass-card surface-section">
                 <div class="card-header"><strong>Update Status</strong></div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('admin.reservations.update-status', $reservation) }}" data-confirm-action data-confirm-message='Type "confirm" to save the reservation status changes.'>
+                    <form method="POST" action="{{ route('admin.reservations.update-status', $reservation) }}" data-confirm-action data-confirm-message='Save the reservation status changes?' data-confirm-variant='primary' data-confirm-label='Save'>
                         @csrf
                         @method('PATCH')
                         <div class="row g-3">

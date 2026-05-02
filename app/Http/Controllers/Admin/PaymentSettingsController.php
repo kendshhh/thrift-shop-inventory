@@ -67,15 +67,19 @@ class PaymentSettingsController extends Controller
 
         $request->validate([
             'edit_id' => ['nullable', 'string'],
-            'name' => ['required', 'string', 'max:100'],
-            'bank_name' => ['required', 'string', 'max:120'],
-            'bank_number' => ['required', 'string', 'max:120'],
+            'name' => ['required', 'string', 'max:100', "regex:/^[\p{L}\p{M}][\p{L}\p{M}\s'.-]*$/u"],
+            'bank_name' => ['required', 'string', 'max:120', "regex:/^[\p{L}\p{M}][\p{L}\p{M}\s'.-]*$/u"],
+            'bank_number' => ['required', 'string', 'max:120', 'regex:/^[0-9]+$/'],
             'existing_qr_paths' => ['nullable', 'array'],
             'existing_qr_paths.*' => ['nullable', 'string'],
             'remove_qr_paths' => ['nullable', 'array'],
             'remove_qr_paths.*' => ['nullable', 'string'],
             'qr_codes' => ['nullable', 'array'],
             'qr_codes.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+        ], [
+            'name.regex' => 'Name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed.',
+            'bank_name.regex' => 'Bank name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed.',
+            'bank_number.regex' => 'Bank number must contain numbers only. Letters, spaces, symbols, and minus signs are not allowed.',
         ]);
 
         $disk = Storage::disk('public');

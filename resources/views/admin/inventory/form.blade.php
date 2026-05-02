@@ -10,7 +10,7 @@
         <div class="col-lg-8">
             <div class="card glass-card surface-section">
                 <div class="card-body form-shell">
-                    <form method="POST" action="{{ $isEditing ? route('admin.inventory.update', $item) : route('admin.inventory.store') }}" enctype="multipart/form-data" data-confirm-action data-confirm-message='Type "confirm" to save this inventory item.'>
+                    <form method="POST" action="{{ $isEditing ? route('admin.inventory.update', $item) : route('admin.inventory.store') }}" enctype="multipart/form-data" data-confirm-action data-confirm-message='Save this inventory item?' data-confirm-variant='primary' data-confirm-label='Save'>
                         @csrf
                         @if ($isEditing) @method('PUT') @endif
 
@@ -28,9 +28,9 @@
                                     <span class="input-group-text">&#8369;</span>
                                     <input
                                         name="price"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
+                                        type="text"
+                                        inputmode="decimal"
+                                        pattern="[0-9]+(\.[0-9]{1,2})?"
                                         class="form-control form-control-modern @error('price') is-invalid @enderror"
                                         value="{{ old('price', $item->price) }}"
                                         data-live-validate="nonnegative-number"
@@ -48,9 +48,9 @@
                                 <label class="form-label form-label-modern">Quantity</label>
                                 <input
                                     name="quantity"
-                                    type="number"
-                                    step="1"
-                                    min="0"
+                                    type="text"
+                                    inputmode="numeric"
+                                    pattern="[0-9]+"
                                     class="form-control form-control-modern @error('quantity') is-invalid @enderror"
                                     value="{{ old('quantity', $item->quantity ?? 0) }}"
                                     data-live-validate="nonnegative-integer"
@@ -163,8 +163,12 @@
                                     name="seller_name"
                                     class="form-control form-control-modern @error('seller_name') is-invalid @enderror"
                                     value="{{ old('seller_name', $item->seller_name) }}"
+                                    data-live-validate="name-only"
+                                    data-warning-target="inventory-seller-name-warning"
+                                    data-warning-message-invalid="Seller name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed."
                                     required
                                 >
+                                <div id="inventory-seller-name-warning" class="text-danger small mt-2" style="display: none;"></div>
                                 @error('seller_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">

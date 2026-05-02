@@ -15,7 +15,19 @@
 
             <div class="mb-3">
                 <x-input-label for="name" :value="__('Full Name')" />
-                <x-text-input id="name" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+                <x-text-input
+                    id="name"
+                    type="text"
+                    name="name"
+                    :value="old('name')"
+                    required
+                    autofocus
+                    autocomplete="name"
+                    data-live-validate="name-only"
+                    data-warning-target="register-name-warning"
+                    data-warning-message-invalid="Full name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed."
+                />
+                <div id="register-name-warning" class="text-danger small mt-2" style="display: none;"></div>
                 <x-input-error :messages="$errors->get('name')" />
             </div>
 

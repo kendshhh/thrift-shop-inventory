@@ -147,19 +147,19 @@
                                         <a href="{{ route('admin.inventory.show', $item) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
                                         <a href="{{ route('admin.inventory.edit', $item) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
                                         @if ($item->status === \App\Enums\ItemStatus::ARCHIVED)
-                                            <form method="POST" action="{{ route('admin.inventory.unarchive', $item) }}" data-confirm-action data-confirm-message='Type "confirm" to restore this inventory item.'>
+                                            <form method="POST" action="{{ route('admin.inventory.unarchive', $item) }}" data-confirm-action data-confirm-message='Restore this inventory item?' data-confirm-variant='primary' data-confirm-label='Confirm'>
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-arrow-counterclockwise"></i></button>
                                             </form>
                                         @else
-                                            <form method="POST" action="{{ route('admin.inventory.destroy', $item) }}" data-confirm-action data-confirm-message='Type "confirm" to archive this inventory item.'>
+                                            <form method="POST" action="{{ route('admin.inventory.destroy', $item) }}" data-confirm-action data-confirm-message='Archive this inventory item?' data-confirm-variant='danger' data-confirm-label='Archive'>
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-outline-warning"><i class="bi bi-archive"></i></button>
                                             </form>
                                         @endif
-                                        <form method="POST" action="{{ route('admin.inventory.force-destroy', $item) }}" data-confirm-action data-confirm-message='Type "confirm" to permanently delete this inventory item.'>
+                                        <form method="POST" action="{{ route('admin.inventory.force-destroy', $item) }}" data-confirm-action data-confirm-message='Permanently delete this inventory item?' data-confirm-variant='danger' data-confirm-label='Delete'>
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>

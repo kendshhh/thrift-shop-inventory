@@ -1886,6 +1886,202 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
 	font-size: 0.95rem;
 }
 
+body.action-confirmation-open {
+	overflow: hidden;
+}
+
+.action-confirmation-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 2200;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.18s ease;
+}
+
+.action-confirmation-modal.is-open {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.action-confirmation-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.52);
+	backdrop-filter: blur(10px);
+}
+
+.action-confirmation-dialog {
+	position: relative;
+	z-index: 1;
+	width: min(100%, 28rem);
+	padding: 1.25rem;
+	border-radius: 24px;
+	background: rgba(255, 255, 255, 0.94);
+	border: 1px solid rgba(255, 255, 255, 0.68);
+	box-shadow: 0 28px 70px -34px rgba(15, 23, 42, 0.55);
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 1rem;
+}
+
+.action-confirmation-icon {
+	width: 2.75rem;
+	height: 2.75rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 16px;
+	background: rgba(var(--accent-rgb), 0.12);
+	border: 1px solid rgba(var(--accent-rgb), 0.2);
+	color: var(--accent-deep);
+	font-size: 1.25rem;
+}
+
+.action-confirmation-modal.is-danger .action-confirmation-icon {
+	background: rgba(220, 38, 38, 0.1);
+	border-color: rgba(220, 38, 38, 0.22);
+	color: #b91c1c;
+}
+
+.action-confirmation-copy h5 {
+	margin: 0 0 0.35rem;
+	font-size: 1.05rem;
+	font-weight: 800;
+	color: #0f172a;
+}
+
+.action-confirmation-copy p {
+	margin: 0;
+	color: #475569;
+	line-height: 1.55;
+}
+
+.action-confirmation-actions {
+	grid-column: 1 / -1;
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.65rem;
+	margin-top: 0.15rem;
+}
+
+.dashboard-page-heading {
+	width: 100%;
+}
+
+.dashboard-page-heading h5 {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.15rem;
+	font-weight: 800;
+	color: #0f172a;
+}
+
+.dashboard-page-heading h5 i {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: 12px;
+	background: rgba(var(--accent-rgb), 0.12);
+	border: 1px solid rgba(var(--accent-rgb), 0.18);
+	color: var(--accent-deep);
+}
+
+.dashboard-focus {
+	display: grid;
+	gap: 1.25rem;
+}
+
+.dashboard-hero-compact {
+	border-radius: 28px;
+}
+
+.dashboard-focus .customer-stat-card {
+	padding: 1rem 1.05rem;
+	border-color: rgba(148, 163, 184, 0.14);
+	box-shadow: var(--card-shadow-soft);
+}
+
+.dashboard-focus .customer-stat-card::before {
+	border-top-width: 4px;
+}
+
+.dashboard-focus .metric-title,
+.dashboard-focus .customer-stat-label,
+.dashboard-focus .data-grid-card .small.text-uppercase {
+	color: #334155;
+}
+
+.dashboard-focus .metric-value,
+.dashboard-focus .customer-stat-value {
+	margin-top: 0.15rem;
+	margin-bottom: 0.35rem;
+}
+
+.dashboard-section-header {
+	padding: 1rem 1.1rem 0.85rem;
+	border-bottom: 1px solid rgba(148, 163, 184, 0.14) !important;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.18) 100%) !important;
+}
+
+.dashboard-section-header strong,
+.dashboard-section-header h6 {
+	display: inline-flex;
+	align-items: center;
+	color: #0f172a;
+	font-size: 0.98rem;
+	letter-spacing: 0;
+}
+
+.dashboard-section-header strong i,
+.dashboard-section-header h6::before {
+	color: var(--accent-deep);
+}
+
+.dashboard-mini-metrics .data-grid-card {
+	padding: 0.9rem 1rem;
+	border-radius: 18px;
+	background: rgba(255, 255, 255, 0.58);
+	border-color: rgba(148, 163, 184, 0.16);
+}
+
+.dashboard-action-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+	gap: 0.75rem;
+}
+
+.dashboard-action-grid-two {
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+}
+
+.dashboard-focus .quick-link-card {
+	min-height: 100%;
+	padding: 0.9rem 1rem;
+	border-radius: 18px;
+	background: rgba(255, 255, 255, 0.58);
+	border-color: rgba(148, 163, 184, 0.16);
+	box-shadow: var(--card-shadow-soft);
+}
+
+.dashboard-focus .quick-link-card h6 {
+	font-size: 0.95rem;
+}
+
+.dashboard-focus .quick-link-card p {
+	line-height: 1.45;
+}
+
+.dashboard-focus-customer > .row:last-child {
+	margin-top: 0;
+}
+
 code {
 	background: #e2e8f0;
 	color: #0f172a;

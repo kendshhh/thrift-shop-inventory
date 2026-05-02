@@ -29,7 +29,7 @@
                     </div>
                     <p class="text-muted small mb-4">Customers will see these payment details on the public site, item pages, and reservation pages.</p>
 
-                    <form method="POST" action="{{ route('admin.payments.update') }}" enctype="multipart/form-data" data-confirm-action data-confirm-message='Type "confirm" to save the payment detail changes.'>
+                    <form method="POST" action="{{ route('admin.payments.update') }}" enctype="multipart/form-data" data-confirm-action data-confirm-message='Save the payment detail changes?' data-confirm-variant='primary' data-confirm-label='Save'>
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="edit_id" value="{{ $editingPaymentId }}">
@@ -60,8 +60,12 @@
                                         class="form-control form-control-modern @error('name') is-invalid @enderror"
                                         value="{{ old('name', data_get($editingPaymentDetail, 'name')) }}"
                                         maxlength="100"
+                                        data-live-validate="name-only"
+                                        data-warning-target="payment-name-warning"
+                                        data-warning-message-invalid="Name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed."
                                         placeholder="Example: Maria Santos"
                                     >
+                                    <div id="payment-name-warning" class="text-danger small mt-2" style="display: none;"></div>
                                     @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-4">
@@ -72,8 +76,12 @@
                                         class="form-control form-control-modern @error('bank_name') is-invalid @enderror"
                                         value="{{ old('bank_name', data_get($editingPaymentDetail, 'bank_name')) }}"
                                         maxlength="120"
+                                        data-live-validate="name-only"
+                                        data-warning-target="payment-bank-name-warning"
+                                        data-warning-message-invalid="Bank name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed."
                                         placeholder="Example: BDO"
                                     >
+                                    <div id="payment-bank-name-warning" class="text-danger small mt-2" style="display: none;"></div>
                                     @error('bank_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-4">
@@ -81,11 +89,18 @@
                                     <input
                                         type="text"
                                         name="bank_number"
+                                        inputmode="numeric"
+                                        pattern="[0-9]+"
                                         class="form-control form-control-modern @error('bank_number') is-invalid @enderror"
                                         value="{{ old('bank_number', data_get($editingPaymentDetail, 'bank_number')) }}"
                                         maxlength="120"
+                                        data-live-validate="digits-only"
+                                        data-warning-target="payment-bank-number-warning"
+                                        data-warning-message-invalid="Bank number must contain numbers only. Letters, spaces, symbols, and minus signs are not allowed."
                                         placeholder="Example: 012345678901"
                                     >
+                                    <div class="form-text">Numbers only. Do not enter letters, spaces, symbols, or "-".</div>
+                                    <div id="payment-bank-number-warning" class="text-danger small mt-2" style="display: none;"></div>
                                     @error('bank_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
@@ -161,7 +176,7 @@
                                     <div class="d-flex gap-2">
                                         @if (!empty($savedEntry['id']))
                                             <a href="{{ route('admin.payments.edit', ['edit' => $savedEntry['id']]) }}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-pencil me-1"></i>Edit</a>
-                                            <form method="POST" action="{{ route('admin.payments.destroy', $savedEntry['id']) }}" data-confirm-action data-confirm-message='Type "confirm" to delete this payment detail.'>
+                                            <form method="POST" action="{{ route('admin.payments.destroy', $savedEntry['id']) }}" data-confirm-action data-confirm-message='Delete this payment detail?' data-confirm-variant='danger' data-confirm-label='Delete'>
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash me-1"></i>Delete</button>

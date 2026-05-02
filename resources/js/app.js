@@ -354,12 +354,92 @@ const initializeOptionDropdowns = () => {
 	});
 };
 
+const createActionConfirmationModal = () => {
+	const modal = document.createElement('div');
+	modal.className = 'action-confirmation-modal';
+	modal.setAttribute('aria-hidden', 'true');
+	modal.innerHTML = `
+		<div class="action-confirmation-backdrop" data-confirm-cancel></div>
+		<div class="action-confirmation-dialog" role="dialog" aria-modal="true" aria-labelledby="action-confirmation-title" aria-describedby="action-confirmation-message">
+			<div class="action-confirmation-icon" data-confirm-icon><i class="bi bi-question-lg"></i></div>
+			<div class="action-confirmation-copy">
+				<h5 id="action-confirmation-title">Confirm action</h5>
+				<p id="action-confirmation-message">Continue with this action?</p>
+			</div>
+			<div class="action-confirmation-actions">
+				<button type="button" class="btn btn-outline-secondary rounded-pill" data-confirm-cancel>Cancel</button>
+				<button type="button" class="btn btn-primary rounded-pill" data-confirm-submit>Confirm</button>
+			</div>
+		</div>
+	`;
+	document.body.appendChild(modal);
+
+	return {
+		modal,
+		title: modal.querySelector('#action-confirmation-title'),
+		message: modal.querySelector('#action-confirmation-message'),
+		icon: modal.querySelector('[data-confirm-icon]'),
+		confirmButton: modal.querySelector('[data-confirm-submit]'),
+		cancelButtons: modal.querySelectorAll('[data-confirm-cancel]'),
+	};
+};
+
 const initializeConfirmationForms = () => {
 	const forms = Array.from(document.querySelectorAll('form[data-confirm-action]'));
 
 	if (!forms.length) {
 		return;
 	}
+
+	const confirmation = createActionConfirmationModal();
+	let pendingForm = null;
+	let pendingSubmitter = null;
+	let lastActiveElement = null;
+
+	const closeConfirmation = () => {
+		confirmation.modal.classList.remove('is-open', 'is-danger');
+		confirmation.modal.setAttribute('aria-hidden', 'true');
+		document.body.classList.remove('action-confirmation-open');
+		pendingForm = null;
+		pendingSubmitter = null;
+
+		if (lastActiveElement instanceof HTMLElement) {
+			lastActiveElement.focus();
+		}
+
+		lastActiveElement = null;
+	};
+
+	const openConfirmation = (form, submitter) => {
+		const variant = form.getAttribute('data-confirm-variant') ?? 'primary';
+		const isDanger = variant === 'danger';
+		const title = form.getAttribute('data-confirm-title') ?? (isDanger ? 'Confirm important action' : 'Confirm action');
+		const message = form.getAttribute('data-confirm-message') ?? 'Continue with this action?';
+		const label = form.getAttribute('data-confirm-label') ?? (isDanger ? 'Continue' : 'Confirm');
+
+		pendingForm = form;
+		pendingSubmitter = submitter;
+		lastActiveElement = document.activeElement;
+
+		confirmation.title.textContent = title;
+		confirmation.message.textContent = message;
+		confirmation.confirmButton.textContent = label;
+		confirmation.confirmButton.className = `btn ${isDanger ? 'btn-danger' : 'btn-primary'} rounded-pill`;
+
+		if (confirmation.icon instanceof HTMLElement) {
+			confirmation.icon.innerHTML = `<i class="bi ${isDanger ? 'bi-exclamation-triangle' : 'bi-check2-circle'}"></i>`;
+		}
+
+		confirmation.modal.classList.toggle('is-danger', isDanger);
+		confirmation.modal.classList.add('is-open');
+		confirmation.modal.setAttribute('aria-hidden', 'false');
+		document.body.classList.add('action-confirmation-open');
+
+		const focusTarget = isDanger ? confirmation.modal.querySelector('[data-confirm-cancel]') : confirmation.confirmButton;
+		if (focusTarget instanceof HTMLElement) {
+			focusTarget.focus();
+		}
+	};
 
 	forms.forEach((form) => {
 		let lastSubmitter = null;
@@ -372,47 +452,44 @@ const initializeConfirmationForms = () => {
 
 		form.addEventListener('submit', (event) => {
 			if (form.dataset.confirmed === 'true') {
-				form.dataset.confirmed = 'false';
+				delete form.dataset.confirmed;
 				return;
 			}
 
 			event.preventDefault();
-
-			const expectedPhrase = (form.getAttribute('data-confirm-phrase') ?? 'confirm').trim();
-			const normalizedExpectedPhrase = expectedPhrase.toLowerCase();
-			const message =
-				form.getAttribute('data-confirm-message') ??
-				`Type "${expectedPhrase}" to continue with this action.`;
-			const enteredValue = window.prompt(message, '');
-
-			if (enteredValue === null) {
-				return;
-			}
-
-			if (enteredValue.trim().toLowerCase() !== normalizedExpectedPhrase) {
-				window.alert(`Please type "${expectedPhrase}" exactly to continue.`);
-				return;
-			}
-
-			let confirmationInput = form.querySelector('input[name="confirmation_text"]');
-
-			if (!(confirmationInput instanceof HTMLInputElement)) {
-				confirmationInput = document.createElement('input');
-				confirmationInput.type = 'hidden';
-				confirmationInput.name = 'confirmation_text';
-				form.appendChild(confirmationInput);
-			}
-
-			confirmationInput.value = enteredValue.trim();
-			form.dataset.confirmed = 'true';
-
-			if (typeof form.requestSubmit === 'function') {
-				form.requestSubmit(lastSubmitter ?? undefined);
-				return;
-			}
-
-			form.submit();
+			openConfirmation(form, event.submitter ?? lastSubmitter);
 		});
+	});
+
+	confirmation.cancelButtons.forEach((button) => {
+		button.addEventListener('click', closeConfirmation);
+	});
+
+	confirmation.confirmButton.addEventListener('click', () => {
+		if (!(pendingForm instanceof HTMLFormElement)) {
+			closeConfirmation();
+			return;
+		}
+
+		const form = pendingForm;
+		const submitter = pendingSubmitter;
+		closeConfirmation();
+		form.dataset.confirmed = 'true';
+
+		if (typeof form.requestSubmit === 'function') {
+			form.requestSubmit(submitter instanceof HTMLElement ? submitter : undefined);
+			return;
+		}
+
+		form.submit();
+	});
+
+	document.addEventListener('keydown', (event) => {
+		if (!confirmation.modal.classList.contains('is-open') || event.key !== 'Escape') {
+			return;
+		}
+
+		closeConfirmation();
 	});
 };
 
@@ -445,6 +522,44 @@ const initializeInlineFieldWarnings = () => {
 		event.metaKey ||
 		['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter'].includes(event.key);
 
+	const sanitizeValue = (field, mode) => {
+		const originalValue = field.value;
+		let sanitizedValue = originalValue;
+
+		if (mode === 'name-only') {
+			sanitizedValue = originalValue.replace(/[^\p{L}\p{M}\s'.-]/gu, '');
+		}
+
+		if (mode === 'digits-only' || mode === 'nonnegative-integer') {
+			sanitizedValue = originalValue.replace(/[^0-9]/g, '');
+		}
+
+		if (mode === 'nonnegative-number') {
+			let hasDecimalPoint = false;
+			sanitizedValue = Array.from(originalValue)
+				.filter((character) => {
+					if (/[0-9]/.test(character)) {
+						return true;
+					}
+
+					if (character === '.' && !hasDecimalPoint) {
+						hasDecimalPoint = true;
+						return true;
+					}
+
+					return false;
+				})
+				.join('');
+		}
+
+		if (sanitizedValue !== originalValue) {
+			field.value = sanitizedValue;
+			return true;
+		}
+
+		return false;
+	};
+
 	fields.forEach((field) => {
 		if (!(field instanceof HTMLInputElement)) {
 			return;
@@ -454,11 +569,21 @@ const initializeInlineFieldWarnings = () => {
 		const invalidMessage = field.getAttribute('data-warning-message-invalid') ?? 'Invalid value.';
 		const negativeMessage = field.getAttribute('data-warning-message-negative') ?? invalidMessage;
 
-		const validate = () => {
+		const validate = (wasSanitized = false) => {
 			const value = field.value.trim();
+
+			if (wasSanitized) {
+				showWarning(field, invalidMessage);
+				return;
+			}
 
 			if (!value) {
 				clearWarning(field);
+				return;
+			}
+
+			if (mode === 'name-only' && /[^\p{L}\p{M}\s'.-]/u.test(value)) {
+				showWarning(field, invalidMessage);
 				return;
 			}
 
@@ -466,6 +591,7 @@ const initializeInlineFieldWarnings = () => {
 				const normalizedValue = value.replace(/,/g, '');
 				const isNegative = normalizedValue.startsWith('-') || Number(normalizedValue) < 0;
 				const isInvalidNumber = normalizedValue === '-' || Number.isNaN(Number(normalizedValue));
+				const requiresNumberFormat = mode === 'nonnegative-number' && !/^\d+(\.\d+)?$/.test(normalizedValue);
 				const requiresWholeNumber = mode === 'nonnegative-integer' && !/^\d+$/.test(normalizedValue);
 
 				if (isNegative) {
@@ -473,7 +599,7 @@ const initializeInlineFieldWarnings = () => {
 					return;
 				}
 
-				if (isInvalidNumber || requiresWholeNumber) {
+				if (isInvalidNumber || requiresNumberFormat || requiresWholeNumber) {
 					showWarning(field, invalidMessage);
 					return;
 				}
@@ -487,10 +613,13 @@ const initializeInlineFieldWarnings = () => {
 			clearWarning(field);
 		};
 
-		field.addEventListener('input', validate);
-		field.addEventListener('blur', validate);
+		field.addEventListener('input', () => {
+			const wasSanitized = sanitizeValue(field, mode);
+			validate(wasSanitized);
+		});
+		field.addEventListener('blur', () => validate());
 
-		if (mode === 'nonnegative-number' || mode === 'nonnegative-integer') {
+		if (mode === 'name-only' || mode === 'digits-only' || mode === 'nonnegative-number' || mode === 'nonnegative-integer') {
 			field.addEventListener('keydown', (event) => {
 				if (isControlKey(event)) {
 					return;
@@ -498,7 +627,35 @@ const initializeInlineFieldWarnings = () => {
 
 				if (event.key === '-' || event.key === 'Subtract') {
 					event.preventDefault();
-					showWarning(field, negativeMessage);
+					showWarning(field, mode === 'name-only' ? invalidMessage : negativeMessage);
+					return;
+				}
+
+				if (event.key.length !== 1) {
+					return;
+				}
+
+				if (mode === 'name-only' && !/[\p{L}\p{M}\s'.-]/u.test(event.key)) {
+					event.preventDefault();
+					showWarning(field, invalidMessage);
+					return;
+				}
+
+				if ((mode === 'digits-only' || mode === 'nonnegative-integer') && !/[0-9]/.test(event.key)) {
+					event.preventDefault();
+					showWarning(field, invalidMessage);
+					return;
+				}
+
+				if (mode === 'nonnegative-number' && !/[0-9.]/.test(event.key)) {
+					event.preventDefault();
+					showWarning(field, invalidMessage);
+					return;
+				}
+
+				if (mode === 'nonnegative-number' && event.key === '.' && field.value.includes('.')) {
+					event.preventDefault();
+					showWarning(field, invalidMessage);
 				}
 			});
 		}

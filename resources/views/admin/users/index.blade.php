@@ -116,7 +116,7 @@
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow-lg glass-dropdown-menu">
                                             <li>
-                                                <form method="POST" action="{{ route('admin.users.update', $user) }}" data-confirm-action data-confirm-message='Type "confirm" to update this user account status.'>
+                                                <form method="POST" action="{{ route('admin.users.update', $user) }}" data-confirm-action data-confirm-message='Update this user account status?' data-confirm-variant='primary' data-confirm-label='Save'>
                                                     @csrf
                                                     @method('PATCH')
                                                     <input type="hidden" name="is_active" value="1">
@@ -129,7 +129,7 @@
                                                 </form>
                                             </li>
                                             <li>
-                                                <form method="POST" action="{{ route('admin.users.update', $user) }}" data-confirm-action data-confirm-message='Type "confirm" to update this user account status.'>
+                                                <form method="POST" action="{{ route('admin.users.update', $user) }}" data-confirm-action data-confirm-message='Update this user account status?' data-confirm-variant='primary' data-confirm-label='Save'>
                                                     @csrf
                                                     @method('PATCH')
                                                     <input type="hidden" name="is_active" value="0">

@@ -84,7 +84,7 @@
 
                     @if ($canExtendReservation)
                         <hr>
-                        <form method="POST" action="{{ route('customer.reservations.extend', $reservation) }}" data-confirm-action data-confirm-message='Type "confirm" to extend this reservation by 24 hours.'>
+                        <form method="POST" action="{{ route('customer.reservations.extend', $reservation) }}" data-confirm-action data-confirm-message='Extend this reservation by 24 hours?' data-confirm-variant='primary' data-confirm-label='Confirm'>
                             @csrf
                             @method('PATCH')
                             <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill">
@@ -166,7 +166,7 @@
 
                     @if (($canRequestCancellation || $canRequestReschedule) && $reservation->customer_request_status !== 'pending')
                         @if ($canRequestCancellation)
-                            <form id="request-cancellation" method="POST" action="{{ route('customer.reservations.request-cancellation', $reservation) }}" class="mb-3" data-confirm-action data-confirm-message='Type "confirm" to request cancellation for this reservation.'>
+                            <form id="request-cancellation" method="POST" action="{{ route('customer.reservations.request-cancellation', $reservation) }}" class="mb-3" data-confirm-action data-confirm-message='Request cancellation for this reservation?' data-confirm-variant='danger' data-confirm-label='Confirm'>
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">Request Cancellation</button>
@@ -188,7 +188,7 @@
                                     </h2>
                                     <div id="rescheduleRequestCollapse" class="accordion-collapse collapse" aria-labelledby="rescheduleRequestHeading" data-bs-parent="#customerRequestActions">
                                         <div class="accordion-body">
-                                            <form method="POST" action="{{ route('customer.reservations.request-reschedule', $reservation) }}" data-confirm-action data-confirm-message='Type "confirm" to submit this pickup reschedule request.'>
+                                            <form method="POST" action="{{ route('customer.reservations.request-reschedule', $reservation) }}" data-confirm-action data-confirm-message='Submit this pickup reschedule request?' data-confirm-variant='primary' data-confirm-label='Confirm'>
                                                 @csrf
                                                 @method('PATCH')
                                                 <div class="row g-3">
@@ -265,7 +265,7 @@
                                             @if($lineItem->cancel_pending)
                                                 <span class="badge text-bg-warning">Cancellation Requested (Pending)</span>
                                             @else
-                                                <form action="{{ route('customer.reservations.cancel-item', [$reservation, $lineItem]) }}" method="POST" style="display:inline" data-confirm-action data-confirm-message='Type "confirm" to request cancellation for this item.'>
+                                                <form action="{{ route('customer.reservations.cancel-item', [$reservation, $lineItem]) }}" method="POST" style="display:inline" data-confirm-action data-confirm-message='Request cancellation for this item?' data-confirm-variant='danger' data-confirm-label='Confirm'>
                                                     @csrf
                                                     @method('PATCH')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger" onclick="window.location.hash='self-service-requests'">Request Cancellation</button>

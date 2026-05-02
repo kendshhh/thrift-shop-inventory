@@ -330,7 +330,7 @@ class InventoryController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'quantity' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
-            'seller_name' => ['required', 'string', 'max:255'],
+            'seller_name' => ['required', 'string', 'max:255', "regex:/^[\p{L}\p{M}][\p{L}\p{M}\s'.-]*$/u"],
             'seller_contact_number' => ['required', 'string', 'max:50', 'regex:/^[0-9]+$/'],
             'condition' => ['required', Rule::in(ItemCondition::values())],
             'tags' => ['nullable', 'string'],
@@ -350,6 +350,7 @@ class InventoryController extends Controller
             'price.min' => 'Price cannot be negative. Enter 0 or a higher amount.',
             'quantity.integer' => 'Quantity must be a whole number.',
             'quantity.min' => 'Quantity cannot be negative. Enter 0 or a higher value.',
+            'seller_name.regex' => 'Seller name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed.',
             'seller_contact_number.regex' => 'Contact number must contain numbers only.',
         ];
     }

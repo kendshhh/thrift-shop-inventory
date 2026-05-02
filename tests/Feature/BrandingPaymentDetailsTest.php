@@ -130,6 +130,33 @@ class BrandingPaymentDetailsTest extends TestCase
             ->assertSee('payment-qr-thumb', false);
     }
 
+    public function test_payment_details_reject_invalid_names_and_bank_number(): void
+    {
+        Storage::fake('public');
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $response = $this
+            ->actingAs($admin)
+            ->from(route('admin.payments.edit'))
+            ->post(route('admin.payments.update'), [
+                '_method' => 'PUT',
+                'name' => 'Maria123',
+                'bank_name' => 'BDO-123',
+                'bank_number' => '0123-ABC',
+                'qr_codes' => [
+                    $this->fakeQrUpload('invalid-payment.png'),
+                ],
+            ]);
+
+        $response
+            ->assertRedirect(route('admin.payments.edit'))
+            ->assertSessionHasErrors(['name', 'bank_name', 'bank_number']);
+
+        $this->assertSame(0, BrandingSetting::query()->count());
+    }
+
     public function test_admin_can_edit_and_delete_saved_payment_detail(): void
     {
         Storage::fake('public');

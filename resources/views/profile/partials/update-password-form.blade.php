@@ -1,6 +1,6 @@
 <p class="text-muted small mb-4">Ensure your account is using a long, random password to stay secure.</p>
 
-<form method="post" action="{{ route('password.update') }}" data-confirm-action data-confirm-message='Type "confirm" to update your password.'>
+<form method="post" action="{{ route('password.update') }}" data-confirm-action data-confirm-message='Update your password?' data-confirm-variant='primary' data-confirm-label='Save'>
     @csrf
     @method('put')
 

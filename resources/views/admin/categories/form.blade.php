@@ -10,7 +10,7 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-body">
-                    <form method="POST" action="{{ $isEditing ? route('admin.categories.update', $category) : route('admin.categories.store') }}" data-confirm-action data-confirm-message='Type "confirm" to save this category.'>
+                    <form method="POST" action="{{ $isEditing ? route('admin.categories.update', $category) : route('admin.categories.store') }}" data-confirm-action data-confirm-message='Save this category?' data-confirm-variant='primary' data-confirm-label='Save'>
                         @csrf
                         @if ($isEditing)
                             @method('PUT')
@@ -22,9 +22,13 @@
                                 name="name"
                                 class="form-control @error('name') is-invalid @enderror"
                                 value="{{ old('name', $category->name) }}"
+                                data-live-validate="name-only"
+                                data-warning-target="category-name-warning"
+                                data-warning-message-invalid="Category name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed."
                                 placeholder="e.g. Clothing"
                                 required
                             >
+                            <div id="category-name-warning" class="text-danger small mt-2" style="display: none;"></div>
                             @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 

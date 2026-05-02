@@ -136,7 +136,7 @@
                                     </div>
                                     <a href="{{ route('customer.reservations.index') }}" class="btn btn-outline-secondary w-100"><i class="bi bi-bag-check me-1"></i>Manage My Reservations</a>
                                 @else
-                                    <form method="POST" action="{{ route('customer.reservations.store') }}" data-confirm-action data-confirm-message='Type "confirm" to create this reservation.'>
+                                    <form method="POST" action="{{ route('customer.reservations.store') }}" data-confirm-action data-confirm-message='Create this reservation?' data-confirm-variant='primary' data-confirm-label='Continue'>
                                         @csrf
                                         <input type="hidden" name="item_id" value="{{ $item->id }}">
 
@@ -150,14 +150,19 @@
                                             <label class="form-label fw-medium">Quantity</label>
                                             <input
                                                 name="quantity"
-                                                type="number"
-                                                min="1"
+                                                type="text"
+                                                inputmode="numeric"
+                                                pattern="[0-9]+"
                                                 max="{{ $availableQuantity }}"
                                                 value="{{ old('quantity', 1) }}"
                                                 class="form-control @error('quantity') is-invalid @enderror"
+                                                data-live-validate="digits-only"
+                                                data-warning-target="reserve-quantity-warning"
+                                                data-warning-message-invalid="Quantity must contain whole numbers only."
                                                 required
                                             >
                                             <div class="form-text">Maximum reservable quantity: {{ $availableQuantity }}.</div>
+                                            <div id="reserve-quantity-warning" class="text-danger small mt-2" style="display: none;"></div>
                                             @error('quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                         </div>
 
@@ -199,7 +204,7 @@
                                         <h6 class="fw-semibold">Save This Item to Cart</h6>
                                         <p class="small text-muted mb-3">Use the cart when you want to combine multiple items into a single reservation checkout.</p>
 
-                                        <form method="POST" action="{{ route('cart.add') }}" data-confirm-action data-confirm-message='Type "confirm" to add this item to your cart.'>
+                                        <form method="POST" action="{{ route('cart.add') }}" data-confirm-action data-confirm-message='Add this item to your cart?' data-confirm-variant='primary' data-confirm-label='Add'>
                                             @csrf
                                             <input type="hidden" name="item_id" value="{{ $item->id }}">
 
@@ -207,14 +212,19 @@
                                                 <label class="form-label fw-medium">Cart Quantity</label>
                                                 <input
                                                     name="quantity"
-                                                    type="number"
-                                                    min="1"
+                                                    type="text"
+                                                    inputmode="numeric"
+                                                    pattern="[0-9]+"
                                                     max="{{ $availableQuantity }}"
                                                     value="{{ old('quantity', 1) }}"
                                                     class="form-control @error('quantity') is-invalid @enderror"
+                                                    data-live-validate="digits-only"
+                                                    data-warning-target="cart-add-quantity-warning"
+                                                    data-warning-message-invalid="Quantity must contain whole numbers only."
                                                     required
                                                 >
                                                 <div class="form-text">Maximum addable quantity right now: {{ $availableQuantity }}.</div>
+                                                <div id="cart-add-quantity-warning" class="text-danger small mt-2" style="display: none;"></div>
                                                 @error('quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                             </div>
 

@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <div>
+        <div class="dashboard-page-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="dashboard-page-heading-copy">
                 <h5 class="mb-1 fw-bold"><i class="bi bi-house-heart me-2"></i>Customer Home</h5>
                 <p class="text-muted mb-0 small">Discover available items and keep track of your pickup schedule.</p>
             </div>
@@ -21,7 +21,8 @@
             || filled($filters['condition'] ?? null);
     @endphp
 
-    <div class="row g-3 mb-4">
+    <div class="dashboard-focus dashboard-focus-customer">
+    <div class="row g-3 g-xl-4 dashboard-stat-row">
         <div class="col-6 col-xl-3">
             <div class="customer-stat-card customer-stat-sky">
                 <span class="customer-stat-label">Total Reservations</span>
@@ -53,7 +54,7 @@
     </div>
 
     @if (($customerStats['expiring_soon'] ?? 0) > 0)
-        <div class="alert alert-warning d-flex align-items-start gap-2 mb-4" role="alert">
+        <div class="alert alert-warning d-flex align-items-start gap-2 mb-0" role="alert">
             <i class="bi bi-exclamation-triangle-fill fs-5 mt-1"></i>
             <div>
                 <strong>{{ $customerStats['expiring_soon'] }}</strong> reservation{{ (int) $customerStats['expiring_soon'] > 1 ? 's are' : ' is' }} expiring within 24 hours.
@@ -104,7 +105,7 @@
     <div class="row g-4">
         <div class="col-xl-8">
             <div class="card glass-card surface-section customer-surface h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header dashboard-section-header d-flex justify-content-between align-items-center">
                     <strong><i class="bi bi-stars me-1"></i>Featured Items</strong>
                     <a class="btn btn-sm btn-outline-custom" href="{{ route('items.index') }}">Browse All <i class="bi bi-arrow-right"></i></a>
                 </div>
@@ -171,7 +172,7 @@
             </div>
 
             <div class="card glass-card surface-section customer-surface mt-4">
-                <div class="card-header"><strong><i class="bi bi-tags me-1"></i>Browse by Category</strong></div>
+                <div class="card-header dashboard-section-header"><strong><i class="bi bi-tags me-1"></i>Browse by Category</strong></div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2">
                         @forelse ($categories as $category)
@@ -186,7 +187,7 @@
 
         <div class="col-xl-4">
             <div class="card glass-card surface-section customer-surface h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header dashboard-section-header d-flex justify-content-between align-items-center">
                     <strong><i class="bi bi-calendar2-check me-1"></i>Upcoming Pickups</strong>
                     <a href="{{ route('customer.reservations.index') }}" class="small text-decoration-none">View all</a>
                 </div>
@@ -232,5 +233,6 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </x-app-layout>

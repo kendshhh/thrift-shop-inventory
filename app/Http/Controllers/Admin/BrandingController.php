@@ -32,12 +32,14 @@ class BrandingController extends Controller
         });
 
         $validated = $request->validate([
-            'brand_name' => ['required', 'string', 'max:80'],
+            'brand_name' => ['required', 'string', 'max:80', "regex:/^[\p{L}\p{M}][\p{L}\p{M}\s'.-]*$/u"],
             'brand_tagline' => ['nullable', 'string', 'max:180'],
             'primary_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'secondary_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
             'remove_logo' => ['nullable', 'boolean'],
+        ], [
+            'brand_name.regex' => 'Brand name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed.',
         ]);
 
         $removeLogo = $request->boolean('remove_logo');

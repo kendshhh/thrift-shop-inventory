@@ -1,15 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <div>
-                <h5 class="mb-1">Everdarling Admin</h5>
+        <div class="dashboard-page-heading d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="dashboard-page-heading-copy">
+                <h5 class="mb-1"><i class="bi bi-speedometer2 me-2"></i>Everdarling Admin</h5>
                 <p class="text-muted small mb-0">A simple overview of your pieces and reservations.</p>
             </div>
             <span class="badge rounded-pill text-bg-light border">Shop overview</span>
         </div>
     </x-slot>
 
-    <section class="admin-nextgen-hero glass-card surface-section p-4 p-lg-5 mb-4">
+    <div class="dashboard-focus dashboard-focus-admin">
+    <section class="admin-nextgen-hero dashboard-hero-compact glass-card surface-section p-4 mb-0">
         <div class="row g-4 align-items-center">
             <div class="col-lg-8">
                 <span class="admin-chip mb-3 d-inline-flex align-items-center gap-2">
@@ -35,7 +36,7 @@
         </div>
     </section>
 
-    <div class="row g-4 mb-4">
+    <div class="row g-3 g-xl-4 dashboard-stat-row">
         <div class="col-sm-6 col-xl-3">
             <article class="customer-stat-card customer-stat-sky admin-stat-card h-100">
                 <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
@@ -78,15 +79,15 @@
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-lg-7">
+    <div class="row g-4">
+        <div class="col-12">
             <div class="card glass-card surface-section customer-surface h-100">
-                <div class="card-header bg-transparent border-0 pb-0 pt-4 px-4">
+                <div class="card-header dashboard-section-header bg-transparent border-0">
                     <h6 class="fw-bold mb-1">Payment Workflow</h6>
                     <p class="text-muted small mb-0">Monitor unpaid reservations and keep manual payment details current.</p>
                 </div>
                 <div class="card-body pt-3">
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3 dashboard-mini-metrics mb-3">
                         <div class="col-md-4">
                             <div class="data-grid-card">
                                 <div class="small text-muted text-uppercase fw-semibold mb-1">Awaiting Payment</div>
@@ -139,14 +140,14 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-5">
+        <div class="col-12">
             <div class="card glass-card surface-section customer-surface h-100">
-                <div class="card-header bg-transparent border-0 pb-0 pt-4 px-4">
+                <div class="card-header dashboard-section-header bg-transparent border-0">
                     <h6 class="fw-bold mb-1">Payment Actions</h6>
                     <p class="text-muted small mb-0">Shortcuts for the parts of the flow admins touch most.</p>
                 </div>
                 <div class="card-body pt-3">
-                    <div class="d-grid gap-2">
+                    <div class="dashboard-action-grid dashboard-action-grid-two">
                         <a href="{{ route('admin.payments.edit') }}" class="quick-link-card text-decoration-none">
                             <span class="quick-link-icon"><i class="bi bi-qr-code"></i></span>
                             <div>
@@ -172,7 +173,7 @@
     <div class="row g-4">
         <div class="col-12">
             <div class="card glass-card surface-section customer-surface h-100">
-                <div class="card-header bg-transparent border-0 pb-0 pt-4 px-4">
+                <div class="card-header dashboard-section-header bg-transparent border-0">
                     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
                         <div>
                             <h6 class="fw-bold mb-1">Quick Actions</h6>
@@ -185,8 +186,8 @@
                     </div>
                 </div>
                 <div class="card-body pt-3">
-                    <div class="row g-3">
-                        <div class="col-md-6 col-xl-4">
+                    <div class="dashboard-action-grid">
+                        <div>
                             <a href="{{ route('admin.inventory.index') }}" class="quick-link-card text-decoration-none h-100">
                                 <span class="quick-link-icon"><i class="bi bi-boxes"></i></span>
                                 <div>
@@ -196,7 +197,7 @@
                                 <i class="bi bi-arrow-right short-arrow"></i>
                             </a>
                         </div>
-                        <div class="col-md-6 col-xl-4">
+                        <div>
                             <a href="{{ route('admin.reservations.index') }}" class="quick-link-card text-decoration-none h-100">
                                 <span class="quick-link-icon"><i class="bi bi-calendar-check"></i></span>
                                 <div>
@@ -206,7 +207,7 @@
                                 <i class="bi bi-arrow-right short-arrow"></i>
                             </a>
                         </div>
-                        <div class="col-md-6 col-xl-4">
+                        <div>
                             <a href="{{ route('admin.inventory.create') }}" class="quick-link-card text-decoration-none h-100">
                                 <span class="quick-link-icon"><i class="bi bi-plus-circle"></i></span>
                                 <div>
@@ -216,7 +217,7 @@
                                 <i class="bi bi-arrow-right short-arrow"></i>
                             </a>
                         </div>
-                        <div class="col-md-6 col-xl-4">
+                        <div>
                             <a href="{{ route('admin.users.index') }}" class="quick-link-card text-decoration-none h-100">
                                 <span class="quick-link-icon"><i class="bi bi-people"></i></span>
                                 <div>
@@ -226,7 +227,7 @@
                                 <i class="bi bi-arrow-right short-arrow"></i>
                             </a>
                         </div>
-                        <div class="col-md-6 col-xl-4">
+                        <div>
                             <a href="{{ route('admin.notifications.index') }}" class="quick-link-card text-decoration-none h-100">
                                 <span class="quick-link-icon"><i class="bi bi-bell"></i></span>
                                 <div>
@@ -240,5 +241,6 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </x-app-layout>

@@ -59,7 +59,7 @@
                         <li class="brand-guidance-item">Wide logos with clean padding render best in the navbar and page footer.</li>
                     </ul>
 
-                    <form method="POST" action="{{ route('admin.branding.update') }}" enctype="multipart/form-data" data-confirm-action data-confirm-message='Type "confirm" to save the branding changes.'>
+                    <form method="POST" action="{{ route('admin.branding.update') }}" enctype="multipart/form-data" data-confirm-action data-confirm-message='Save the branding changes?' data-confirm-variant='primary' data-confirm-label='Save'>
                         @csrf
                         @method('PUT')
 
@@ -71,8 +71,12 @@
                                 class="form-control form-control-modern @error('brand_name') is-invalid @enderror"
                                 value="{{ $brandName }}"
                                 maxlength="80"
+                                data-live-validate="name-only"
+                                data-warning-target="brand-name-warning"
+                                data-warning-message-invalid="Brand name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed."
                                 required
                             >
+                            <div id="brand-name-warning" class="text-danger small mt-2" style="display: none;"></div>
                             @error('brand_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 

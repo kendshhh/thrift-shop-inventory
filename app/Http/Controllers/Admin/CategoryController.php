@@ -67,9 +67,11 @@ class CategoryController extends Controller
         $this->requireConfirmedAction($request);
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
+            'name' => ['required', 'string', 'max:255', "regex:/^[\p{L}\p{M}][\p{L}\p{M}\s'.-]*$/u", 'unique:categories,name'],
             'description' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
+        ], [
+            'name.regex' => 'Category name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed.',
         ]);
 
         $validated['slug'] = $this->makeUniqueSlug($validated['name']);
@@ -100,9 +102,11 @@ class CategoryController extends Controller
         $this->requireConfirmedAction($request);
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')->ignore($category->id)],
+            'name' => ['required', 'string', 'max:255', "regex:/^[\p{L}\p{M}][\p{L}\p{M}\s'.-]*$/u", Rule::unique('categories', 'name')->ignore($category->id)],
             'description' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
+        ], [
+            'name.regex' => 'Category name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed.',
         ]);
 
         $validated['slug'] = $this->makeUniqueSlug($validated['name'], $category->id);

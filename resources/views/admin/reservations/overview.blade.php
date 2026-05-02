@@ -162,14 +162,14 @@
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow-lg glass-dropdown-menu">
                                                 <li>
-                                                    <form method="POST" action="{{ route('admin.reservations.remove-item', [$reservationRow['reservation_id'], $reservationRow['reservation_item_id']]) }}" data-confirm-action data-confirm-message='Type "confirm" to release this reserved item.'>
+                                                    <form method="POST" action="{{ route('admin.reservations.remove-item', [$reservationRow['reservation_id'], $reservationRow['reservation_item_id']]) }}" data-confirm-action data-confirm-message='Release this reserved item?' data-confirm-variant='danger' data-confirm-label='Remove'>
                                                         @csrf
                                                         @method('PATCH')
                                                         <button type="submit" class="dropdown-item text-start w-100">Release</button>
                                                     </form>
                                                 </li>
                                                 <li>
-                                                    <form method="POST" action="{{ route('admin.reservations.extend', $reservationRow['reservation_id']) }}" data-confirm-action data-confirm-message='Type "confirm" to extend this reservation timer.'>
+                                                    <form method="POST" action="{{ route('admin.reservations.extend', $reservationRow['reservation_id']) }}" data-confirm-action data-confirm-message='Extend this reservation timer?' data-confirm-variant='primary' data-confirm-label='Confirm'>
                                                         @csrf
                                                         @method('PATCH')
                                                         <button type="submit" class="dropdown-item text-start w-100">Extend Time</button>
@@ -177,7 +177,7 @@
                                                 </li>
                                                 <li><hr class="dropdown-divider"></li>
                                                 <li>
-                                                    <form method="POST" action="{{ route('admin.reservations.mark-sold', $reservationRow['reservation_id']) }}" data-confirm-action data-confirm-message='Type "confirm" to mark this reservation as sold.'>
+                                                    <form method="POST" action="{{ route('admin.reservations.mark-sold', $reservationRow['reservation_id']) }}" data-confirm-action data-confirm-message='Mark this reservation as sold?' data-confirm-variant='danger' data-confirm-label='Confirm'>
                                                         @csrf
                                                         @method('PATCH')
                                                         <button type="submit" class="dropdown-item text-success text-start w-100">Mark as Sold</button>
@@ -269,7 +269,7 @@
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow-lg glass-dropdown-menu">
                                                     <li>
-                                                    <form method="POST" action="{{ route('admin.reservations.remove-item', [$row['reservation']->id, $row['reservation_item']->id]) }}" data-confirm-action data-confirm-message='Type "confirm" to remove this item from the reservation.'>
+                                                    <form method="POST" action="{{ route('admin.reservations.remove-item', [$row['reservation']->id, $row['reservation_item']->id]) }}" data-confirm-action data-confirm-message='Remove this item from the reservation?' data-confirm-variant='danger' data-confirm-label='Remove'>
                                                             @csrf
                                                             @method('PATCH')
                                                             <button type="submit" class="dropdown-item text-danger text-start w-100">Remove Item</button>
@@ -287,7 +287,7 @@
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <div class="fw-semibold">Subtotal: &#8369;{{ number_format((float) $group['subtotal'], 2) }}</div>
                         @if ($group['user'])
-                            <form method="POST" action="{{ route('admin.reservations.cancel-all-for-user', $group['user']) }}" data-confirm-action data-confirm-message='Type "confirm" to cancel all active reservations for this user.'>
+                            <form method="POST" action="{{ route('admin.reservations.cancel-all-for-user', $group['user']) }}" data-confirm-action data-confirm-message='Cancel all active reservations for this user?' data-confirm-variant='danger' data-confirm-label='Confirm'>
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">Cancel All Reservations</button>

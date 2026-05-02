@@ -105,4 +105,21 @@ class RegistrationTest extends TestCase
 
         $this->assertGuest();
     }
+
+    public function test_registration_rejects_numbers_in_full_name(): void
+    {
+        $response = $this->from('/register')->post('/register', [
+            'name' => 'Test User 123',
+            'email' => 'test@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'legal_consent' => '1',
+        ]);
+
+        $response
+            ->assertRedirect('/register')
+            ->assertSessionHasErrors(['name']);
+
+        $this->assertGuest();
+    }
 }

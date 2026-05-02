@@ -2,13 +2,26 @@
 
 <form id="send-verification" method="post" action="{{ route('verification.send') }}">@csrf</form>
 
-<form method="post" action="{{ route('profile.update') }}" data-confirm-action data-confirm-message='Type "confirm" to save your profile changes.'>
+<form method="post" action="{{ route('profile.update') }}" data-confirm-action data-confirm-message='Save your profile changes?' data-confirm-variant='primary' data-confirm-label='Save'>
     @csrf
     @method('patch')
 
     <div class="mb-3">
         <label for="name" class="form-label fw-medium">Name</label>
-        <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name">
+        <input
+            id="name"
+            name="name"
+            type="text"
+            class="form-control @error('name') is-invalid @enderror"
+            value="{{ old('name', $user->name) }}"
+            required
+            autofocus
+            autocomplete="name"
+            data-live-validate="name-only"
+            data-warning-target="profile-name-warning"
+            data-warning-message-invalid="Name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed."
+        >
+        <div id="profile-name-warning" class="text-danger small mt-2" style="display: none;"></div>
         @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 

@@ -64,6 +64,23 @@ class ProfileTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
+    public function test_profile_name_rejects_numbers(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->from('/profile')
+            ->patch('/profile', [
+                'name' => 'Test User 123',
+                'email' => $user->email,
+            ]);
+
+        $response
+            ->assertRedirect('/profile')
+            ->assertSessionHasErrors(['name']);
+    }
+
     public function test_user_can_delete_their_account(): void
     {
         $user = User::factory()->create();

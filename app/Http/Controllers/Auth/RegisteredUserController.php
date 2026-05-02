@@ -40,11 +40,12 @@ class RegisteredUserController extends Controller
         ]);
 
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', "regex:/^[\p{L}\p{M}][\p{L}\p{M}\s'.-]*$/u"],
             'email' => ['required', 'string', 'email:rfc', 'regex:/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'legal_consent' => ['accepted'],
         ], [
+            'name.regex' => 'Full name must contain letters only. Spaces, apostrophes, periods, and hyphens are allowed.',
             'email.email' => 'Please enter a valid email address.',
             'email.regex' => 'Please enter a valid email address with a domain and top-level domain, such as example@email.com.',
             'legal_consent.accepted' => 'You must agree to the Privacy Policy and Terms & Conditions before creating an account.',
