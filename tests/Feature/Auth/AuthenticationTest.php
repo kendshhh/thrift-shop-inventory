@@ -6,6 +6,7 @@ use Database\Seeders\RolesAndAdminSeeder;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -120,6 +121,25 @@ class AuthenticationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect(RouteServiceProvider::HOME);
         $this->assertNotNull(User::query()->where('email', 'admin@thriftshop.local')->first());
+    }
+
+    public function test_default_admin_password_is_restored_when_admin_sign_in_is_requested(): void
+    {
+        $this->seed(RolesAndAdminSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@thriftshop.local')->firstOrFail();
+        $admin->forceFill([
+            'password' => Hash::make('wrong-password'),
+        ])->save();
+
+        $response = $this->post('/login', [
+            'role' => 'admin',
+            'email' => 'admin@thriftshop.local',
+            'password' => '123',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(RouteServiceProvider::HOME);
     }
 
     public function test_users_can_logout(): void

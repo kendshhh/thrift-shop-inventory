@@ -36,7 +36,7 @@ class UserManagementController extends Controller
         }
 
         if (!empty($validated['role'])) {
-            $query->role((string) $validated['role']);
+            $query->whereRoleNamed((string) $validated['role']);
         }
 
         if (!empty($validated['state'])) {

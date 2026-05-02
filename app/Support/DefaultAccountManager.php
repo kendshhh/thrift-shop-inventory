@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
 class DefaultAccountManager
@@ -20,6 +21,7 @@ class DefaultAccountManager
             name: $this->defaultAdminName(),
             password: $this->defaultAdminPassword(),
             roleName: 'admin',
+            syncPassword: true,
         );
     }
 
@@ -69,7 +71,13 @@ class DefaultAccountManager
             && strtolower(trim((string) $user->email)) === $this->defaultAdminEmail();
     }
 
-    private function ensureDefaultUser(string $email, string $name, string $password, string $roleName): User
+    private function ensureDefaultUser(
+        string $email,
+        string $name,
+        string $password,
+        string $roleName,
+        bool $syncPassword = false
+    ): User
     {
         $user = User::query()->firstOrCreate(
             ['email' => $email],
@@ -96,6 +104,10 @@ class DefaultAccountManager
 
         if ($user->email_verified_at === null) {
             $updates['email_verified_at'] = now();
+        }
+
+        if ($syncPassword && ! Hash::check($password, (string) $user->password)) {
+            $updates['password'] = $password;
         }
 
         if ($updates !== []) {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -66,6 +67,19 @@ class User extends Authenticatable
         $this->attributes['email'] = $value === null
             ? null
             : strtolower(trim($value));
+    }
+
+    public function scopeWhereRoleNamed(Builder $query, string $roleName, string $guardName = 'web'): Builder
+    {
+        return $query->whereHas('roles', static function (Builder $roleQuery) use ($roleName, $guardName): void {
+            $roleQuery->where('name', $roleName)
+                ->where('guard_name', $guardName);
+        });
+    }
+
+    public function scopeAdmins(Builder $query): Builder
+    {
+        return $query->whereRoleNamed('admin');
     }
 
     public function isAdmin(): bool

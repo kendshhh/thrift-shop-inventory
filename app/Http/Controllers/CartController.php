@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 class CartController extends Controller
 {
@@ -259,14 +258,10 @@ class CartController extends Controller
 
     private function notifyAdmins(Reservation $reservation, string $eventType): void
     {
-        try {
-            User::role('admin')
-                ->get()
-                ->each(static function (User $admin) use ($reservation, $eventType): void {
-                    $admin->notify(new AdminReservationNotification($reservation, $eventType));
-                });
-        } catch (RoleDoesNotExist $exception) {
-            report($exception);
-        }
+        User::admins()
+            ->get()
+            ->each(static function (User $admin) use ($reservation, $eventType): void {
+                $admin->notify(new AdminReservationNotification($reservation, $eventType));
+            });
     }
 }

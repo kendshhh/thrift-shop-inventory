@@ -781,7 +781,7 @@ class ReservationManagementController extends Controller
 
     private function notifyOtherAdmins(Reservation $reservation, string $eventType, ?string $actorName = null, ?int $ignoreUserId = null): void
     {
-        User::role('admin')
+        User::admins()
             ->when($ignoreUserId !== null, static function ($query) use ($ignoreUserId) {
                 $query->whereKeyNot($ignoreUserId);
             })

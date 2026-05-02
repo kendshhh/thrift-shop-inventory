@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BrandingSetting;
 use App\Models\Item;
 use App\Models\Reservation;
+use App\Models\User;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -23,7 +24,7 @@ class DashboardController extends Controller
             ->whereRaw('(quantity - reserved_quantity) <= 3')
             ->get();
         if ($lowStockItems->isNotEmpty()) {
-            $adminUsers = \App\Models\User::role('admin')->get();
+            $adminUsers = User::admins()->get();
             foreach ($lowStockItems as $item) {
                 foreach ($adminUsers as $admin) {
                     // Only notify if not already notified and unread
@@ -43,7 +44,7 @@ class DashboardController extends Controller
             ->where('status', ReservationStatus::OVERDUE->value)
             ->get();
         if ($overdueReservations->isNotEmpty()) {
-            $adminUsers = \App\Models\User::role('admin')->get();
+            $adminUsers = User::admins()->get();
             foreach ($overdueReservations as $reservation) {
                 foreach ($adminUsers as $admin) {
                     $alreadyNotified = $admin->unreadNotifications()
